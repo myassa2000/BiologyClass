@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>효소 반응 속도와 억제제 시뮬레이션</title>
+<style>
+  :root {
+    --bg: #f4f7f6; --surface: #ffffff; --ink: #2c3e50; --ink-2: #7f8c8d; --line: #ecf0f1;
+    --primary: #27ae60; --primary-d: #229954;
+    --none: #16a34a;      /* 억제제 없음 : 초록 */
+    --comp: #2563eb;      /* 경쟁적 억제제 : 파랑 */
+    --noncomp: #dc2626;   /* 비경쟁적 억제제 : 빨강 */
+    --e-color: #3498db;
+    --es-color: #f1c40f;
+    --ei-color: #e67e22;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard", -apple-system, "Malgun Gothic", sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 30px 20px 50px; }
+  .eyebrow { font-size: 13px; color: var(--primary); font-weight: 800; margin-bottom: 5px; }
+  h1 { font-size: 28px; margin: 0 0 20px; letter-spacing: -0.5px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+  .card { background: var(--surface); border-radius: 16px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid var(--line); display: flex; flex-direction: column; }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 15px; font-size: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--line); padding-bottom: 10px; }
+
+  /* 컨트롤 패널 */
+  .control-panel { background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 4px; border: 1px solid #e2e8f0; }
+
+  .radio-group { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+  .radio-label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: bold; padding: 8px 16px; border-radius: 8px; border: 2px solid var(--line); transition: 0.2s; background: #fff; }
+  .radio-label:hover { border-color: #b7c0c4; }
+  .radio-label input { display: none; }
+  .radio-label .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .radio-label.active[data-type="none"] { border-color: var(--none); background: #eafaf1; }
+  .radio-label.active[data-type="comp"] { border-color: var(--comp); background: #eaf1fd; }
+  .radio-label.active[data-type="noncomp"] { border-color: var(--noncomp); background: #fdecec; }
+
+  .slider-group { margin-bottom: 15px; }
+  .slider-group.dim { opacity: 0.45; }
+  .slider-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-bottom: 8px; }
+  input[type=range] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+  .tick-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-2); margin-top: -4px; }
+
+  .compare-row { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink-2); font-weight: 600; }
+  .compare-row input { accent-color: var(--primary); width: 16px; height: 16px; }
+
+  /* 그래프 영역 */
+  .svg-container { flex: 1; min-height: 340px; position: relative; width: 100%; display: flex; justify-content: center; align-items: center; background: #fffdf5; border: 1px solid #ead9b0; border-radius: 12px; padding: 12px; }
+  svg { width: 100%; height: 100%; overflow: visible; }
+
+  .axis { stroke: #2c3e50; stroke-width: 2; }
+  .grid-line { stroke: #ecf0f1; stroke-width: 1; }
+  .asymptote { stroke: #566573; stroke-width: 1.6; stroke-dasharray: 7 5; }
+  .graph-line { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+  .graph-line.ghost { stroke-width: 2.5; opacity: 0.35; }
+  .indicator-line { stroke: #95a5a6; stroke-width: 1.5; stroke-dasharray: 4; }
+
+  .graph-legend { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-size: 13px; font-weight: 700; margin-top: 12px; }
+  .graph-legend .li { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 22px; height: 4px; border-radius: 2px; }
+  .hint { font-size: 12.5px; color: var(--ink-2); text-align: center; margin-top: 8px; }
+
+  /* 효소 상태 바 영역 */
+  .status-board { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+  .bar-container { width: 100%; height: 40px; background: #ecf0f1; border-radius: 20px; overflow: hidden; display: flex; margin-bottom: 15px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
+  .bar-segment { height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 13px; transition: width 0.25s ease; overflow: hidden; white-space: nowrap; }
+  .bar-e { background: var(--e-color); }
+  .bar-es { background: var(--es-color); }
+  .bar-ei { background: var(--ei-color); }
+
+  .legend { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; font-size: 13.5px; font-weight: bold; }
+  .leg-item { display: flex; align-items: center; gap: 6px; }
+  .leg-color { width: 14px; height: 14px; border-radius: 4px; }
+
+  .reaction-rate { text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 18px; font-weight: 800; border: 2px dashed #bdc3c7; }
+  .reaction-rate small { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-top: 4px; }
+
+  /* 개념 설명 */
+  .status-desc { margin-top: 15px; padding: 15px; background: #eafaf1; border-left: 4px solid var(--none); border-radius: 4px; font-size: 14.5px; font-weight: 500; flex: 1; }
+
+  footer { margin-top: 26px; text-align: center; font-size: 12.5px; color: var(--ink-2); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="eyebrow">세포와 물질대사 · 효소</div>
+  <h1>효소 억제제(Enzyme Inhibitor) 시뮬레이션</h1>
+
+  <div class="card full" style="margin-bottom: 20px;">
+    <h2>💡 효소 억제제의 종류</h2>
+    <p style="font-size: 14.5px; color: var(--ink-2); margin-top: -10px;">억제제의 종류와 농도를 바꾸어가며 반응 속도 그래프와 효소–기질 복합체 형성 비율을 관찰하세요.</p>
+
+    <div class="control-panel">
+      <div class="radio-group" id="inhibitorType">
+        <label class="radio-label active" data-type="none">
+          <span class="dot" style="background: var(--none);"></span>
+          <input type="radio" name="iType" value="none" checked> 억제제 없음
+        </label>
+        <label class="radio-label" data-type="comp">
+          <span class="dot" style="background: var(--comp);"></span>
+          <input type="radio" name="iType" value="comp"> 경쟁적 억제제 (Competitive)
+        </label>
+        <label class="radio-label" data-type="noncomp">
+          <span class="dot" style="background: var(--noncomp);"></span>
+          <input type="radio" name="iType" value="noncomp"> 비경쟁적 억제제 (Non-competitive)
+        </label>
+      </div>
+
+      <div class="slider-group dim" id="iGroup">
+        <div class="slider-header">
+          <span>억제제 농도 ([I])</span>
+          <span id="iLabel">0</span>
+        </div>
+        <input type="range" id="iSlider" min="0" max="100" step="1" value="0" disabled>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <span style="color: var(--primary-d);">기질 농도 조절 ([S])</span>
+          <span id="sLabel" style="color: var(--primary-d);">30</span>
+        </div>
+        <input type="range" id="sSlider" min="0" max="600" step="3" value="30">
+        <div class="tick-row"><span>0</span><span>150</span><span>300</span><span>450</span><span>600</span></div>
+      </div>
+
+      <label class="compare-row">
+        <input type="checkbox" id="compareChk"> 세 곡선 함께 비교하기 (교과서 그림과 같은 형태)
+      </label>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- 그래프 영역 -->
+    <div class="card">
+      <h2>📈 기질 농도–반응 속도 그래프</h2>
+      <div class="svg-container">
+        <svg viewBox="0 0 560 350" id="graphSvg">
+          <!-- 그리드 -->
+          <line x1="60" y1="105" x2="535" y2="105" class="grid-line"/>
+          <line x1="60" y1="170" x2="535" y2="170" class="grid-line"/>
+          <line x1="60" y1="235" x2="535" y2="235" class="grid-line"/>
+
+          <!-- Vmax 점근선 -->
+          <line x1="60" y1="40" x2="535" y2="40" class="asymptote"/>
+          <text x="540" y="44" font-size="12" font-weight="bold" fill="#566573">Vmax</text>
+
+          <!-- 억제제가 있을 때의 최대 속도(비경쟁적) -->
+          <line id="vmaxLine" x1="60" y1="40" x2="535" y2="40" class="asymptote" stroke="#dc2626" opacity="0"/>
+          <text id="vmaxText" x="540" y="44" font-size="12" font-weight="bold" fill="#dc2626" opacity="0">Vmax'</text>
+
+          <!-- 축 -->
+          <line x1="60" y1="300" x2="545" y2="300" class="axis"/>
+          <line x1="60" y1="25" x2="60" y2="300" class="axis"/>
+
+          <!-- 축 눈금 -->
+          <text x="53" y="304" text-anchor="end" font-size="11" fill="#7f8c8d">0</text>
+          <text x="53" y="174" text-anchor="end" font-size="11" fill="#7f8c8d">50</text>
+          <text x="53" y="44" text-anchor="end" font-size="11" fill="#7f8c8d">100</text>
+          <text x="60" y="318" text-anchor="middle" font-size="11" fill="#7f8c8d">0</text>
+          <text x="178" y="318" text-anchor="middle" font-size="11" fill="#7f8c8d">150</text>
+          <text x="297" y="318" text-anchor="middle" font-size="11" fill="#7f8c8d">300</text>
+          <text x="416" y="318" text-anchor="middle" font-size="11" fill="#7f8c8d">450</text>
+          <text x="535" y="318" text-anchor="middle" font-size="11" fill="#7f8c8d">600</text>
+
+          <text x="300" y="340" text-anchor="middle" font-size="14" font-weight="bold">기질의 농도 [S]</text>
+          <text x="16" y="165" text-anchor="middle" font-size="14" font-weight="bold" transform="rotate(-90 16 165)">반응 속도 (v)</text>
+
+          <!-- 곡선 -->
+          <path id="pathNone" class="graph-line" stroke="#16a34a" d=""/>
+          <path id="pathComp" class="graph-line" stroke="#2563eb" d="" opacity="0"/>
+          <path id="pathNoncomp" class="graph-line" stroke="#dc2626" d="" opacity="0"/>
+
+          <!-- 현재 [S] 인디케이터 -->
+          <line id="indicatorLine" x1="60" y1="30" x2="60" y2="300" class="indicator-line"/>
+          <circle id="indicatorDot" cx="60" cy="300" r="6" fill="#16a34a" stroke="#fff" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="graph-legend">
+        <div class="li"><span class="swatch" style="background: var(--none);"></span>억제제 없음</div>
+        <div class="li"><span class="swatch" style="background: var(--comp);"></span>경쟁적 억제제</div>
+        <div class="li"><span class="swatch" style="background: var(--noncomp);"></span>비경쟁적 억제제</div>
+      </div>
+      <div class="hint" id="graphHint">기질 농도를 오른쪽 끝까지 올려 보세요. 어떤 곡선이 Vmax에 도달하나요?</div>
+    </div>
+
+    <!-- 효소 상태 및 설명 영역 -->
+    <div class="card">
+      <h2>🔬 효소의 결합 상태 (농도 비율)</h2>
+      <p style="font-size:13px; color:var(--ink-2); margin-top:-10px;">전체 효소 중 기질이나 억제제와 결합한 효소의 비율입니다.</p>
+
+      <div class="status-board">
+        <div class="legend">
+          <div class="leg-item"><div class="leg-color" style="background:var(--e-color);"></div>자유 효소 (E)</div>
+          <div class="leg-item"><div class="leg-color" style="background:var(--es-color);"></div>효소–기질 복합체 (ES, 활성)</div>
+          <div class="leg-item"><div class="leg-color" style="background:var(--ei-color);"></div>억제제가 결합한 효소 (비활성)</div>
+        </div>
+
+        <div class="bar-container">
+          <div class="bar-segment bar-e" id="barE" style="width: 25%;">E 25%</div>
+          <div class="bar-segment bar-es" id="barES" style="width: 75%;">ES 75%</div>
+          <div class="bar-segment bar-ei" id="barEI" style="width: 0%;"></div>
+        </div>
+
+        <div class="reaction-rate">
+          현재 반응 속도: <span id="vRate" style="color: var(--none);">75.0</span> / 100
+          <small id="vSub">억제제가 없을 때의 최대 속도(Vmax)의 75%</small>
+        </div>
+      </div>
+
+      <div id="statusDesc" class="status-desc"></div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 광덕고 이재빈 &middot; 생명과학 효소 시뮬레이션
+  </footer>
+</div>
+
+<script>
+  // ── 상수 ─────────────────────────────────────────────
+  const VMAX = 100;      // 최대 반응 속도(상댓값)
+  const KM   = 10;       // 미카엘리스 상수(상댓값)
+  const KI_C = 25;       // 경쟁적 억제 상수
+  const KI_N = 50;       // 비경쟁적 억제 상수
+  const SMAX = 600;      // 그래프 가로축 최대 기질 농도
+  const I_REF = 50;      // '억제제 없음' 상태에서 비교 곡선을 그릴 기준 농도
+
+  // ── DOM ──────────────────────────────────────────────
+  const radioLabels = document.querySelectorAll('.radio-label');
+  const iSlider = document.getElementById('iSlider');
+  const sSlider = document.getElementById('sSlider');
+  const iLabel  = document.getElementById('iLabel');
+  const sLabel  = document.getElementById('sLabel');
+  const iGroup  = document.getElementById('iGroup');
+  const compareChk = document.getElementById('compareChk');
+
+  const pathNone     = document.getElementById('pathNone');
+  const pathComp     = document.getElementById('pathComp');
+  const pathNoncomp  = document.getElementById('pathNoncomp');
+  const indLine = document.getElementById('indicatorLine');
+  const indDot  = document.getElementById('indicatorDot');
+  const vmaxLine = document.getElementById('vmaxLine');
+  const vmaxText = document.getElementById('vmaxText');
+
+  const barE = document.getElementById('barE');
+  const barES = document.getElementById('barES');
+  const barEI = document.getElementById('barEI');
+  const vRate = document.getElementById('vRate');
+  const vSub  = document.getElementById('vSub');
+  const statusDesc = document.getElementById('statusDesc');
+  const graphHint = document.getElementById('graphHint');
+
+  const COLOR = { none: '#16a34a', comp: '#2563eb', noncomp: '#dc2626' };
+
+  // ── 좌표 매핑 (X: 0~600 → 60~535, Y: 0~100 → 300~40) ──
+  function mapX(s) { return 60 + (s / SMAX) * 475; }
+  function mapY(v) { return 300 - (v / VMAX) * 260; }
+
+  // 곡선 경로 생성 : 낮은 [S] 구간을 촘촘히 표본화해 초반 급상승 구간을 부드럽게 그림
+  function buildPath(appVmax, appKm) {
+    const N = 220;
+    let d = "";
+    for (let k = 0; k <= N; k++) {
+      const t = k / N;
+      const s = SMAX * t * t;              // 저농도 구간 조밀 샘플링
+      const v = (appVmax * s) / (appKm + s);
+      d += (k === 0 ? "M " : " L ") + mapX(s).toFixed(2) + "," + mapY(v).toFixed(2);
+    }
+    return d;
+  }
+
+  function kinetics(type, i) {
+    if (type === 'comp')    return { vmax: VMAX, km: KM * (1 + i / KI_C) };
+    if (type === 'noncomp') return { vmax: VMAX / (1 + i / KI_N), km: KM };
+    return { vmax: VMAX, km: KM };
+  }
+
+  function updateSimulation() {
+    const type = document.querySelector('input[name="iType"]:checked').value;
+    const s = parseFloat(sSlider.value);
+    const i = (type === 'none') ? 0 : parseFloat(iSlider.value);
+    const compare = compareChk.checked;
+    const iShown = (type === 'none') ? I_REF : i;   // 비교 곡선용 농도
+
+    sLabel.textContent = s;
+    iLabel.textContent = (type === 'none') ? '0' : i;
+    iGroup.classList.toggle('dim', type === 'none');
+
+    // ── 세 곡선 경로 ──
+    pathNone.setAttribute('d', buildPath(VMAX, KM));
+    const kc = kinetics('comp', iShown);
+    const kn = kinetics('noncomp', iShown);
+    pathComp.setAttribute('d', buildPath(kc.vmax, kc.km));
+    pathNoncomp.setAttribute('d', buildPath(kn.vmax, kn.km));
+
+    // ── 표시/강조 규칙 ──
+    const show = (el, on, active) => {
+      el.setAttribute('opacity', on ? 1 : 0);
+      el.classList.toggle('ghost', on && !active);
+    };
+    show(pathNone,    true,                         type === 'none');
+    show(pathComp,    compare || type === 'comp',   type === 'comp');
+    show(pathNoncomp, compare || type === 'noncomp',type === 'noncomp');
+
+    // ── 현재 상태의 반응 속도 ──
+    const k = kinetics(type, i);
+    const currentV = (k.vmax * s) / (k.km + s);
+    vRate.textContent = currentV.toFixed(1);
+    vRate.style.color = COLOR[type];
+    vSub.textContent = `억제제가 없을 때의 최대 속도(Vmax)의 ${currentV.toFixed(0)}%`;
+
+    // ── 인디케이터 ──
+    indLine.setAttribute('x1', mapX(s)); indLine.setAttribute('x2', mapX(s));
+    indDot.setAttribute('cx', mapX(s));  indDot.setAttribute('cy', mapY(currentV));
+    indDot.setAttribute('fill', COLOR[type]);
+
+    // ── 낮아진 최대 속도 점근선(비경쟁적일 때만) ──
+    // Vmax 선과 겹칠 만큼 가까우면 표시하지 않음
+    const showVmax2 = kn.vmax < VMAX * 0.92 &&
+                      ((type === 'noncomp' && i > 0) || (compare && iShown > 0));
+    if (showVmax2) {
+      const y = mapY(kn.vmax);
+      vmaxLine.setAttribute('y1', y); vmaxLine.setAttribute('y2', y);
+      vmaxText.setAttribute('y', y + 4);
+      vmaxLine.setAttribute('opacity', type === 'noncomp' ? 1 : 0.45);
+      vmaxText.setAttribute('opacity', type === 'noncomp' ? 1 : 0.45);
+    } else {
+      vmaxLine.setAttribute('opacity', 0);
+      vmaxText.setAttribute('opacity', 0);
+    }
+
+    // ── 효소 결합 상태 분율 ──
+    let pE = 0, pES = 0, pEI = 0;
+
+    if (type === 'none') {
+      pES = s / (KM + s);
+      pE  = 1 - pES;
+      statusDesc.innerHTML = `<b>상태: 정상 반응</b><br>억제제가 없는 상태입니다. 기질 농도([S])가 증가할수록 <b>효소–기질 복합체(ES)</b> 형성 비율이 높아져 반응 속도가 빨라집니다. 기질이 충분히 많아지면 대부분의 효소가 ES를 형성하여 반응 속도는 <b>최대 반응 속도(Vmax)에 수렴</b>합니다.`;
+      statusDesc.style.borderColor = COLOR.none;
+      statusDesc.style.backgroundColor = '#eafaf1';
+
+    } else if (type === 'comp') {
+      const denom = 1 + (s / KM) + (i / KI_C);
+      pES = (s / KM) / denom;
+      pEI = (i / KI_C) / denom;
+      pE  = 1 / denom;
+      statusDesc.innerHTML = `<b>상태: 경쟁적 억제</b><br>억제제가 기질과 구조가 비슷하여 효소의 <b>활성 부위</b>를 놓고 기질과 경쟁합니다. 억제제가 있으면 같은 속도를 내는 데 <b>더 많은 기질</b>이 필요하지만, 기질 농도를 충분히 높이면 효소가 기질과 만날 확률이 압도적으로 커져 결국 <b>원래의 최대 반응 속도(Vmax)에 도달</b>합니다.`;
+      statusDesc.style.borderColor = COLOR.comp;
+      statusDesc.style.backgroundColor = '#eaf1fd';
+
+    } else {
+      // 순수 비경쟁적 억제: 억제제는 E와 ES 모두에 같은 친화도로 결합
+      const d1 = 1 + (i / KI_N);
+      const d2 = 1 + (s / KM);
+      pES = (s / KM) / (d1 * d2);   // 활성 상태의 ES
+      pE  = 1 / (d1 * d2);          // 자유 효소
+      pEI = 1 - pE - pES;           // 억제제가 결합한 효소(EI + ESI, 모두 비활성)
+      statusDesc.innerHTML = `<b>상태: 비경쟁적 억제</b><br>억제제가 활성 부위가 아닌 <b>다른 부위</b>에 결합하여 효소의 입체 구조를 변형시킵니다. 기질이 결합하더라도 반응이 일어나지 않으므로 <b>사용할 수 있는 효소의 수 자체가 줄어든 것</b>과 같습니다. 따라서 기질 농도를 아무리 높여도 <b>최대 반응 속도가 낮아진 채로 유지</b>됩니다.`;
+      statusDesc.style.borderColor = COLOR.noncomp;
+      statusDesc.style.backgroundColor = '#fdecec';
+    }
+
+    barE.style.width  = (pE  * 100) + '%';
+    barES.style.width = (pES * 100) + '%';
+    barEI.style.width = (pEI * 100) + '%';
+    barE.textContent  = pE  > 0.07 ? `E ${(pE*100).toFixed(0)}%`   : '';
+    barES.textContent = pES > 0.07 ? `ES ${(pES*100).toFixed(0)}%` : '';
+    barEI.textContent = pEI > 0.07 ? `비활성 ${(pEI*100).toFixed(0)}%` : '';
+
+    graphHint.textContent = compare
+      ? `세 곡선을 [I] = ${iShown} 조건에서 함께 그렸습니다. 초록·파랑은 같은 Vmax에 수렴하고, 빨강만 더 낮은 값에 수렴합니다.`
+      : '기질 농도를 오른쪽 끝까지 올려 보세요. 어떤 곡선이 Vmax에 도달하나요?';
+  }
+
+  // ── 이벤트 ───────────────────────────────────────────
+  radioLabels.forEach(label => {
+    label.addEventListener('click', function () {
+      radioLabels.forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+      const type = this.querySelector('input').value;
+      if (type === 'none') {
+        iSlider.value = 0;
+        iSlider.disabled = true;
+      } else {
+        iSlider.disabled = false;
+        if (iSlider.value == 0) iSlider.value = 50;
+      }
+      updateSimulation();
+    });
+  });
+
+  iSlider.addEventListener('input', updateSimulation);
+  sSlider.addEventListener('input', updateSimulation);
+  compareChk.addEventListener('change', updateSimulation);
+
+  updateSimulation();
+</script>
+</body>
+</html>

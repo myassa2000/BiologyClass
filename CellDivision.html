@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>세포 분열 시뮬레이션 — 체세포 분열 · 감수 분열</title>
+<style>
+  :root{
+    --bg:#e8edf1; --surface:#ffffff; --ink:#1d2731; --ink-2:#5d6b77; --line:#d6dee5;
+    --cell:#f1f8f7; --cell-stroke:#a9bcc6; --cell-wall:#5f9a55; --cell-plant:#eef6ea;
+    --nuc:#e2ecf3; --nuc-stroke:#9db1bf;
+    --mat:#e0654d; --mat-d:#b03e28; --pat:#2e8d94; --pat-d:#19595f;
+    --accent:#e3a32a; --spindle:#aebbc4;
+    --warn-bg:#fdf3df; --warn-line:#e3a32a;
+    --good-bg:#e8f4ec; --good-line:#3f9d6a;
+    --info-bg:#eaf1f7; --info-line:#5d87b0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Pretendard Variable",-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px; margin:0 auto; padding:26px 20px 40px;}
+  .eyebrow{font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--pat-d); font-weight:700;}
+  h1{font-size:clamp(21px,3.6vw,29px); margin:.12em 0 .12em; letter-spacing:-.01em;}
+  .sub{color:var(--ink-2); font-size:14px; margin:0 0 16px;}
+ 
+  /* 상단 컨트롤 */
+  .toolbar{display:flex; flex-wrap:wrap; gap:10px 14px; align-items:flex-end; margin-bottom:16px;
+           background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:13px 15px;
+           box-shadow:0 6px 18px rgba(20,40,60,.05);}
+  .tb-group{display:flex; flex-direction:column; gap:5px;}
+  .tb-label{font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--ink-2); text-transform:uppercase;}
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:9px; overflow:hidden;}
+  .seg button{font:inherit; font-size:13px; font-weight:700; border:0; background:#f6f9fb; color:var(--ink-2);
+              padding:7px 13px; cursor:pointer; transition:.15s;}
+  .seg button.on{background:var(--pat); color:#fff;}
+  .geno-pick{display:flex; gap:8px;}
+  .geno-pick select{font:inherit; font-weight:700; font-size:13px; padding:6px 8px; border:1px solid var(--line);
+                     border-radius:8px; background:#f6f9fb; color:var(--ink); cursor:pointer;}
+  .geno-pick label{display:flex; flex-direction:column; gap:3px; font-size:10.5px; color:var(--ink-2); align-items:center;}
+  button.mini{font:inherit; font-weight:700; font-size:13px; border:1px solid var(--line); background:#fff;
+              border-radius:9px; padding:7px 12px; cursor:pointer; color:var(--ink);}
+  button.mini:hover{border-color:var(--pat); color:var(--pat-d);}
+  button.mini.hidden{display:none;}
+ 
+  .grid{display:grid; grid-template-columns:1.32fr 1fr; gap:18px; align-items:start;}
+  @media (max-width:880px){ .grid{grid-template-columns:1fr;} }
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:16px;
+        box-shadow:0 1px 2px rgba(20,40,60,.04), 0 8px 24px rgba(20,40,60,.05);}
+  .stage-card{padding:13px 13px 15px;}
+  svg.scene{width:100%; height:auto; display:block; user-select:none;}
+  .chromatid{transition:transform .85s cubic-bezier(.42,.04,.22,1), opacity .45s ease;}
+  .chromatid text{font-weight:700; font-size:12px; pointer-events:none;}
+  .chromatid.thread .bar{opacity:.74;}
+  @media (prefers-reduced-motion:reduce){ .chromatid{transition:none;} }
+ 
+  .stepper{display:flex; flex-wrap:wrap; gap:5px; margin:13px 2px 4px;}
+  .step{flex:1 1 0; min-width:62px; border:1px solid var(--line); background:#f7fafc;
+        border-radius:9px; padding:7px 3px; cursor:pointer; text-align:center; transition:.18s;}
+  .step .ph{font-size:9.5px; color:var(--ink-2); letter-spacing:.02em;}
+  .step .nm{font-size:11.5px; font-weight:700; margin-top:1px;}
+  .step:hover{border-color:var(--pat);}
+  .step.active{background:var(--pat); border-color:var(--pat); color:#fff;}
+  .step.active .ph{color:#cfeaec;}
+  .controls{display:flex; gap:8px; margin-top:11px;}
+  button.ctrl{font:inherit; font-weight:700; font-size:14px; cursor:pointer; border-radius:10px;
+              border:1px solid var(--line); background:#fff; padding:9px 14px; transition:.15s; color:var(--ink);}
+  button.ctrl:hover{border-color:var(--pat); color:var(--pat-d);}
+  button.ctrl:disabled{opacity:.4; cursor:not-allowed;}
+  button.play{margin-left:auto; background:var(--pat); border-color:var(--pat); color:#fff;}
+  button.play:hover{background:var(--pat-d); color:#fff;}
+ 
+  .panel{padding:17px 18px 19px;}
+  .phase-tag{display:inline-block; font-size:12px; font-weight:700; color:var(--pat-d);
+             background:#e4f1f1; padding:3px 10px; border-radius:999px;}
+  .panel h2{font-size:18px; margin:9px 0 6px;}
+  .desc{font-size:14px; color:#2b3a45; margin:0 0 11px;}
+  .count{font-size:12.5px; color:var(--ink-2); border-top:1px dashed var(--line); padding-top:9px; margin-bottom:11px;}
+  .count b{color:var(--ink);}
+  .hl{font-size:13.5px; border-radius:11px; padding:10px 12px; border:1px solid var(--line); background:#f7fafc;}
+  .hl.warn{background:var(--warn-bg); border-color:var(--warn-line);}
+  .hl.good{background:var(--good-bg); border-color:var(--good-line);}
+  .hl.info{background:var(--info-bg); border-color:var(--info-line);}
+  .hl strong{font-weight:800;}
+  .genobar{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:13px; font-size:12.5px;
+           color:var(--ink-2); background:#f7fafc; border:1px solid var(--line); border-radius:11px; padding:9px 11px;}
+  .geno{font-weight:800; color:var(--ink); letter-spacing:.04em; font-size:14px;}
+  .arrow{color:var(--pat-d); font-weight:800;}
+  .legend{margin-top:14px; border-top:1px solid var(--line); padding-top:12px;}
+  .legend h3{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); margin:0 0 7px;}
+  .leg-row{display:flex; align-items:center; gap:8px; font-size:12.5px; margin:5px 0; color:#2b3a45;}
+  .swatch{width:15px; height:15px; border-radius:5px; flex:none;}
+  .sw-mat{background:var(--mat);} .sw-pat{background:var(--pat);}
+  .pair-ico{display:flex; gap:3px;} .pair-ico i{width:6px; height:15px; border-radius:3px; display:block;}
+ 
+  /* 하단 설명 카드 */
+  .info-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px;}
+  @media (max-width:880px){ .info-grid{grid-template-columns:1fr;} }
+  .infocard{padding:16px 18px;}
+  .infocard h3{margin:0 0 9px; font-size:15px; display:flex; align-items:center; gap:7px;}
+  .infocard p{margin:0 0 9px; font-size:13.5px; color:#2b3a45;}
+  .infocard p b{color:var(--ink);}
+  .term{border-left:3px solid var(--pat); padding-left:11px; margin-bottom:11px;}
+  .term .t{font-weight:800; font-size:13.5px;}
+  .term .d{font-size:13px; color:#3a4852;}
+  .cyto-row{display:flex; gap:12px; flex-wrap:wrap;}
+  .cyto-box{flex:1 1 200px; border:1px solid var(--line); border-radius:11px; padding:11px 13px; background:#fafcfd;}
+  .cyto-box.animal{border-color:var(--mat-d);}
+  .cyto-box.plant{border-color:var(--cell-wall);}
+  .cyto-box .h{font-weight:800; font-size:13.5px; margin-bottom:3px;}
+  .cyto-box.animal .h{color:var(--mat-d);}
+  .cyto-box.plant .h{color:#3f7a36;}
+  .cyto-box .b{font-size:12.5px; color:#3a4852;}
+ 
+  footer.copyright{margin-top:22px; text-align:center; font-size:13px; color:var(--ink-2);
+                   border-top:1px solid var(--line); padding-top:16px;}
+  footer.copyright b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">생명과학 · 세포 분열</div>
+  <h1>세포 분열 시뮬레이션</h1>
+  <p class="sub">체세포 분열과 감수 분열을 한 화면에서 비교하고, 유전자형·세포 종류를 바꿔가며 살펴보세요. (예시 세포: 2n=6 / 유전자 A·B·D 3쌍)</p>
+ 
+  <!-- 컨트롤 -->
+  <div class="toolbar">
+    <div class="tb-group">
+      <span class="tb-label">분열 방식</span>
+      <div class="seg" id="modeSeg">
+        <button data-mode="mitosis" class="on">체세포 분열</button>
+        <button data-mode="meiosis">감수 분열</button>
+      </div>
+    </div>
+    <div class="tb-group">
+      <span class="tb-label">세포 종류</span>
+      <div class="seg" id="cellSeg">
+        <button data-cell="animal" class="on">동물세포</button>
+        <button data-cell="plant">식물세포</button>
+      </div>
+    </div>
+    <div class="tb-group">
+      <span class="tb-label">유전자형 (모세포)</span>
+      <div class="geno-pick" id="genoPick">
+        <label>유전자 A
+          <select data-gene="A"><option>AA</option><option selected>Aa</option><option>aa</option></select>
+        </label>
+        <label>유전자 B
+          <select data-gene="B"><option>BB</option><option selected>Bb</option><option>bb</option></select>
+        </label>
+        <label>유전자 D
+          <select data-gene="D"><option>DD</option><option selected>Dd</option><option>dd</option></select>
+        </label>
+      </div>
+    </div>
+    <div class="tb-group">
+      <span class="tb-label">&nbsp;</span>
+      <button class="mini hidden" id="shuffle">🎲 독립적 분배 다시 섞기</button>
+    </div>
+  </div>
+ 
+  <div class="grid">
+    <!-- 시각화 -->
+    <section class="card stage-card">
+      <svg class="scene" viewBox="0 0 800 600" role="img" aria-label="세포 분열 단계 시각화">
+        <g id="membrane"></g>
+        <g id="spindle"></g>
+        <g id="centromeres"></g>
+        <g id="chromosomes"></g>
+      </svg>
+      <div class="stepper" id="stepper"></div>
+      <div class="controls">
+        <button class="ctrl" id="prev">◀ 이전</button>
+        <button class="ctrl" id="next">다음 ▶</button>
+        <button class="ctrl play" id="play">▷ 자동 재생</button>
+      </div>
+    </section>
+ 
+    <!-- 설명 패널 -->
+    <aside class="card panel">
+      <span class="phase-tag" id="phaseTag">간기</span>
+      <h2 id="title">단계</h2>
+      <p class="desc" id="desc"></p>
+      <div class="count" id="count"></div>
+      <div class="hl" id="hl"></div>
+      <div class="genobar" id="genobar"></div>
+      <div class="legend">
+        <h3>범례</h3>
+        <div class="leg-row"><span class="swatch sw-mat"></span> 빨강 = 어머니에게서 온 염색체</div>
+        <div class="leg-row"><span class="swatch sw-pat"></span> 파랑 = 아버지에게서 온 염색체</div>
+        <div class="leg-row"><span class="pair-ico"><i class="sw-mat"></i><i class="sw-pat"></i></span> 같은 크기 빨강·파랑 한 쌍 = <b>&nbsp;상동염색체</b></div>
+        <div class="leg-row"><span style="font-weight:800;color:var(--ink);width:15px;text-align:center">A</span> A·a / B·b / D·d = <b>&nbsp;대립유전자</b></div>
+      </div>
+    </aside>
+  </div>
+ 
+  <!-- 구조 용어 + 세포질 분열 -->
+  <div class="info-grid">
+    <section class="card infocard">
+      <h3>🔬 분열 장치 용어</h3>
+      <div class="term"><div class="t">중심체 (centrosome)</div>
+        <div class="d">동물세포에서 방추사가 뻗어 나오는 중심. 분열 전 복제되어 양극으로 이동해 방추사를 만든다. (식물세포는 뚜렷한 중심체 없이 방추사를 형성한다.)</div></div>
+      <div class="term"><div class="t">방추사 (spindle fiber)</div>
+        <div class="d">양극(중심체)에서 뻗어 나오는 단백질 섬유. 염색체의 동원체에 붙어 염색체를 양극으로 끌어당겨 정확히 나눈다.</div></div>
+      <div class="term"><div class="t">동원체 (centromere)</div>
+        <div class="d">염색체의 잘록한 부위로, 방추사가 부착되는 지점이자 자매염색분체가 연결되는 곳이다.</div></div>
+      <div class="term" style="border-color:var(--accent)"><div class="t">동원체 수 = 염색체 수</div>
+        <div class="d">염색체 한 개에는 동원체가 한 개씩 있다. 따라서 동원체의 개수를 세면 그 세포의 염색체 수를 알 수 있다. <b id="centroCount"></b></div></div>
+    </section>
+ 
+    <section class="card infocard">
+      <h3>✂️ 세포질 분열 — 동물 vs 식물</h3>
+      <p id="cytoActive" style="font-weight:700;"></p>
+      <div class="cyto-row">
+        <div class="cyto-box animal">
+          <div class="h">동물세포 · 세포막 함입</div>
+          <div class="b">세포막이 바깥에서 안쪽으로 잘록하게 들어가(분열구) 세포가 둘로 졸려 나뉜다.</div>
+        </div>
+        <div class="cyto-box plant">
+          <div class="h">식물세포 · 세포판 형성</div>
+          <div class="b">단단한 세포벽 때문에 함입이 안 된다. 세포 가운데에 세포판이 생겨 바깥쪽으로 자라며 새 세포벽을 만들어 나뉜다.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+ 
+  <footer class="copyright">
+    © 2026 <b>광덕고 이재빈</b> · 세포 분열 시뮬레이션 · 교육용으로 자유롭게 사용·수정 가능
+  </footer>
+</div>
+ 
+<script>
+const NS='http://www.w3.org/2000/svg';
+const OFF=11;
+ 
+/* ---------- 유전자/세포 상태 ---------- */
+const GENES=[ {key:'A',size:66}, {key:'B',size:52}, {key:'D',size:40} ];
+let geno={A:'Aa', B:'Bb', D:'Dd'};
+let orient={A:0, B:0, D:0};      // 0: 모계가 왼쪽, 1: 부계가 왼쪽 (독립적 분배)
+let mode='mitosis';              // 'mitosis' | 'meiosis'
+let cellType='animal';           // 'animal' | 'plant'
+let stage=0;
+ 
+function alleles(gene){ const s=geno[gene]; return [s[0], s[1]]; } // [모계, 부계]
+ 
+/* 염색분체 12개 (각 상동염색체 = 자매염색분체 2개) */
+const CH=[];
+GENES.forEach(g=>['m','p'].forEach(par=>[1,2].forEach(s=>
+  CH.push({id:g.key+par+s, gene:g.key, parent:par, sister:s, size:g.size}))));
+ 
+/* ---------- 배치 좌표 상수 ---------- */
+const CLUSTER={ Am:[-78,-58], Ap:[-16,-78], Bm:[68,-52], Bp:[82,30], Dm:[-70,54], Dp:[12,72] };
+const CELL6  ={ Am:[-48,-50], Ap:[18,-58], Bm:[52,-16], Bp:[40,42], Dm:[-46,32], Dp:[-12,58] };
+const CELL3  ={ A:[-40,-46], B:[40,-26], D:[-6,52] };
+const MITO_ORDER=[['A','m'],['A','p'],['B','m'],['B','p'],['D','m'],['D','p']];
+const SLOT6=[100,184,268,352,436,520];
+const SLOT3=[150,300,450];
+const SLOT3b=[180,300,420];
+const BIV={ A:[320,190], B:[492,250], D:[378,415] };
+const add=(c,d)=>[c[0]+d[0], c[1]+d[1]];
+ 
+/* ---------- 단계별 레이아웃 생성 ---------- */
+function buildLayout(){
+  const pos={}, hidden=new Set(), centroJoin=[];
+  let cells=[{cx:400,cy:300,rx:300,ry:250}], nuclei=[], poles=[], dividing=false, thread=false;
+  const joined=(g,p,cx,cy)=>{ pos[g+p+'1']=[cx-OFF,cy]; pos[g+p+'2']=[cx+OFF,cy]; centroJoin.push(g+p); };
+  const single=(g,p,cx,cy)=>{ pos[g+p+'1']=[cx,cy]; pos[g+p+'2']=[cx,cy]; hidden.add(g+p+'2'); };
+  const split=(g,p,cx,cy,d)=>{ pos[g+p+'1']=[cx-d,cy]; pos[g+p+'2']=[cx+d,cy]; };
+  const at=(g,p,s,xy)=>{ pos[g+p+s]=xy; };
+  const C=[400,300];
+ 
+  if(mode==='mitosis'){
+    switch(stage){
+      case 0: thread=true; nuclei=[{cx:400,cy:300,rx:178,ry:160}];
+        MITO_ORDER.forEach(([g,p])=>single(g,p, ...add(C,CLUSTER[g+p]))); break;
+      case 1: thread=true; nuclei=[{cx:400,cy:300,rx:178,ry:160}];
+        MITO_ORDER.forEach(([g,p])=>joined(g,p, ...add(C,CLUSTER[g+p]))); break;
+      case 2: poles=[[120,300],[680,300]];
+        MITO_ORDER.forEach(([g,p])=>joined(g,p, ...add(C,CLUSTER[g+p]))); break;
+      case 3: poles=[[120,300],[680,300]];
+        MITO_ORDER.forEach(([g,p],i)=>joined(g,p,400,SLOT6[i])); break;
+      case 4: poles=[[120,300],[680,300]]; cells=[{cx:400,cy:300,rx:330,ry:232}];
+        MITO_ORDER.forEach(([g,p],i)=>split(g,p,400,SLOT6[i],150)); break;
+      case 5: thread=true; dividing=true;
+        cells=[{cx:250,cy:300,rx:150,ry:210},{cx:550,cy:300,rx:150,ry:210}];
+        nuclei=[{cx:250,cy:300,rx:108,ry:150},{cx:550,cy:300,rx:108,ry:150}];
+        MITO_ORDER.forEach(([g,p])=>{ at(g,p,'1',add([250,300],CELL6[g+p])); at(g,p,'2',add([550,300],CELL6[g+p])); }); break;
+    }
+  } else { /* meiosis */
+    const lp=g=>orient[g]?'p':'m';   // 왼쪽으로 가는 homolog
+    const rp=g=>orient[g]?'m':'p';   // 오른쪽
+    switch(stage){
+      case 0: thread=true; nuclei=[{cx:400,cy:300,rx:178,ry:160}];
+        MITO_ORDER.forEach(([g,p])=>single(g,p, ...add(C,CLUSTER[g+p]))); break;
+      case 1: thread=true; nuclei=[{cx:400,cy:300,rx:178,ry:160}];
+        MITO_ORDER.forEach(([g,p])=>joined(g,p, ...add(C,CLUSTER[g+p]))); break;
+      case 2: poles=[[120,300],[680,300]];   // 전기 I : 대합(2가 형성)
+        GENES.forEach(g=>{ joined(g.key,'m',BIV[g.key][0]-20,BIV[g.key][1]); joined(g.key,'p',BIV[g.key][0]+20,BIV[g.key][1]); }); break;
+      case 3: poles=[[120,300],[680,300]];   // 중기 I : 2가가 적도면에
+        GENES.forEach((g,i)=>{ joined(g.key,lp(g.key),400-30,SLOT3[i]); joined(g.key,rp(g.key),400+30,SLOT3[i]); }); break;
+      case 4: poles=[[120,300],[680,300]]; cells=[{cx:400,cy:300,rx:330,ry:232}]; // 후기 I : 상동염색체 분리
+        GENES.forEach((g,i)=>{ joined(g.key,lp(g.key),205,SLOT3[i]); joined(g.key,rp(g.key),595,SLOT3[i]); }); break;
+      case 5: dividing=true;                 // 말기 I : 2세포 (n=3, 복제 상태)
+        cells=[{cx:250,cy:300,rx:150,ry:210},{cx:550,cy:300,rx:150,ry:210}];
+        nuclei=[{cx:250,cy:300,rx:108,ry:150},{cx:550,cy:300,rx:108,ry:150}];
+        GENES.forEach(g=>{ joined(g.key,lp(g.key), ...add([250,300],CELL3[g.key])); joined(g.key,rp(g.key), ...add([550,300],CELL3[g.key])); }); break;
+      case 6: poles=[[150,300],[350,300],[450,300],[650,300]]; // 중기 II
+        cells=[{cx:250,cy:300,rx:150,ry:210},{cx:550,cy:300,rx:150,ry:210}];
+        GENES.forEach((g,i)=>{ joined(g.key,lp(g.key),250,SLOT3b[i]); joined(g.key,rp(g.key),550,SLOT3b[i]); }); break;
+      case 7: poles=[[150,300],[350,300],[450,300],[650,300]]; // 후기 II : 자매염색분체 분리
+        cells=[{cx:250,cy:300,rx:160,ry:205},{cx:550,cy:300,rx:160,ry:205}];
+        GENES.forEach((g,i)=>{ split(g.key,lp(g.key),250,SLOT3b[i],70); split(g.key,rp(g.key),550,SLOT3b[i],70); }); break;
+      case 8: thread=true; dividing=true;    // 말기 II : 4 생식세포 (n=3)
+        const ctr=[150,340,460,650];
+        cells=ctr.map(x=>({cx:x,cy:300,rx:86,ry:170}));
+        nuclei=ctr.map(x=>({cx:x,cy:300,rx:62,ry:118}));
+        GENES.forEach(g=>{
+          at(g.key,lp(g.key),'1',add([ctr[0],300],CELL3[g.key]));
+          at(g.key,lp(g.key),'2',add([ctr[1],300],CELL3[g.key]));
+          at(g.key,rp(g.key),'1',add([ctr[2],300],CELL3[g.key]));
+          at(g.key,rp(g.key),'2',add([ctr[3],300],CELL3[g.key]));
+        }); break;
+    }
+  }
+  return {pos,hidden,centroJoin,cells,nuclei,poles,dividing,thread};
+}
+ 
+/* ---------- 렌더링 ---------- */
+const gChrom=document.getElementById('chromosomes');
+function buildChromatids(){
+  gChrom.innerHTML='';
+  CH.forEach(c=>{
+    const h=c.size;
+    const fill=c.parent==='m'?'var(--mat)':'var(--pat)';
+    const stroke=c.parent==='m'?'var(--mat-d)':'var(--pat-d)';
+    const g=document.createElementNS(NS,'g'); g.setAttribute('class','chromatid'); g.id='ch-'+c.id;
+    g.innerHTML=`
+      <rect class="bar" x="-8.5" y="${-h/2}" width="17" height="${h}" rx="7.5" fill="${fill}" stroke="${stroke}" stroke-width="2"/>
+      <path d="M -8.5 -3.5 L -3 0 L -8.5 3.5 Z" fill="${stroke}" opacity=".5"/>
+      <path d="M 8.5 -3.5 L 3 0 L 8.5 3.5 Z" fill="${stroke}" opacity=".5"/>
+      <circle cx="0" cy="${-h/2+16}" r="9.2" fill="#fff" stroke="${stroke}" stroke-width="1.5"/>
+      <text x="0" y="${-h/2+20.1}" text-anchor="middle" fill="${stroke}" data-al></text>`;
+    gChrom.appendChild(g);
+  });
+  updateAlleles();
+}
+function updateAlleles(){
+  CH.forEach(c=>{
+    const t=document.querySelector('#ch-'+c.id+' [data-al]');
+    if(t) t.textContent=alleles(c.gene)[c.parent==='m'?0:1];
+  });
+}
+function ell(c,fill,st,sw,dash){
+  return `<ellipse cx="${c.cx}" cy="${c.cy}" rx="${c.rx}" ry="${c.ry}" fill="${fill}" stroke="${st}" stroke-width="${sw}"${dash?` stroke-dasharray="${dash}"`:''}/>`;
+}
+function renderMembrane(L){
+  const m=document.getElementById('membrane'); let s='';
+  L.cells.forEach(c=>{
+    if(cellType==='plant')
+      s+=`<rect x="${c.cx-c.rx}" y="${c.cy-c.ry}" width="${c.rx*2}" height="${c.ry*2}" rx="14"
+            fill="var(--cell-plant)" stroke="var(--cell-wall)" stroke-width="6"/>`;
+    else
+      s+=ell(c,'var(--cell)','var(--cell-stroke)',2.5);
+  });
+  // 세포질 분열 표시 (세포판 / 분열구)
+  if(L.dividing && L.cells.length>1){
+    const cs=L.cells; const ry=cs[0].ry;
+    for(let i=0;i<cs.length-1;i++){
+      const bx=(cs[i].cx+cs[i+1].cx)/2; const top=cs[i].cy-ry+8, bot=cs[i].cy+ry-8;
+      if(cellType==='plant'){
+        s+=`<line x1="${bx}" y1="${top}" x2="${bx}" y2="${bot}" stroke="var(--cell-wall)" stroke-width="5"/>`;
+      } else {
+        s+=`<path d="M ${bx-12} ${top} Q ${bx} ${top+22} ${bx+12} ${top}" fill="none" stroke="var(--cell-stroke)" stroke-width="3"/>`;
+        s+=`<path d="M ${bx-12} ${bot} Q ${bx} ${bot-22} ${bx+12} ${bot}" fill="none" stroke="var(--cell-stroke)" stroke-width="3"/>`;
+      }
+    }
+  }
+  L.nuclei.forEach(c=> s+=ell(c,'var(--nuc)','var(--nuc-stroke)',2,'7 7'));
+  m.innerHTML=s;
+}
+function renderSpindle(L){
+  const el=document.getElementById('spindle');
+  if(!L.poles.length){ el.innerHTML=''; return; }
+  let s='';
+  L.poles.forEach(p=>{
+    s+=`<circle cx="${p[0]}" cy="${p[1]}" r="${cellType==='plant'?3.5:6}" fill="#8fa0aa"/>`;
+    if(cellType==='animal'){ // 중심체(별가락) 느낌
+      s+=`<circle cx="${p[0]}" cy="${p[1]}" r="11" fill="none" stroke="#aab8c1" stroke-width="1" opacity=".5"/>`;
+    }
+  });
+  CH.forEach(c=>{
+    if(L.hidden.has(c.id)) return;
+    const t=L.pos[c.id]; if(!t) return;
+    let best=L.poles[0], bd=1e9;
+    L.poles.forEach(p=>{ const d=(p[0]-t[0])**2+(p[1]-t[1])**2; if(d<bd){bd=d; best=p;} });
+    s+=`<line x1="${best[0]}" y1="${best[1]}" x2="${t[0]}" y2="${t[1]}" stroke="var(--spindle)" stroke-width="1.3" opacity=".5"/>`;
+  });
+  el.innerHTML=s;
+}
+function renderCentromeres(L){
+  const el=document.getElementById('centromeres');
+  if(!L.centroJoin.length){ el.innerHTML=''; return; }
+  let s='';
+  L.centroJoin.forEach(hk=>{
+    const a=L.pos[hk+'1'], b=L.pos[hk+'2']; if(!a||!b) return;
+    const cx=(a[0]+b[0])/2, cy=(a[1]+b[1])/2, w=Math.abs(b[0]-a[0])+12;
+    s+=`<rect x="${cx-w/2}" y="${cy-4.5}" width="${w}" height="9" rx="4.5" fill="#4a5a64"/>`;
+  });
+  el.innerHTML=s;
+}
+ 
+/* ---------- 단계 텍스트 ---------- */
+const META={
+  mitosis:[
+    {ph:'간기 · G1', t:'DNA 복제 전', c:'염색체 <b>6개</b> · 동원체 <b>6개</b> · 염색분체 <b>6가닥</b>',
+     d:'핵 속에 상동염색체 3쌍(2n=6)이 들어 있습니다. 색은 부모 유래, 같은 자리의 글자는 대립유전자입니다. 아직 복제 전이라 각 염색체는 염색분체 1개입니다.',
+     h:'같은 크기의 빨강·파랑 한 쌍 = <strong>상동염색체</strong>. 같은 자리의 서로 다른 글자 = <strong>대립유전자</strong>.', hc:''},
+    {ph:'간기 · S', t:'DNA 복제 후', c:'염색체 <b>6개</b> · 동원체 <b>6개</b> · 염색분체 <b>12가닥</b>',
+     d:'DNA가 복제되어 각 염색체가 자매염색분체 2가닥이 됩니다. 두 가닥은 동원체로 연결되며, 완전히 똑같은 복사본입니다.',
+     h:'자매염색분체는 동일한 복사본 → <strong>같은 대립유전자</strong>를 가집니다.', hc:''},
+    {ph:'분열기 · 전기', t:'전기 (Prophase)', c:'염색체 <b>6개</b> · 염색분체 <b>12가닥</b>',
+     d:'핵막이 사라지고 염색체가 응축됩니다. 중심체가 양극으로 이동하며 방추사가 형성되기 시작합니다.',
+     h:'방추사가 염색체의 <strong>동원체</strong>에 부착될 준비를 합니다.', hc:''},
+    {ph:'분열기 · 중기', t:'중기 (Metaphase)', c:'염색체 <b>6개</b> · 염색분체 <b>12가닥</b>',
+     d:'6개의 염색체가 적도면에 하나씩 일렬로 배열됩니다.',
+     h:'⚠️ 상동염색체끼리 짝짓지 않고 <strong>하나씩 배열</strong> — 이것이 체세포 분열! (감수분열에서는 상동염색체가 짝을 이룸)', hc:'warn'},
+    {ph:'분열기 · 후기', t:'후기 (Anaphase)', c:'동원체 분리 → 양극으로 <b>6개씩</b> 이동',
+     d:'동원체가 분리되며 자매염색분체가 방추사에 끌려 양극으로 이동합니다.',
+     h:'★ 나뉘는 것은 상동염색체가 아니라 <strong>자매염색분체</strong>입니다.', hc:'warn'},
+    {ph:'분열기 · 말기', t:'말기 · 세포질 분열', c:'딸세포마다 염색체 <b>6개 (2n=6)</b>',
+     d:'핵막이 다시 만들어지고 세포질이 나뉘어 2개의 딸세포가 됩니다.',
+     h:'두 딸세포는 모세포와 <strong>유전적으로 동일</strong>합니다.', hc:'good'},
+  ],
+  meiosis:[
+    {ph:'간기 · G1', t:'DNA 복제 전', c:'염색체 <b>6개</b> · 동원체 <b>6개</b> · 염색분체 <b>6가닥</b>',
+     d:'핵 속에 상동염색체 3쌍(2n=6)이 있습니다. 복제 전 상태입니다.',
+     h:'감수분열도 분열 전에 DNA를 <strong>한 번만</strong> 복제합니다.', hc:'info'},
+    {ph:'간기 · S', t:'DNA 복제 후', c:'염색체 <b>6개</b> · 염색분체 <b>12가닥</b>',
+     d:'DNA가 복제되어 각 염색체가 자매염색분체 2가닥이 됩니다.',
+     h:'자매염색분체는 동원체로 연결된 <strong>동일한 복사본</strong>입니다.', hc:''},
+    {ph:'감수 1분열 · 전기 I', t:'전기 I — 대합 · 교차', c:'2가 염색체 <b>3개</b> (염색체 6개)',
+     d:'상동염색체가 서로 달라붙어 2가 염색체(4분염색체)를 만듭니다(대합). 이때 교차가 일어나 유전적 다양성이 커질 수 있습니다.',
+     h:'대합·교차는 유전적 다양성의 원인입니다. (이 시뮬레이션은 교차 없이 독립적 분배만 시각화)', hc:'info'},
+    {ph:'감수 1분열 · 중기 I', t:'중기 I (Metaphase I)', c:'2가 염색체 <b>3개</b>가 적도면에 배열',
+     d:'2가 염색체가 적도면에 배열됩니다. 각 2가의 방향은 무작위(독립적 분배)입니다.',
+     h:'★ <strong>상동염색체가 쌍으로</strong> 배열 — 체세포 분열과의 결정적 차이!', hc:'warn'},
+    {ph:'감수 1분열 · 후기 I', t:'후기 I (Anaphase I)', c:'양극으로 염색체 <b>3개씩</b> (n으로 감소)',
+     d:'상동염색체가 서로 분리되어 양극으로 갑니다. 자매염색분체는 아직 붙어 있습니다(동원체 분리 안 됨).',
+     h:'★ 후기 I에서 나뉘는 것은 <strong>상동염색체</strong>입니다. 염색체 수가 2n→n으로 절반이 됩니다!', hc:'warn'},
+    {ph:'감수 1분열 · 말기 I', t:'말기 I · 세포질 분열', c:'각 세포 염색체 <b>3개 (n=3)</b>, 자매염색분체 2가닥',
+     d:'세포질이 나뉘어 2개의 세포가 됩니다. 각 염색체는 아직 자매염색분체 2가닥인 상태입니다.',
+     h:'딸세포는 <strong>반수체(n=3)</strong>가 됩니다. 보통 DNA 복제 없이 곧바로 2분열로 이어집니다.', hc:'info'},
+    {ph:'감수 2분열 · 중기 II', t:'중기 II (Metaphase II)', c:'각 세포 염색체 <b>3개</b> · 동원체 <b>3개</b>',
+     d:'두 세포에서 각각 3개의 염색체가 적도면에 하나씩 배열됩니다(체세포 분열 중기와 비슷).',
+     h:'이제부터는 체세포 분열처럼 <strong>자매염색분체가 분리</strong>될 차례입니다.', hc:''},
+    {ph:'감수 2분열 · 후기 II', t:'후기 II (Anaphase II)', c:'동원체 분리 → 자매염색분체 이동',
+     d:'동원체가 분리되며 자매염색분체가 양극으로 갑니다.',
+     h:'후기 II에서는 (체세포 후기처럼) <strong>자매염색분체</strong>가 나뉩니다.', hc:'warn'},
+    {ph:'감수 2분열 · 말기 II', t:'말기 II · 세포질 분열', c:'생식세포 <b>4개</b> · 각 <b>n=3</b>',
+     d:'세포질이 나뉘어 총 4개의 생식세포가 됩니다.',
+     h:'결과: <strong>4개의 생식세포(n=3)</strong>. 독립적 분배·교차로 유전적으로 다양합니다. 🎲 다시 섞기로 확인하세요!', hc:'good'},
+  ]
+};
+const STEPS={
+  mitosis:[['간기','복제 전'],['간기','복제 후'],['전기','전기'],['중기','중기'],['후기','후기'],['말기','말기·분열']],
+  meiosis:[['간기','복제 전'],['간기','복제 후'],['전기 I','대합·교차'],['중기 I','중기 I'],['후기 I','후기 I'],['말기 I','말기 I'],['중기 II','중기 II'],['후기 II','후기 II'],['말기 II','말기 II']]
+};
+ 
+/* ---------- 유전자형 / 생식세포 표시 ---------- */
+function parentGeno(){ return geno.A+geno.B+geno.D; }
+function gameteSets(){
+  const L=GENES.map(g=> alleles(g.key)[orient[g.key]?1:0]).join('');
+  const R=GENES.map(g=> alleles(g.key)[orient[g.key]?0:1]).join('');
+  return [L,R];
+}
+function renderGenobar(){
+  const el=document.getElementById('genobar');
+  if(mode==='mitosis'){
+    const g=parentGeno();
+    el.innerHTML=`<span>모세포 <span class="geno">${g}</span></span><span class="arrow">→</span>`+
+      `<span>딸세포 <span class="geno">${g}</span> · <span class="geno">${g}</span> (동일)</span>`;
+  } else {
+    const [L,R]=gameteSets();
+    el.innerHTML=`<span>모세포 <span class="geno">${parentGeno()}</span></span><span class="arrow">→</span>`+
+      `<span>생식세포 <span class="geno">${L}</span>·<span class="geno">${L}</span>·<span class="geno">${R}</span>·<span class="geno">${R}</span></span>`;
+  }
+}
+ 
+/* ---------- 적용 ---------- */
+function apply(){
+  const L=buildLayout();
+  renderMembrane(L); renderSpindle(L); renderCentromeres(L);
+  CH.forEach(c=>{
+    const g=document.getElementById('ch-'+c.id); const p=L.pos[c.id];
+    if(p){ g.style.transform=`translate(${p[0]}px, ${p[1]}px)`; }
+    g.style.opacity=L.hidden.has(c.id)?'0':'1';
+    g.classList.toggle('thread', L.thread);
+  });
+  const m=META[mode][stage];
+  document.getElementById('phaseTag').textContent=m.ph;
+  document.getElementById('title').textContent=m.t;
+  document.getElementById('desc').textContent=m.d;
+  document.getElementById('count').innerHTML=m.c;
+  const hl=document.getElementById('hl'); hl.innerHTML=m.h; hl.className='hl '+(m.hc||'');
+  [...document.querySelectorAll('.step')].forEach((b,i)=>b.classList.toggle('active', i===stage));
+  document.getElementById('prev').disabled = stage===0;
+  document.getElementById('next').disabled = stage===STEPS[mode].length-1;
+  // 동물/식물 안내 활성 표시
+  document.getElementById('cytoActive').textContent =
+    cellType==='animal' ? '▶ 현재: 동물세포 — 세포막이 함입되어 나뉩니다.'
+                        : '▶ 현재: 식물세포 — 세포판이 형성되어 나뉩니다.';
+  // 동원체 수 안내
+  const cc = mode==='mitosis'
+     ? (stage<5?'지금 화면의 동원체 = 6개 → 염색체 6개':'각 딸세포의 동원체 = 6개 → 염색체 6개')
+     : (stage<5?'지금 화면의 동원체 = 6개 → 염색체 6개':'각 세포의 동원체 = 3개 → 염색체 3개(n)');
+  document.getElementById('centroCount').textContent='(예: '+cc+')';
+  renderGenobar();
+}
+ 
+/* ---------- 스텝퍼 ---------- */
+function buildStepper(){
+  const sp=document.getElementById('stepper'); sp.innerHTML='';
+  STEPS[mode].forEach((lab,i)=>{
+    const b=document.createElement('button'); b.className='step';
+    b.innerHTML=`<div class="ph">${lab[0]}</div><div class="nm">${lab[1]}</div>`;
+    b.addEventListener('click',()=>{ stopPlay(); stage=i; apply(); });
+    sp.appendChild(b);
+  });
+}
+ 
+/* ---------- 컨트롤 이벤트 ---------- */
+const btnPrev=document.getElementById('prev'), btnNext=document.getElementById('next'), btnPlay=document.getElementById('play');
+btnPrev.addEventListener('click',()=>{ stopPlay(); if(stage>0){stage--; apply();} });
+btnNext.addEventListener('click',()=>{ stopPlay(); if(stage<STEPS[mode].length-1){stage++; apply();} });
+document.addEventListener('keydown',e=>{ if(e.key==='ArrowLeft')btnPrev.click(); if(e.key==='ArrowRight')btnNext.click(); });
+ 
+let timer=null;
+function stopPlay(){ if(timer){ clearInterval(timer); timer=null; btnPlay.textContent='▷ 자동 재생'; } }
+btnPlay.addEventListener('click',()=>{
+  if(timer){ stopPlay(); return; }
+  if(stage===STEPS[mode].length-1){ stage=0; apply(); }
+  btnPlay.textContent='⏸ 멈춤';
+  timer=setInterval(()=>{ if(stage>=STEPS[mode].length-1){ stopPlay(); return; } stage++; apply(); }, 1900);
+});
+ 
+document.getElementById('modeSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  stopPlay(); mode=b.dataset.mode; stage=0;
+  [...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));
+  document.getElementById('shuffle').classList.toggle('hidden', mode!=='meiosis');
+  buildStepper(); apply();
+});
+document.getElementById('cellSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  cellType=b.dataset.cell;
+  [...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));
+  apply();
+});
+document.getElementById('genoPick').addEventListener('change',e=>{
+  if(e.target.dataset.gene){ geno[e.target.dataset.gene]=e.target.value; updateAlleles(); renderGenobar(); }
+});
+document.getElementById('shuffle').addEventListener('click',()=>{
+  orient={A:Math.round(Math.random()), B:Math.round(Math.random()), D:Math.round(Math.random())};
+  apply();
+});
+ 
+/* ---------- 시작 ---------- */
+buildChromatids(); buildStepper(); apply();
+</script>
+</body>
+</html>

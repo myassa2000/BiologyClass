@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>현미경과 마이크로미터를 이용한 크기 측정</title>
+<style>
+:root{
+  --paper:#FAF7F0; --card:#FFFFFF;
+  --ink:#25231E; --ink2:#5E584D; --ink3:#918977;
+  --rule:#E0D8C7; --rule2:#CFC5AE;
+
+  --steel:#C7CDD4; --steel2:#8B93A0; --steel3:#5A6270;
+  --steelL:#E7EAEE;
+  --red:#C0392B; --red2:#8E2A20;
+  --lens:#8FBFD8; --lens2:#3E7EA0;
+  --oc:#2E3238;      /* 접안마이크로미터 눈금 색 */
+  --obj:#B0341F;     /* 대물마이크로미터 눈금 색 */
+  --obj-soft:#F6DCD3;
+  --cellF:#DCEAF4; --cellL:#5F9AC2;
+  --nucF:#B9A7DD; --nucL:#6C4FA0;
+
+  --magenta:#BE3487; --blue:#3A7BC0; --blue-soft:#D3E3F4;
+  --orange:#DE7A2C; --orange-soft:#F9DCC0;
+  --green-soft:#DDEDD4; --purple-soft:#E6DCF4;
+
+  --sans:"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR","Nanum Gothic",sans-serif;
+  --serif:"Times New Roman","Nanum Myeongjo",Batang,"Batang",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+header{border-bottom:1px solid var(--rule2);background:var(--paper);position:sticky;top:0;z-index:40}
+.hbar{max-width:1560px;margin:0 auto;padding:14px 22px 0;display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px;padding-bottom:12px}
+.brand h1{font-size:19px;font-weight:800;letter-spacing:-.03em}
+.brand span{font-size:12px;color:var(--ink3);letter-spacing:.06em}
+.maintabs{display:flex;gap:6px;margin-left:auto}
+.maintabs button{
+  font-family:inherit;font-size:15px;font-weight:700;letter-spacing:-.02em;
+  border:1px solid var(--rule2);border-bottom:none;background:#F2ECE0;color:var(--ink2);
+  padding:10px 24px;border-radius:9px 9px 0 0;cursor:pointer;position:relative;top:1px;transition:background .15s,color .15s}
+.maintabs button:hover{background:#EAE2D2}
+.maintabs button[aria-selected="true"]{background:var(--paper);color:var(--ink);box-shadow:0 -3px 0 0 var(--obj) inset}
+.subbar{border-top:1px solid var(--rule2);background:#F6F1E6}
+.subtabs{max-width:1560px;margin:0 auto;padding:0 22px;display:flex;gap:2px;flex-wrap:wrap}
+.subtabs button{
+  font-family:inherit;font-size:13.5px;font-weight:600;border:none;background:none;color:var(--ink3);
+  padding:11px 16px;cursor:pointer;border-bottom:3px solid transparent;letter-spacing:-.02em;transition:color .15s}
+.subtabs button:hover{color:var(--ink2)}
+.subtabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--obj)}
+.subtabs button .stepnum{
+  display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;
+  background:var(--rule2);color:#fff;font-size:10px;font-weight:800;margin-right:5px;
+}
+.subtabs button[aria-selected="true"] .stepnum{background:var(--obj)}
+
+main{max-width:1560px;margin:0 auto;padding:20px 22px 8px;display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:20px;align-items:start}
+.stage-col{min-width:0}
+.stagehead{display:flex;align-items:baseline;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.stagehead h2{font-size:17px;font-weight:800;letter-spacing:-.03em}
+.stagehead p{font-size:12.5px;color:var(--ink3)}
+.stage{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:8px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.btn{font-family:inherit;font-size:13px;font-weight:700;letter-spacing:-.02em;border:1px solid var(--rule2);
+  background:var(--card);color:var(--ink);padding:8px 14px;border-radius:7px;cursor:pointer;transition:.15s}
+.btn:hover{background:#F4EFE4}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.primary:hover{background:#3b3830}
+.btn:disabled{opacity:.38;cursor:default}
+.btn[aria-pressed="true"]{background:var(--obj);border-color:var(--red2);color:#fff}
+.seg{display:inline-flex;border:1px solid var(--rule2);border-radius:7px;overflow:hidden}
+.seg button{font-family:inherit;font-size:13px;font-weight:700;border:none;background:var(--card);color:var(--ink2);
+  padding:8px 13px;cursor:pointer;border-right:1px solid var(--rule)}
+.seg button:last-child{border-right:none}
+.seg button[aria-selected="true"]{background:var(--ink);color:#fff}
+.spacer{flex:1}
+
+aside{display:flex;flex-direction:column;gap:14px;position:sticky;top:118px}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.panel > h3{font-size:11px;font-weight:800;letter-spacing:.13em;color:var(--ink3);
+  padding:11px 14px 9px;border-bottom:1px solid var(--rule);background:#FCFAF5}
+.pbody{padding:13px 14px 15px}
+.pbody .ph{font-size:16px;font-weight:800;letter-spacing:-.03em;margin-bottom:3px}
+.pbody .role{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:9px;background:var(--steelL);color:var(--steel3)}
+.pbody dl{font-size:13px;line-height:1.62}
+.pbody dt{font-weight:700;color:var(--ink2);margin-top:9px;font-size:12px;letter-spacing:.02em}
+.pbody dd{color:var(--ink2)}
+.pbody .hint{color:var(--ink3);font-size:12.5px;line-height:1.6}
+.pbody .adv{margin-top:11px;padding:9px 11px;border-radius:7px;background:#F6F2E8;border-left:3px solid var(--rule2);font-size:12.5px;color:var(--ink2)}
+.pbody .adv b{color:var(--ink);font-weight:800}
+
+.calc{padding:13px 14px 15px}
+.calc .formula{
+  font-family:var(--serif);font-size:15px;text-align:center;padding:14px 10px;background:#FCFAF5;
+  border:1px solid var(--rule);border-radius:8px;margin-bottom:12px;line-height:1.9;
+}
+.calc .frac{display:inline-block;vertical-align:middle;text-align:center;margin:0 5px}
+.calc .frac .num,.calc .frac .den{display:block;padding:0 4px}
+.calc .frac .num{border-bottom:1.4px solid var(--ink)}
+.readrow{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;margin-bottom:8px}
+.readrow input{
+  width:60px;text-align:center;font-family:var(--serif);font-size:15px;font-weight:700;
+  border:1.6px solid var(--rule2);border-radius:6px;padding:5px 4px;background:#fff;color:var(--ink);
+}
+.readrow input:focus{outline:none;border-color:var(--obj)}
+.readrow input.ok{border-color:#7CB36E;background:#EAF6E6}
+.readrow input.no{border-color:#D89187;background:#FBE9E6}
+.ansbox{display:flex;align-items:center;gap:8px;margin-top:10px}
+.result{margin-top:10px;font-size:12.5px;line-height:1.6;color:var(--ink2);padding:10px 11px;border-radius:7px;background:#F6F2E8;display:none}
+.result.show{display:block}
+.result.ok{background:#E3F2E0;color:#2f5b28}
+.result.no{background:#FBE4E0;color:#8c3226}
+
+.quiz{padding:13px 14px 15px}
+.quiz .q{font-size:13.5px;font-weight:700;line-height:1.55;margin-bottom:10px}
+.qopts{display:flex;flex-direction:column;gap:6px}
+.qopt{font-family:inherit;text-align:left;font-size:13px;font-weight:600;border:1px solid var(--rule2);
+  background:var(--card);color:var(--ink2);padding:8px 11px;border-radius:7px;cursor:pointer;transition:.12s}
+.qopt:hover{border-color:var(--ink3);background:#FBF8F1}
+.qopt.ok{background:#E3F2E0;border-color:#7CB36E;color:#2f5b28}
+.qopt.no{background:#FBE4E0;border-color:#D89187;color:#8c3226}
+.qfb{margin-top:10px;font-size:12.5px;line-height:1.6;color:var(--ink2);display:none}
+.qfb.show{display:block}
+
+.steplist{padding:10px 10px 12px;display:flex;flex-direction:column;gap:4px}
+.stepitem{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--ink3)}
+.stepitem .n{display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--rule2);color:#fff;font-size:10.5px;font-weight:800;flex:none}
+.stepitem.cur{background:var(--steelL);color:var(--ink)}
+.stepitem.cur .n{background:var(--obj)}
+.stepitem.done{color:var(--ink2)}
+.stepitem.done .n{background:#7CB36E}
+
+.legend{padding:11px 13px 13px;display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}
+.lg{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);font-weight:600}
+.lg i{width:13px;height:13px;border-radius:3px;flex:none;border:1px solid rgba(0,0,0,.22)}
+.lg.full{grid-column:1/-1}
+
+.modal{position:fixed;inset:0;background:rgba(38,35,30,.55);z-index:80;display:none;align-items:center;justify-content:center;padding:24px}
+.modal.open{display:flex}
+.mcard{background:var(--card);border-radius:14px;max-width:720px;width:100%;max-height:86vh;overflow:auto;padding:26px 28px 24px}
+.mcard h3{font-size:19px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px}
+.mcard .sub{font-size:12px;color:var(--ink3);margin-bottom:16px}
+.mcard ul{margin:0;padding-left:0;list-style:none}
+.mcard li{font-size:13.5px;line-height:1.65;color:var(--ink2);padding:9px 0 9px 16px;border-top:1px solid var(--rule);position:relative}
+.mcard li:before{content:"";position:absolute;left:0;top:17px;width:6px;height:6px;border-radius:50%;background:var(--obj)}
+.mcard li b{color:var(--ink);font-weight:800}
+.mclose{margin-top:18px}
+
+footer{max-width:1560px;margin:16px auto 0;padding:16px 22px 26px;font-size:11.5px;color:var(--ink3);
+  border-top:1px solid var(--rule);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* ---- SVG 공통 ---- */
+.hot{cursor:pointer}
+.hot:focus{outline:none}
+.hot:focus-visible .ring{opacity:1;stroke-width:2.6}
+.hot .hit{fill:transparent;stroke:none}
+.hot .ring{fill:none;stroke:var(--obj);stroke-width:2;opacity:.5;stroke-dasharray:4 4;transition:opacity .15s,stroke-width .15s}
+.hot:hover .ring{opacity:.95;stroke-width:2.6}
+.hot.sel .ring{opacity:1;stroke-dasharray:none;stroke-width:3.4}
+.hot .lead{stroke:var(--ink3);stroke-width:1}
+.hot:hover .lead,.hot.sel .lead{stroke:var(--obj);stroke-width:1.6}
+.hot .cap{font-size:12.5px;font-weight:700;fill:var(--ink)}
+.hot:hover .cap,.hot.sel .cap{fill:var(--obj)}
+.photo-part-hit{fill:transparent;stroke:none;pointer-events:all}
+.photo-part-ring{fill:rgba(222,122,44,.08);stroke:var(--obj);stroke-width:3;stroke-dasharray:7 5;opacity:0;transition:opacity .15s,stroke-width .15s}
+.photo-hot:hover .photo-part-ring,.photo-hot.sel .photo-part-ring{opacity:1}
+.photo-hot:focus-visible .photo-part-ring{opacity:1}
+.photo-hot.sel .photo-part-ring{stroke-width:4;stroke-dasharray:none}
+.photo-step-ring{fill:rgba(222,122,44,.16);stroke:var(--obj);stroke-width:4;stroke-dasharray:9 6;pointer-events:none}
+.photo-cue{fill:none;stroke:var(--red);stroke-width:5;stroke-linecap:round;pointer-events:none}
+.drag{cursor:grab}
+.drag .dhandle{fill:none;stroke:var(--red);stroke-width:2;stroke-dasharray:5 4;opacity:.75;transition:opacity .15s,stroke-width .15s}
+.drag:hover .dhandle,.drag.active .dhandle{opacity:1;stroke-width:2.8}
+.drag:active{cursor:grabbing}
+text{font-family:var(--sans);fill:var(--ink)}
+.f{font-family:var(--serif)}
+.lbl{font-size:13px;font-weight:600}
+.lbl-s{font-size:11.5px;font-weight:600;fill:var(--ink2)}
+.lbl-xs{font-size:10.5px;font-weight:600;fill:var(--ink3)}
+.zone{font-size:12.5px;font-weight:800;letter-spacing:-.02em}
+.note{font-size:11.5px;font-weight:600;fill:var(--magenta)}
+.dim{opacity:.14;transition:opacity .35s}
+.soft{opacity:.32;transition:opacity .35s}
+.hide{opacity:0;pointer-events:none}
+.pulse{animation:pl 1.5s ease-in-out infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.4}}
+.flash{animation:fl .8s ease-out}
+@keyframes fl{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+.spin{animation:sp 1.6s linear infinite;transform-origin:center}
+@keyframes sp{to{transform:rotate(360deg)}}
+.adv-only{display:none}
+body.adv .adv-only{display:block}
+.gset{cursor:pointer}
+@media (prefers-reduced-motion:reduce){.pulse,.flash,.spin{animation:none}*{transition-duration:.01ms !important}}
+@media (max-width:1180px){main{grid-template-columns:1fr}aside{position:static;flex-direction:row;flex-wrap:wrap}aside > .panel{flex:1 1 300px}}
+@media (max-width:640px){
+  .hbar{padding:12px 14px 0}.maintabs{margin-left:0;width:100%}
+  .maintabs button{flex:1;padding:9px 6px;font-size:13px}
+  .subtabs{padding:0 10px}.subtabs button{padding:9px 9px;font-size:12px}
+  main{padding:14px 12px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hbar">
+    <div class="brand">
+      <h1>현미경과 마이크로미터</h1>
+      <span>세포와 물질대사 인터랙티브 탐구</span>
+    </div>
+    <nav class="maintabs" id="maintabs" role="tablist">
+      <button role="tab" data-main="ms" aria-selected="true">현미경 사용법</button>
+      <button role="tab" data-main="mm" aria-selected="false">마이크로미터로 크기 측정</button>
+    </nav>
+  </div>
+  <div class="subbar"><nav class="subtabs" id="subtabs" role="tablist"></nav></div>
+</header>
+
+<main>
+  <div class="stage-col">
+    <div class="stagehead"><h2 id="viewTitle">—</h2><p id="viewSub"></p></div>
+    <div class="ctrl" id="ctrl"></div>
+    <div class="stage" id="stage"></div>
+  </div>
+  <aside>
+    <div class="panel" id="infoPanel"><h3 id="infoTitle">부품 설명</h3><div class="pbody" id="info"></div></div>
+    <div class="panel" id="stepPanel" hidden><h3>진행 순서</h3><div class="steplist" id="steplist"></div></div>
+    <div class="panel" id="calcPanel" hidden><h3 id="calcTitle">계산</h3><div class="calc" id="calc"></div></div>
+    <div class="panel" id="quizPanel" hidden><h3 id="quizTitle">확인 질문</h3><div class="quiz" id="quiz"></div></div>
+    <div class="panel" id="legendPanel"><h3>범례</h3><div class="legend" id="legend"></div></div>
+  </aside>
+</main>
+
+<footer>
+  <span>ⓒ 이재빈, 광덕고등학교 세포와 물질대사</span>
+  <span>실제 광학현미경의 눈금 관계를 단순화한 모식도입니다.</span>
+</footer>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="mcard" id="mcard"></div></div>
+
+<script>
+/* ============================================================
+   현미경과 마이크로미터를 이용한 크기 측정
+   ⓒ 이재빈, 광덕고등학교 세포와 물질대사
+   ============================================================ */
+"use strict";
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+
+/* ---------- SVG 공통 헬퍼 ---------- */
+function defs(){
+  const mk=(id,c)=>`<marker id="${id}" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">`+
+    `<path d="M0,0.6 L9.4,5 L0,9.4 z" fill="${c}"/></marker>`;
+  const lg=(id,c0,c1,x2="0%",y2="100%")=>`<linearGradient id="${id}" x1="0%" y1="0%" x2="${x2}" y2="${y2}">`+
+    `<stop offset="0" stop-color="${c0}"/><stop offset="1" stop-color="${c1}"/></linearGradient>`;
+  const rg=(id,c0,c1,c2,cx="34%",cy="26%")=>`<radialGradient id="${id}" cx="${cx}" cy="${cy}" r="84%">`+
+    `<stop offset="0" stop-color="${c0}"/>${c2?`<stop offset=".5" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/>`:`<stop offset="1" stop-color="${c1}"/>`}</radialGradient>`;
+  return `<defs>
+    ${mk("aOr","var(--obj)")}${mk("aBl","var(--blue)")}${mk("aGy","#7d766a")}${mk("aRe","#D0483A")}
+    ${lg("gSteel","var(--steelL)","var(--steel2)")}
+    ${lg("gSteelV","#F3F5F7","var(--steel)")}
+    ${lg("gArm","#D8DCE1","#9299A4")}
+    ${rg("gKnob","#E8695A","var(--red)","#7A1F16","36%","28%")}
+    ${rg("gLens","#DCEEF6","var(--lens)","#2C5E7A","36%","26%")}
+    ${rg("gCell","#EEF6FB","var(--cellF)","#A8CBE0","38%","30%")}
+    ${rg("gNuc","#D8CBEF","var(--nucF)","#5C3F90","36%","26%")}
+    <filter id="sh" x="-40%" y="-40%" width="185%" height="185%">
+      <feDropShadow dx="1.6" dy="2.6" stdDeviation="3" flood-color="#3a2f22" flood-opacity=".28"/></filter>
+    <filter id="shS" x="-40%" y="-40%" width="185%" height="185%">
+      <feDropShadow dx="1" dy="1.6" stdDeviation="1.6" flood-color="#3a2f22" flood-opacity=".3"/></filter>
+    <filter id="fovBlur" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="4.6"/></filter>
+  </defs>`;
+}
+function hotC(id,cx,cy,r){
+  return `<g class="hot" data-o="${id}" tabindex="0" role="button">`+
+    `<circle class="hit" cx="${cx}" cy="${cy}" r="${r}"/><circle class="ring" cx="${cx}" cy="${cy}" r="${r}"/></g>`;
+}
+function hotR(id,x,y,w,h,rx=8){
+  return `<g class="hot" data-o="${id}" tabindex="0" role="button">`+
+    `<rect class="hit" x="${x}" y="${y}" width="${w}" height="${h}"/>`+
+    `<rect class="ring" x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/></g>`;
+}
+function tagHot(id,label,tx,ty,anchor,path,hit){
+  const [hx,hy,hw,hh,hr]=hit;
+  return `<g class="hot tag-hot" data-o="${id}" tabindex="0" role="button">`+
+    `<path class="lead" d="${path}" fill="none"/>`+
+    `<text class="cap" x="${tx}" y="${ty}" text-anchor="${anchor}">${label}</text>`+
+    `<rect class="hit" x="${hx}" y="${hy}" width="${hw}" height="${hh}"/>`+
+    `<rect class="ring" x="${hx}" y="${hy}" width="${hw}" height="${hh}" rx="${hr||8}"/></g>`;
+}
+function fitTagBoxes(root){
+  // 글꼴마다 달라지는 실제 글자 크기를 기준으로 클릭 영역과 점선 박스를 맞춘다.
+  // 부품 연결선도 계산된 박스의 바깥 가장자리에서 시작하게 해 박스를 침범하지 않게 한다.
+  root.querySelectorAll(".tag-hot").forEach(g=>{
+    const label=g.querySelector(".cap");
+    const hit=g.querySelector("rect.hit");
+    const ring=g.querySelector("rect.ring");
+    const lead=g.querySelector(".lead");
+    if(!label||!hit||!ring) return;
+
+    const box=label.getBBox();
+    const padX=10, padY=5;
+    const attrs={
+      x:box.x-padX,
+      y:box.y-padY,
+      width:box.width+padX*2,
+      height:box.height+padY*2
+    };
+    [hit,ring].forEach(rect=>{
+      Object.entries(attrs).forEach(([name,value])=>rect.setAttribute(name,value));
+    });
+
+    if(lead){
+      const end=lead.getPointAtLength(lead.getTotalLength());
+      const cx=attrs.x+attrs.width/2, cy=attrs.y+attrs.height/2;
+      const dx=end.x-cx, dy=end.y-cy;
+      if(dx||dy){
+        const tx=dx ? attrs.width/(2*Math.abs(dx)) : Infinity;
+        const ty=dy ? attrs.height/(2*Math.abs(dy)) : Infinity;
+        const t=Math.min(tx,ty);
+        const gap=4/Math.hypot(dx,dy);
+        const startX=cx+dx*(t+gap);
+        const startY=cy+dy*(t+gap);
+        lead.setAttribute("d",`M${startX} ${startY} L${end.x} ${end.y}`);
+      }
+    }
+  });
+}
+
+/* ---------- 정보 패널 / 범례 / 퀴즈 / 요약 (공용) ---------- */
+function showInfo(db,id){
+  if(!id){ $("#info").innerHTML=`<p class="hint">도식에서 <b>점선 테두리가 뜨는 요소</b>를 누르면 설명이 여기에 나타납니다.</p>`; return; }
+  const o=db[id]; if(!o) return;
+  let h=`<div class="ph">${o.t}</div>`;
+  if(o.r) h+=`<span class="role">${o.r}</span>`;
+  h+=`<dl>`+(o.d||[]).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")+`</dl>`;
+  if(o.adv) h+=`<div class="adv adv-only"><b>심화</b> ${o.adv}</div>`;
+  $("#info").innerHTML=h;
+}
+function bindHots(root,db){
+  root.querySelectorAll(".hot").forEach(g=>{
+    const act=()=>{
+      root.querySelectorAll(".hot.sel").forEach(x=>x.classList.remove("sel"));
+      g.classList.add("sel");
+      const f=VIEW[state.view]&&VIEW[state.view].onPick;
+      if(f && f(g.dataset.o)===false) return;
+      if(db) showInfo(db,g.dataset.o);
+    };
+    g.addEventListener("click",act);
+    g.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();act();} });
+  });
+}
+function setLegend(items){
+  $("#legend").innerHTML=items.map(([c,t])=>{
+    const full=t.length>7?" full":"";
+    return `<div class="lg${full}"><i style="background:${c}"></i><span>${t}</span></div>`;
+  }).join("");
+}
+function setQuiz(q,title){
+  const p=$("#quizPanel");
+  if(!q){ p.hidden=true; return; }
+  p.hidden=false; $("#quizTitle").textContent=title||"확인 질문";
+  $("#quiz").innerHTML=`<div class="q">${q.q}</div><div class="qopts">`+
+    q.o.map((t,i)=>`<button class="qopt" data-i="${i}">${t}</button>`).join("")+`</div><div class="qfb" id="qfb"></div>`;
+  $("#quiz").querySelectorAll(".qopt").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;
+    $("#quiz").querySelectorAll(".qopt").forEach(x=>x.disabled=true);
+    b.classList.add(i===q.a?"ok":"no");
+    if(i!==q.a) $("#quiz").querySelector(`.qopt[data-i="${q.a}"]`).classList.add("ok");
+    const fb=$("#qfb"); fb.innerHTML=q.e; fb.classList.add("show");
+  });
+}
+function setSteps(items,cur){
+  const p=$("#stepPanel");
+  if(!items){ p.hidden=true; return; }
+  p.hidden=false;
+  $("#steplist").innerHTML=items.map((t,i)=>{
+    const cls=i<cur?"stepitem done":i===cur?"stepitem cur":"stepitem";
+    return `<div class="${cls}"><span class="n">${i<cur?"✓":i+1}</span><span>${t}</span></div>`;
+  }).join("");
+}
+function summary(title,sub,items,extra){
+  $("#mcard").innerHTML=`<h3>${title}</h3><div class="sub">${sub}</div>`+
+    `<ul>${items.map(i=>`<li>${i}</li>`).join("")}</ul>`+(extra||"")+
+    `<button class="btn primary mclose" id="mclose">닫기</button>`;
+  $("#modal").classList.add("open");
+  $("#mclose").onclick=()=>$("#modal").classList.remove("open");
+}
+$("#modal").addEventListener("click",e=>{ if(e.target.id==="modal") $("#modal").classList.remove("open"); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") $("#modal").classList.remove("open"); });
+
+/* ---------- 라우터 ---------- */
+const SUB={
+  ms:[["ms-parts","현미경의 구조"],["ms-use","관찰 순서 따라하기"]],
+  mm:[["mm-mount","① 마이크로미터 장착"],["mm-cal","② 눈금 보정 (100배)"],["mm-measure","③ 시료 측정 (100배)"],["mm-re","④ 배율 변경 후 재보정 (400배)"]]
+};
+const VIEW={};
+let state={main:"ms",view:"ms-parts",adv:false};
+function renderSubtabs(){
+  const isNum=state.main==="mm";
+  $("#subtabs").innerHTML=SUB[state.main].map(([id,t],i)=>
+    `<button role="tab" data-view="${id}" aria-selected="${id===state.view}">${isNum?`<span class="stepnum">${i+1}</span>`:""}${t.replace(/^[①②③④]\s*/,"")}</button>`).join("");
+  $("#subtabs").querySelectorAll("button").forEach(b=>b.onclick=()=>go(b.dataset.view));
+}
+function go(view){
+  const main=view.startsWith("ms")?"ms":"mm";
+  state.main=main; state.view=view;
+  $$("#maintabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.main===main));
+  renderSubtabs();
+  const v=VIEW[view];
+  $("#viewTitle").textContent=v.title;
+  $("#viewSub").textContent=v.sub||"";
+  $("#ctrl").innerHTML=typeof v.ctrl==="function"?v.ctrl():(v.ctrl||"");
+  const stage=$("#stage");
+  stage.innerHTML=`<svg viewBox="${v.vb}" role="img" aria-label="${v.title} 도식">${defs()}${v.svg()}</svg>`;
+  const stageSvg=stage.querySelector("svg");
+  fitTagBoxes(stageSvg);
+  setLegend(v.legend||[]);
+  setQuiz(v.quiz||null,v.quizTitle);
+  setSteps(v.steps||null,v.curStep||0);
+  $("#calcPanel").hidden=!v.calc;
+  if(v.calc){ $("#calcTitle").textContent=v.calcTitle||"계산"; }
+  showInfo(v.info,null);
+  bindHots(stage,v.info);
+  if(v.init) v.init(stageSvg);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$$("#maintabs button").forEach(b=>b.onclick=()=>go(SUB[b.dataset.main][0][0]));
+function advToggle(id){
+  const el=$("#"+id); if(!el) return;
+  el.checked=state.adv;
+  el.onchange=()=>{ state.adv=el.checked; document.body.classList.toggle("adv",state.adv); };
+  document.body.classList.toggle("adv",state.adv);
+}
+</script>
+<script>
+/* ============================================================
+   현미경의 구조 자료 (두 탭이 공유)
+   ============================================================ */
+const PARTS={
+  eyepiece:{t:"접안렌즈",r:"눈을 대고 보는 렌즈",d:[
+    ["역할","대물렌즈가 만든 상을 다시 확대해서 눈으로 볼 수 있게 한다."],
+    ["배율","보통 5배, 10배, 15배짜리가 있다. 렌즈 몸통에 배율이 적혀 있다."],
+    ["접안마이크로미터","크기를 측정할 때는 이 렌즈 안에 접안마이크로미터라는 눈금자를 끼워 넣는다."],
+    ["총 배율","현미경의 배율 = 대물렌즈 배율 × 접안렌즈 배율"]]},
+  tube:{t:"경통",r:"접안렌즈와 대물렌즈를 잇는 통",d:[
+    ["역할","접안렌즈가 위에, 대물렌즈가 아래에 달려 있도록 두 렌즈 사이의 거리를 유지한다."],
+    ["구조","대물렌즈가 만든 실상이 이 통 안을 지나 접안렌즈로 전달된다."]]},
+  nosepiece:{t:"회전판",r:"대물렌즈를 바꿔 끼우는 손잡이 (렌즈 교환기)",d:[
+    ["역할","배율이 다른 대물렌즈 여러 개가 달려 있어, 돌려서 원하는 배율로 바꿀 수 있다."],
+    ["사용법","반드시 저배율 대물렌즈로 먼저 초점을 맞춘 뒤 고배율로 돌린다."],
+    ["딸깍 소리","제대로 돌아가면 렌즈가 재물대 중앙에 정확히 맞춰지며 딸깍 소리가 난다."]]},
+  objLow:{t:"대물렌즈 (저배율)",r:"표본에 가장 가까운 렌즈",d:[
+    ["역할","표본의 상을 1차로 확대한다. 이 상을 접안렌즈가 다시 확대한다."],
+    ["배율","보통 4배, 10배짜리를 저배율이라 부른다."],
+    ["왜 먼저 쓰나","시야가 넓고 초점 맞추기가 쉬워, 표본의 위치부터 잡을 때 사용한다."]]},
+  objHigh:{t:"대물렌즈 (고배율)",r:"표본을 더 크게 확대하는 렌즈",d:[
+    ["역할","저배율로 찾은 부분을 더 크게 확대해서 자세히 관찰한다."],
+    ["배율","보통 40배, 100배짜리를 고배율이라 부른다."],
+    ["주의","고배율일수록 렌즈와 표본 사이 거리(작동거리)가 매우 가까워 렌즈나 표본이 파손되지 않도록 조심해야 한다."]]},
+  stage:{t:"재물대",r:"표본(프레파라트)을 올려놓는 판",d:[
+    ["역할","프레파라트를 평평하게 고정해 아래에서 오는 빛이 표본을 통과하게 한다."],
+    ["구멍","가운데에 빛이 지나가는 구멍이 뚫려 있다."]]},
+  clip:{t:"클립",r:"프레파라트를 고정하는 집게",d:[
+    ["역할","재물대 위의 프레파라트가 움직이지 않도록 눌러 고정한다."],
+    ["표본 이동","클립으로 고정한 채 프레파라트를 살짝 밀어 보고 싶은 부분을 렌즈 아래로 옮긴다."]]},
+  diaphragm:{t:"조리개",r:"빛의 양을 조절하는 장치",d:[
+    ["역할","재물대 아래에서 빛이 얼마나 들어올지 조절한다."],
+    ["사용법","표본이 너무 밝거나 어두우면 조리개를 돌려 밝기를 맞춘다."],
+    ["배율과의 관계","고배율일수록 시야가 어두워지므로 조리개를 더 열어야 할 때가 많다."]]},
+  light:{t:"광원 (반사경)",r:"표본을 비추는 빛의 출처",d:[
+    ["역할","아래에서 빛을 비추어 표본을 통과한 빛이 렌즈로 들어가게 한다."],
+    ["종류","전등이 내장된 것도 있고, 거울로 외부 빛을 반사시키는 반사경도 있다."]]},
+  coarse:{t:"조동나사",r:"초점을 크게 움직여 맞추는 나사",d:[
+    ["역할","재물대(또는 경통)를 <b>큰 폭으로</b> 위아래로 움직여 표본이 시야에 대충 들어오게 한다."],
+    ["사용 시점","저배율에서 처음 초점을 잡을 때 사용한다."],
+    ["주의","고배율에서는 렌즈와 표본이 매우 가까워지므로 조동나사를 쓰면 렌즈나 표본이 부딪혀 파손될 수 있다. 고배율에서는 미동나사만 사용한다."]]},
+  fine:{t:"미동나사",r:"초점을 정밀하게 맞추는 나사",d:[
+    ["역할","재물대(또는 경통)를 <b>미세하게</b> 움직여 상을 또렷하게 맞춘다."],
+    ["사용 시점","조동나사로 대략 맞춘 뒤, 또는 고배율로 바꾼 뒤 정밀하게 초점을 맞출 때 사용한다."]]},
+  arm:{t:"팔",r:"경통과 다리를 잇는 부분",d:[["역할","현미경을 옮길 때 손으로 잡는 부분이다. 이동할 때는 팔과 다리를 함께 받쳐 든다."]]},
+  base:{t:"다리 (경대)",r:"현미경을 바닥에 지지하는 받침",d:[["역할","현미경 전체를 안정적으로 지지한다. 무게 중심이 있어 현미경이 넘어지지 않게 한다."]]}
+};
+const PARTS_LEGEND=[["var(--lens2)","렌즈"],["var(--red)","초점 나사"],["var(--steel2)","몸체"],["var(--obj)","재물대/클립"]];
+
+/* ---------- 현미경 측면도 ---------- */
+function drawMicroscope(withKnobHi){
+  let s="";
+  // 다리(경대)
+  s+=`<g id="pBase" filter="url(#sh)">
+    <path d="M170 700 q10 -18 40 -18 h420 q30 0 40 18 l14 34 q6 14 -12 14 H168 q-18 0 -12 -14 z" fill="url(#gSteelV)" stroke="var(--steel3)" stroke-width="2"/>
+    <ellipse cx="420" cy="748" rx="270" ry="10" fill="#00000018"/>
+  </g>`;
+  // 팔
+  s+=`<g id="pArm" filter="url(#shS)">
+    <path d="M430 700 C430 560 470 520 470 420 C470 330 440 260 420 210 L468 200 C494 260 520 330 520 420 C520 520 486 560 486 700 Z" fill="url(#gArm)" stroke="var(--steel3)" stroke-width="2"/>
+  </g>`;
+  // 재물대
+  s+=`<g id="pStage">
+    <rect x="230" y="470" width="360" height="26" rx="6" fill="url(#gSteel)" stroke="var(--steel3)" stroke-width="1.6"/>
+    <ellipse cx="410" cy="483" rx="30" ry="9" fill="#3A3F46"/>
+  </g>`;
+  // 프레파라트 (슬라이드)
+  s+=`<g id="pSlide"><rect x="366" y="462" width="88" height="14" rx="2" fill="#D9EEF7" stroke="#7FB3D0" stroke-width="1.4" opacity=".92"/>
+      <ellipse cx="410" cy="469" rx="10" ry="4" fill="#8FBFD8" opacity=".7"/></g>`;
+  // 클립
+  s+=`<g id="pClip"><path d="M356 462 q-14 -4 -14 10 v10 q0 12 14 8" fill="none" stroke="#3A3F46" stroke-width="5" stroke-linecap="round"/>
+      <path d="M464 462 q14 -4 14 10 v10 q0 12 -14 8" fill="none" stroke="#3A3F46" stroke-width="5" stroke-linecap="round"/></g>`;
+  // 조리개 + 광원
+  s+=`<g id="pDia"><rect x="384" y="500" width="52" height="16" rx="3" fill="#6B7280" stroke="#3A3F46" stroke-width="1.4"/>
+      <circle cx="410" cy="508" r="5.5" fill="#2B2F35"/></g>`;
+  s+=`<g id="pLight"><rect x="392" y="524" width="36" height="30" rx="6" fill="#EDE7D6" stroke="var(--steel3)" stroke-width="1.6"/>
+      <circle cx="410" cy="539" r="9" fill="#FCE9A8" stroke="#D9B54A" stroke-width="1.2"/></g>`;
+  s+=`<line id="pRay" x1="410" y1="524" x2="410" y2="470" stroke="#F6D877" stroke-width="6" opacity="0"/>`;
+
+  // 회전판 + 대물렌즈
+  s+=`<g id="pNose"><path d="M400 430 q20 -18 60 0 l10 26 q-40 14 -80 0 z" fill="url(#gSteel)" stroke="var(--steel3)" stroke-width="1.6"/></g>`;
+  s+=`<g id="pObjLow" filter="url(#shS)"><rect x="392" y="452" width="30" height="34" rx="5" fill="url(#gLens)" stroke="var(--lens2)" stroke-width="1.6"/>
+      <rect x="397" y="480" width="20" height="8" rx="2" fill="#3E7EA0"/></g>`;
+  s+=`<g id="pObjHigh" filter="url(#shS)"><rect x="438" y="446" width="24" height="42" rx="5" fill="url(#gLens)" stroke="var(--lens2)" stroke-width="1.6"/>
+      <rect x="442" y="484" width="16" height="8" rx="2" fill="#3E7EA0"/></g>`;
+
+  // 경통 + 접안렌즈
+  s+=`<g id="pTube" filter="url(#shS)"><path d="M418 220 L468 210 L472 400 L414 410 Z" fill="url(#gSteel)" stroke="var(--steel3)" stroke-width="1.8"/></g>`;
+  s+=`<g id="pEye" filter="url(#shS)"><rect x="400" y="170" width="40" height="56" rx="10" fill="url(#gLens)" stroke="var(--lens2)" stroke-width="1.8" transform="rotate(-8 420 198)"/></g>`;
+
+  // 조동나사 / 미동나사
+  s+=`<g id="pCoarse" class="${withKnobHi==='coarse'?'pulse':''}" filter="url(#shS)">
+    <circle cx="500" cy="360" r="26" fill="url(#gKnob)" stroke="var(--red2)" stroke-width="2"/>
+    <circle cx="500" cy="360" r="10" fill="#7A1F16"/></g>`;
+  s+=`<g id="pFine" class="${withKnobHi==='fine'?'pulse':''}" filter="url(#shS)">
+    <circle cx="500" cy="410" r="16" fill="url(#gKnob)" stroke="var(--red2)" stroke-width="2"/>
+    <circle cx="500" cy="410" r="6" fill="#7A1F16"/></g>`;
+
+  return s;
+}
+
+/* ---------- 실제 현미경 사진 + 상호작용 오버레이 ---------- */
+const PHOTO_W=746, PHOTO_H=918;
+const PHOTO_PARTS={
+  eyepiece:[142,105,122,78],
+  tube:[372,264,155,105],
+  nosepiece:[370,360,96,42],
+  objLow:[319,393,39,55],
+  objHigh:[372,420,42,64],
+  stage:[354,515,190,67],
+  clip:[363,469,151,38],
+  diaphragm:[345,592,79,34],
+  light:[333,707,76,56],
+  coarse:[624,621,73,76],
+  fine:[670,622,38,42],
+  arm:[538,341,92,190],
+  base:[365,820,242,85]
+};
+function drawMicroscopePhoto(x=0){
+  return `<image href="./ms.png" x="${x}" y="0" width="${PHOTO_W}" height="${PHOTO_H}"
+    preserveAspectRatio="xMidYMid meet" aria-label="실제 현미경 사진"/>`;
+}
+function photoTagHot(id,label,tx,ty,anchor,imgX=0){
+  const [px,py,rx,ry]=PHOTO_PARTS[id];
+  const cx=imgX+px;
+  return `<g class="hot tag-hot photo-hot" data-o="${id}" tabindex="0" role="button" aria-label="${label}">`+
+    `<path class="lead" d="M${tx} ${ty} L${cx} ${py}" fill="none"/>`+
+    `<ellipse class="photo-part-hit" cx="${cx}" cy="${py}" rx="${rx}" ry="${ry}"/>`+
+    `<ellipse class="photo-part-ring" cx="${cx}" cy="${py}" rx="${rx}" ry="${ry}"/>`+
+    `<text class="cap" x="${tx}" y="${ty}" text-anchor="${anchor}">${label}</text>`+
+    `<rect class="hit" x="${tx-2}" y="${ty-14}" width="4" height="20"/>`+
+    `<rect class="ring" x="${tx-2}" y="${ty-14}" width="4" height="20" rx="5"/></g>`;
+}
+function photoStepOverlay(part,imgX=0,step=0,knob=null){
+  const ids=[part];
+  if(knob&&!ids.includes(knob)) ids.push(knob);
+  let s=ids.map(id=>{
+    const p=PHOTO_PARTS[id];
+    if(!p) return "";
+    return `<ellipse class="photo-step-ring pulse" cx="${imgX+p[0]}" cy="${p[1]}" rx="${p[2]}" ry="${p[3]}"/>`;
+  }).join("");
+
+  const objX=imgX+372;
+  if(step===1){
+    s+=`<path class="photo-cue" d="M${imgX+310} 330 A82 72 0 0 1 ${imgX+442} 335" marker-end="url(#aRe)"/>`;
+  } else if(step===2){
+    s+=`<path d="M${imgX+333} 705 L${imgX+345} 548" stroke="#E4B52C" stroke-width="9" opacity=".55" marker-end="url(#aOr)"/>`;
+  } else if(step===3){
+    s+=`<path class="photo-cue" d="M${objX} 458 L${objX} 354" marker-end="url(#aRe)"/>`;
+    s+=`<text class="note" x="${objX+18}" y="405">서서히 위로</text>`;
+  } else if(step===4){
+    s+=`<path class="photo-cue" d="M${imgX+670} 570 A55 55 0 0 1 ${imgX+704} 654" marker-end="url(#aRe)"/>`;
+    s+=`<text class="note" x="${imgX+610}" y="548">미세 조절</text>`;
+  } else if(step===5){
+    s+=`<path class="photo-cue" d="M${imgX+310} 330 A82 72 0 0 1 ${imgX+442} 335" marker-end="url(#aRe)"/>`;
+    s+=`<text class="note" x="${imgX+500}" y="405">고배율 전환 후 미동나사만 사용</text>`;
+  }
+  return s;
+}
+
+VIEW["ms-parts"]={
+  title:"현미경의 구조",
+  sub:"현미경의 각 부분을 눌러 이름과 역할을 확인해 보세요",
+  vb:"0 0 1200 920",
+  legend:PARTS_LEGEND,
+  ctrl:`<span class="spacer"></span><button class="btn" id="msSum">핵심 요약</button>`,
+  info:PARTS,
+  quiz:{
+    q:"저배율에서 고배율로 바꿀 때, 초점을 다시 맞추기 위해 사용해야 할 것은?",
+    o:["조동나사만 사용한다","미동나사만 사용한다","조동나사로 크게 맞춘 뒤 미동나사로 정밀하게 맞춘다","아무 나사도 쓰지 않아도 된다"],
+    a:1,
+    e:"고배율에서는 대물렌즈와 표본 사이 거리가 매우 가깝습니다. 이때 <b>조동나사</b>를 돌리면 렌즈와 표본이 부딪혀 파손될 수 있습니다. 그래서 고배율로 바꾼 뒤에는 <b>미동나사만</b> 사용해 정밀하게 초점을 맞춥니다."
+  },
+  init(){}
+};
+VIEW["ms-parts"].svg=function(){
+  const imgX=227;
+  let s=drawMicroscopePhoto(imgX);
+  s+=photoTagHot("eyepiece","접안렌즈",174,72,"end",imgX);
+  s+=photoTagHot("tube","경통",174,225,"end",imgX);
+  s+=photoTagHot("nosepiece","회전판",174,345,"end",imgX);
+  s+=photoTagHot("objLow","대물렌즈 (저배율)",174,415,"end",imgX);
+  s+=photoTagHot("objHigh","대물렌즈 (고배율)",174,468,"end",imgX);
+  s+=photoTagHot("arm","팔",1026,258,"start",imgX);
+  s+=photoTagHot("clip","클립",1026,420,"start",imgX);
+  s+=photoTagHot("stage","재물대",1026,468,"start",imgX);
+  s+=photoTagHot("diaphragm","조리개",1026,520,"start",imgX);
+  s+=photoTagHot("coarse","조동나사",1026,585,"start",imgX);
+  s+=photoTagHot("fine","미동나사",1026,645,"start",imgX);
+  s+=photoTagHot("light","광원",1026,720,"start",imgX);
+  s+=photoTagHot("base","다리 (경대)",1026,840,"start",imgX);
+  return s;
+};
+VIEW["ms-parts"].init=function(){
+  $("#msSum").onclick=()=>summary("현미경의 구조","핵심 정리",[
+    "빛의 경로: <b>광원 → 조리개 → 표본 → 대물렌즈 → 경통 → 접안렌즈 → 눈</b>",
+    "<b>배율 담당</b>: 대물렌즈와 접안렌즈. 현미경의 배율 = 대물렌즈 배율 × 접안렌즈 배율",
+    "<b>렌즈를 바꾸는 것</b>: 회전판을 돌려 저배율↔고배율 대물렌즈를 바꾼다.",
+    "<b>초점을 맞추는 것</b>: 조동나사(크게)와 미동나사(정밀하게).",
+    "<b>밝기를 맞추는 것</b>: 조리개.",
+    "<b>표본을 고정하는 것</b>: 재물대 위에서 클립이 프레파라트를 붙잡는다.",
+    "가장 중요한 안전 수칙: <b>저배율로 먼저 초점을 맞춘 뒤 고배율로 바꾼다.</b> 처음부터 고배율로 시작하면 표본을 찾기 어렵고 렌즈가 표본에 부딪힐 위험이 크다."
+  ]);
+};
+
+/* ============================================================
+   관찰 순서 따라하기 (스테퍼)
+   ============================================================ */
+const USE_STEPS=[
+  {t:"프레파라트를 재물대에 고정한다",part:"stage",knob:null,view:"off",objY:0,lens:"low",
+   d:"관찰할 표본이 담긴 프레파라트를 재물대 위에 놓고, 클립으로 눌러 고정한다. 표본이 빛이 지나가는 구멍 위에 오도록 맞춘다.",
+   q:{q:"프레파라트를 고정하는 데 사용하는 것은?",o:["조리개","클립","조동나사","회전판"],a:1,
+      e:"<b>클립</b>이 재물대 위에서 프레파라트가 움직이지 않도록 눌러 줍니다."}},
+  {t:"저배율 대물렌즈로 맞춘다",part:"nosepiece",knob:null,view:"off",objY:0,lens:"low",
+   d:"회전판을 돌려 <b>가장 배율이 낮은 대물렌즈</b>가 재물대 중앙에 오도록 맞춘다. 저배율은 시야가 넓어 표본을 찾기 쉽다.",
+   q:{q:"현미경 관찰을 시작할 때 먼저 사용해야 하는 대물렌즈는?",o:["가장 배율이 높은 것","가장 배율이 낮은 것","아무거나 상관없다","접안렌즈와 배율이 같은 것"],a:1,
+      e:"<b>저배율</b>부터 시작해야 시야가 넓어 표본을 쉽게 찾을 수 있습니다. 고배율로 바로 시작하면 시야가 좁아 표본을 찾기 어렵습니다."}},
+  {t:"조리개로 밝기를 조절한다",part:"diaphragm",knob:null,view:"light",objY:0,lens:"low",
+   d:"광원을 켜고 조리개를 조절해 시야의 밝기를 적당하게 맞춘다. 너무 밝으면 표본이 잘 보이지 않는다.",
+   q:{q:"시야가 너무 밝아서 표본이 잘 안 보일 때 조절해야 하는 것은?",o:["조동나사","미동나사","조리개","회전판"],a:2,
+      e:"빛의 양은 <b>조리개</b>로 조절합니다. 초점을 맞추는 나사와는 별개입니다."}},
+  {t:"접안렌즈로 보며 조동나사로 초점을 맞춘다",part:"coarse",knob:"coarse",view:"blur",objY:14,lens:"low",
+   d:"대물렌즈와 표본 사이가 안전한지 확인한 뒤, 접안렌즈로 보면서 조동나사를 돌려 <b>대물렌즈를 서서히 올리며</b> 표본이 시야에 들어오게 한다.",
+   q:{q:"이 단계에서 대물렌즈는 어느 방향으로 움직여야 할까요?",o:["표본에서 멀어지는 방향(위)으로 천천히","표본에 가까워지는 방향(아래)으로 계속","움직이지 않는다","좌우로 움직인다"],a:0,
+      e:"렌즈와 표본의 안전거리를 확인하고 <b>표본에서 멀어지는 방향으로 천천히 움직이며</b> 초점이 맞는 지점을 찾습니다. 표본 쪽으로 계속 움직이면 충돌할 수 있습니다."}},
+  {t:"미동나사로 초점을 정밀하게 맞춘다",part:"fine",knob:"fine",view:"focus",objY:6,lens:"low",
+   d:"조동나사로 대략 상이 보이면, 미동나사로 미세하게 조절해 상을 또렷하게 맞춘다.",
+   q:{q:"조동나사로 상을 대략 찾은 뒤 다음으로 할 일은?",o:["바로 고배율로 바꾼다","미동나사로 정밀하게 초점을 맞춘다","조리개를 완전히 닫는다","프레파라트를 새로 놓는다"],a:1,
+      e:"조동나사는 큰 폭으로 움직이므로 상이 흐릿할 수 있습니다. <b>미동나사</b>로 미세 조정해 또렷하게 만듭니다."}},
+  {t:"고배율로 바꾼 뒤 미동나사로만 다시 맞춘다",part:"nosepiece",knob:"fine",view:"zoom",objY:3,lens:"high",
+   d:"자세히 보고 싶은 부분을 시야 중앙에 둔 채 회전판을 돌려 고배율로 바꾼다. 고배율에서는 <b>미동나사만</b> 사용해 초점을 맞춘다.",
+   q:{q:"고배율로 바꾼 뒤 조동나사를 사용하면 안 되는 이유는?",
+      o:["조동나사가 고장 나 있어서","고배율에서는 렌즈와 표본 사이 거리가 매우 가까워 부딪힐 수 있어서","조동나사는 저배율 전용 부품이라서","미동나사보다 조작이 느려서"],a:1,
+      e:"고배율 대물렌즈는 표본과의 거리(작동거리)가 매우 짧습니다. 이 상태에서 조동나사로 크게 움직이면 <b>렌즈나 표본이 파손</b>될 수 있어, 미동나사만 사용합니다."}}
+];
+
+// 접안렌즈로 보이는 모습을 흉내 낸 작은 원. 단계마다 실제로 달라져야
+// "그림이 안 바뀐다"는 느낌이 없다.
+function fovCircle(cx,cy,r,state){
+  let s=`<g>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="${r+9}" fill="#2B2F35"/>`;
+  if(state==="off"){
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#15181C"/>`;
+    s+=`<text class="lbl-xs" x="${cx}" y="${cy-4}" text-anchor="middle" fill="#8a8f98">아직</text>`;
+    s+=`<text class="lbl-xs" x="${cx}" y="${cy+12}" text-anchor="middle" fill="#8a8f98">초점을 맞추지 않음</text>`;
+  } else if(state==="light"){
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#FBF3D0"/>`;
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r*.7}" fill="#FEFBEA"/>`;
+  } else if(state==="side"){
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#15181C"/>`;
+    s+=`<line x1="${cx-r*.55}" y1="${cy-r*.55}" x2="${cx+r*.55}" y2="${cy+r*.55}" stroke="#C0392B" stroke-width="4.5" stroke-linecap="round"/>`;
+    s+=`<text class="lbl-xs" x="${cx}" y="${cy+r*.72}" text-anchor="middle" fill="#c98a86">지금은 옆에서 보는 중</text>`;
+  } else {
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#FBF3D0"/>`;
+    const scale=state==="zoom"?2.05:1;
+    const filt=state==="blur"?`filter="url(#fovBlur)"`:``;
+    s+=`<clipPath id="fovClip"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath>`;
+    s+=`<g clip-path="url(#fovClip)">`;
+    s+=`<g ${filt} transform="translate(${cx} ${cy}) scale(${scale})">`;
+    s+=`<ellipse rx="36" ry="25" fill="url(#gCell)" stroke="var(--cellL)" stroke-width="2"/>`;
+    s+=`<ellipse cx="-7" cy="4" rx="13" ry="17" fill="url(#gNuc)" stroke="#5C3F90" stroke-width="1.2"/>`;
+    s+=`</g></g>`;
+  }
+  s+=`<circle cx="${cx}" cy="${cy}" r="${r+9}" fill="none" stroke="#0c0e11" stroke-width="3.5"/>`;
+  const cap={off:"",light:"밝기가 조절되었다",side:"",blur:"초점이 흐리다",focus:"초점이 또렷하다",zoom:"고배율로 확대되었다"}[state];
+  if(cap) s+=`<text class="lbl-xs" x="${cx}" y="${cy+r+26}" text-anchor="middle" fill="var(--ink3)">${cap}</text>`;
+  s+=`</g>`;
+  return s;
+}
+
+VIEW["ms-use"]={
+  title:"관찰 순서 따라하기",
+  sub:"버튼을 눌러 순서대로 진행하며, 접안렌즈로 보이는 모습이 어떻게 달라지는지 확인해 보세요",
+  vb:"0 0 1250 920",
+  legend:PARTS_LEGEND,
+  get steps(){ return USE_STEPS.map(s=>s.t); },
+  get curStep(){ return USEQ.i; },
+  ctrl:`<button class="btn primary" id="useNext">다음 단계</button>
+        <button class="btn" id="usePrev">이전 단계</button>
+        <span class="spacer"></span><button class="btn" id="useRestart">처음부터</button>`,
+  svg(){
+    const st=USE_STEPS[USEQ.i], imgX=42;
+    return drawMicroscopePhoto(imgX)+photoStepOverlay(st.part,imgX,USEQ.i,st.knob)+
+      fovCircle(1015,205,92,st.view)+
+      `<text class="lbl-s" x="1015" y="82" text-anchor="middle">접안렌즈로 보이는 모습 (예시)</text>`;
+  },
+  init(svg){
+    render(false);
+    function render(animate){
+      const st=USE_STEPS[USEQ.i];
+      const imgX=42;
+      $("#stage").innerHTML=`<svg viewBox="0 0 1250 920" role="img" aria-label="${st.t}">${defs()}
+        ${drawMicroscopePhoto(imgX)}${photoStepOverlay(st.part,imgX,USEQ.i,st.knob)}
+        ${fovCircle(1015,205,92,st.view)}
+        <text class="lbl-s" x="1015" y="82" text-anchor="middle">접안렌즈로 보이는 모습 (예시)</text>
+        <text class="lbl-s" x="1015" y="385" text-anchor="middle">주황색 표시가 현재 조작할 부분입니다</text></svg>`;
+      $("#viewTitle").textContent=`관찰 순서 ${USEQ.i+1} / ${USE_STEPS.length}`;
+      $("#viewSub").textContent=st.t;
+      $("#info").innerHTML=`<div class="ph">${USEQ.i+1}. ${st.t}</div><dl><dd>${st.d}</dd></dl>`;
+      setSteps(USE_STEPS.map(s=>s.t),USEQ.i);
+      setQuiz(st.q,"확인 질문");
+      $("#usePrev").disabled=USEQ.i===0;
+      $("#useNext").textContent=USEQ.i<USE_STEPS.length-1?"다음 단계":"관찰 순서 완료";
+    }
+    $("#useNext").onclick=()=>{
+      if(USEQ.i<USE_STEPS.length-1){ USEQ.i++; render(true); }
+      else summary("관찰 순서 완료","핵심 정리",[
+        "<b>저배율 → 고배율</b> 순서로 진행한다. 절대 거꾸로 하지 않는다.",
+        "접안렌즈로 보면서 초점을 맞출 때는 <b>대물렌즈를 서서히 올리는</b> 방향으로 조동나사를 돌린다.",
+        "조동나사로 대략 맞춘 뒤 <b>미동나사</b>로 정밀하게 맞춘다.",
+        "<b>고배율로 바꾼 뒤에는 미동나사만</b> 사용한다. 조동나사를 쓰면 렌즈와 표본이 부딪힐 수 있다.",
+        "이 순서를 지키는 이유는 결국 하나, <b>렌즈와 표본을 보호하면서 정확한 초점을 찾기 위해서</b>다."
+      ]);
+    };
+    $("#usePrev").onclick=()=>{ if(USEQ.i>0){ USEQ.i--; render(true); } };
+    $("#useRestart").onclick=()=>{ USEQ.i=0; render(false); };
+  }
+};
+const USEQ={i:0,knob:null};
+</script>
+
+<script>
+/* ============================================================
+   마이크로미터 눈금자 공용 헬퍼 + 배율별 데이터
+   ============================================================ */
+const OPX=16;              // 접안마이크로미터 1칸의 화면 픽셀 폭 (배율과 무관하게 고정, 확대 표시를 위해 넓힘)
+const OC_TOTAL=100;       // 접안마이크로미터 총 눈금 수
+// 대물마이크로미터는 1칸 = 실제 10 μm. 배율이 오르면 그 상이 더 크게 보이므로
+// 화면에서 1칸이 차지하는 픽셀 폭(objPxPerDiv)도 배율에 비례해 커진다.
+// targetNobj/targetNoc는 서로소(공약수가 1)로 골라, 그 배수 지점(2배, 3배...)이
+// 눈에 보이는 범위 안에 다시 나타나지 않게 했다. 그래서 진짜 일치점은 딱 하나뿐이고
+// 나머지 눈금은 자로 재보면 다 미묘하게 어긋나 있다. 실제 실습과 같은 상황이다.
+const MAGCFG={
+  100:{objPxPerDiv:400/6,  targetNobj:6, targetNoc:25, calib:2.4, specLeft:42, specRight:57, ocShow:32, objShow:8},
+  400:{objPxPerDiv:1600/6, targetNobj:3, targetNoc:50, calib:0.6, specLeft:15, specRight:75, ocShow:58, objShow:5}
+};
+const SPEC_L=36; // 시료(세포)의 실제 크기, μm. 배율이 달라도 실제 크기는 항상 같다.
+const MICRO={ cal:{100:{done:false,nObj:null,nOc:null,val:null}, 400:{done:false,nObj:null,nOc:null,val:null}},
+              meas:{100:{done:false,cnt:null,val:null}, 400:{done:false,cnt:null,val:null}} };
+
+function ocularTicks(x0,y0,nDiv,pxPerDiv,opt={}){
+  let s=`<g>`;
+  s+=`<line x1="${x0}" y1="${y0}" x2="${x0+nDiv*pxPerDiv}" y2="${y0}" stroke="var(--oc)" stroke-width="1.6"/>`;
+  for(let i=0;i<=nDiv;i++){
+    const x=x0+i*pxPerDiv, major=i%5===0;
+    const h=major?22:12;
+    s+=`<line x1="${x}" y1="${y0}" x2="${x}" y2="${y0-h}" stroke="var(--oc)" stroke-width="${major?1.8:1}"/>`;
+    if(major) s+=`<text x="${x}" y="${y0-28}" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--oc)">${i}</text>`;
+  }
+  s+=`<text class="lbl-s" x="${x0}" y="${y0-50}">접안마이크로미터</text>`;
+  s+=`</g>`;
+  return s;
+}
+function objectiveTicks(x0,y0,nDiv,pxPerDiv,opt={}){
+  let s=`<g>`;
+  s+=`<line x1="${x0}" y1="${y0}" x2="${x0+nDiv*pxPerDiv}" y2="${y0}" stroke="var(--obj)" stroke-width="1.6"/>`;
+  for(let i=0;i<=nDiv;i++){
+    const x=x0+i*pxPerDiv;
+    s+=`<line x1="${x}" y1="${y0}" x2="${x}" y2="${y0+24}" stroke="var(--obj)" stroke-width="2.4"/>`;
+    s+=`<text x="${x}" y="${y0+42}" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--obj)">${i}</text>`;
+    if(i<nDiv && !opt.noMinor){
+      for(let k=1;k<10;k++){
+        const x2=x+k*(pxPerDiv/10);
+        s+=`<line x1="${x2}" y1="${y0}" x2="${x2}" y2="${y0+13}" stroke="var(--obj)" stroke-width="1"/>`;
+      }
+    }
+  }
+  s+=`<text class="lbl-s" x="${x0}" y="${y0+64}" fill="var(--obj)">대물마이크로미터 (한 칸 = 10 μm)</text>`;
+  s+=`</g>`;
+  return s;
+}
+function cellShape(cx,cy,rx,ry,id){
+  return `<g id="${id}" filter="url(#shS)">
+    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="url(#gCell)" stroke="var(--cellL)" stroke-width="2"/>
+    <ellipse cx="${cx-rx*.15}" cy="${cy+ry*.1}" rx="${rx*.32}" ry="${ry*.55}" fill="url(#gNuc)" stroke="#5C3F90" stroke-width="1.4"/>
+  </g>`;
+}
+</script>
+<script>
+/* ============================================================
+   ① 마이크로미터 장착
+   ============================================================ */
+const MICRO_PARTS={
+  ocmm:{t:"접안마이크로미터",r:"접안렌즈 속에 끼우는 눈금자",d:[
+    ["생김새","작고 둥근 유리판에 일정한 간격으로 눈금이 새겨져 있다. 보통 0~100까지 100칸이다."],
+    ["결정적 특징","<b>눈금 한 칸이 실제로 몇 μm인지 그 자체로는 알 수 없다.</b> 배율에 따라 한 칸이 나타내는 실제 길이가 달라지기 때문이다."],
+    ["그래서 하는 일","대물마이크로미터와 비교해서 <b>보정</b>해야 비로소 눈금 한 칸의 실제 길이를 알 수 있다."],
+    ["장착 위치","접안렌즈를 분해해서 렌즈 사이에 끼운 뒤 다시 조립한다."]]},
+  obmm:{t:"대물마이크로미터",r:"보정에 사용하는 기준 눈금자",d:[
+    ["생김새","슬라이드 글라스처럼 생겼고, 그 위에 아주 정밀한 눈금이 새겨져 있다."],
+    ["결정적 특징","눈금 한 칸이 정확히 <b>10 μm</b>로 미리 정해져 있다. 제작 단계에서 이미 길이를 알고 만든 기준자다."],
+    ["쓰임새","이것으로 시료를 측정하지는 않는다. <b>접안마이크로미터를 보정하는 용도로만</b> 잠깐 재물대에 올려 사용한다."],
+    ["보정이 끝나면","대물마이크로미터는 치우고, 실제 관찰할 시료가 담긴 프레파라트로 바꾼다."]]}
+};
+
+VIEW["mm-mount"]={
+  title:"① 마이크로미터 장착",
+  sub:"접안마이크로미터를 손가락(또는 마우스)으로 잡아 접안렌즈 안 눈금 자리로 끌어다 놓으세요",
+  vb:"0 0 1100 620",
+  legend:[["var(--lens2)","접안렌즈"],["var(--oc)","접안마이크로미터"],["var(--obj)","대물마이크로미터"]],
+  info:MICRO_PARTS,
+  ctrl:`<button class="btn" id="mtInsert">자동으로 끼우기</button>
+        <span class="spacer"></span><button class="btn primary" id="mtNext" disabled>다음: 눈금 보정하기 →</button>`,
+  quiz:{
+    q:"대물마이크로미터에 대한 설명으로 옳은 것은?",
+    o:["시료를 직접 측정할 때 사용한다","눈금 한 칸이 실제로 10 μm임을 이미 알고 있는 기준자다",
+       "접안렌즈 속에 넣어서 사용한다","배율에 따라 눈금 한 칸의 길이가 달라진다"],
+    a:1,
+    e:"대물마이크로미터는 <b>눈금 한 칸이 정확히 10 μm</b>로 이미 정해진 기준자입니다. 이것으로 시료를 재는 것이 아니라, <b>접안마이크로미터의 눈금 값을 알아내는 데(보정)</b> 딱 한 번 사용합니다. 배율이 달라져도 대물마이크로미터의 실제 눈금 값(10 μm)은 변하지 않습니다. 배율에 따라 값이 달라지는 쪽은 <b>접안마이크로미터</b>입니다."
+  },
+  svg(){
+    let s="";
+    // 왼쪽: 접안렌즈 분해도 + 드래그로 끼우기
+    s+=`<text class="zone" x="60" y="40">접안렌즈에 접안마이크로미터 끼우기</text>`;
+    s+=`<g filter="url(#shS)"><rect x="120" y="80" width="90" height="150" rx="16" fill="url(#gLens)" stroke="var(--lens2)" stroke-width="2"/></g>`;
+    s+=`<text class="lbl-s" x="165" y="256" text-anchor="middle">접안렌즈</text>`;
+    // 드롭존 (항상 보이는 점선 표시)
+    s+=`<g id="mtDrop" class="drag"><circle class="dhandle" cx="165" cy="155" r="38"/></g>`;
+    s+=`<text id="mtDropTip" class="lbl-xs" x="165" y="230" text-anchor="middle" fill="var(--ink3)">점선 원 안으로 끌어다 놓으세요</text>`;
+    // 트레이 위 접안마이크로미터 (드래그 대상)
+    s+=`<g id="mtDisc" class="drag">
+        <circle class="dhandle" cx="0" cy="0" r="36"/>
+        <circle cx="0" cy="0" r="34" fill="#fff" stroke="var(--oc)" stroke-width="2"/>
+        ${Array.from({length:11},(_,i)=>{const x=-30+i*6; return `<line x1="${x}" y1="-15" x2="${x}" y2="${i%5===0?-5:-9}" stroke="var(--oc)" stroke-width="1"/>`;}).join("")}
+        <text class="lbl-xs" x="0" y="10" text-anchor="middle" fill="var(--oc)">0 . . . 10</text>
+        <text class="lbl-xs" x="0" y="24" text-anchor="middle" fill="var(--ink3)">접안마이크로미터</text>
+      </g>`;
+    s+=hotR("ocmm",100,296,130,40,6);
+    s+=`<text class="lbl-xs" x="165" y="352" text-anchor="middle">누르면 설명이 보여요</text>`;
+    s+=`<g id="mtDone" class="hide"><text class="note" x="165" y="330" text-anchor="middle" font-weight="800">✓ 장착 완료</text></g>`;
+
+    // 오른쪽: 대물마이크로미터 (슬라이드)
+    s+=`<text class="zone" x="620" y="40">대물마이크로미터를 재물대에 올리기</text>`;
+    s+=`<g filter="url(#shS)"><rect x="620" y="130" width="360" height="20" rx="4" fill="#E7F0F6" stroke="var(--obj)" stroke-width="1.6"/>`;
+    for(let i=0;i<=20;i++){ const x=630+i*17; s+=`<line x1="${x}" y1="130" x2="${x}" y2="${i%5===0?146:138}" stroke="var(--obj)" stroke-width="${i%5===0?1.6:1}"/>`; }
+    s+=`</g>`;
+    s+=`<text class="lbl-xs" x="800" y="168" text-anchor="middle" fill="var(--obj)">한 칸 = 10 μm로 이미 알려진 눈금</text>`;
+    s+=hotR("obmm",620,110,360,60,8);
+
+    // 재물대 위 슬라이드 놓기 그림
+    s+=`<g transform="translate(0 220)">`;
+    s+=`<rect x="640" y="80" width="320" height="16" rx="8" fill="url(#gSteel)" stroke="var(--steel3)" stroke-width="1.4"/>`;
+    s+=`<ellipse cx="800" cy="88" rx="26" ry="7" fill="#3A3F46"/>`;
+    s+=`<g id="mtSlide"><rect x="740" y="80" width="120" height="14" rx="2" fill="#E7F0F6" stroke="var(--obj)" stroke-width="1.4"/>
+        ${Array.from({length:9},(_,i)=>`<line x1="${750+i*13}" y1="80" x2="${750+i*13}" y2="86" stroke="var(--obj)" stroke-width="1"/>`).join("")}</g>`;
+    s+=`<text class="lbl-xs" x="800" y="130" text-anchor="middle">대물마이크로미터를 재물대 위에 올려 두고, 접안렌즈로 관찰하며 비교한다</text>`;
+    s+=`</g>`;
+    return s;
+  },
+  init(svg){
+    const TRAY={x:165,y:430}, SLOT={x:165,y:155};
+    let inserted=false;
+    const disc=svg.querySelector("#mtDisc"), drop=svg.querySelector("#mtDrop");
+    function place(x,y,animate){
+      disc.style.transition=animate?"transform .35s ease":"";
+      disc.setAttribute("transform",`translate(${x} ${y})`);
+    }
+    function setInserted(v,animate){
+      inserted=v;
+      place(v?SLOT.x:TRAY.x, v?SLOT.y:TRAY.y, animate);
+      svg.querySelector("#mtDone").classList.toggle("hide",!v);
+      svg.querySelector("#mtDropTip").classList.toggle("hide",v);
+      disc.classList.toggle("active",v);
+      $("#mtInsert").textContent=v?"꺼내기":"자동으로 끼우기";
+      $("#mtNext").disabled=!v;
+    }
+    place(TRAY.x,TRAY.y,false);
+
+    function toLocal(clientX,clientY){
+      const pt=svg.createSVGPoint(); pt.x=clientX; pt.y=clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+    let curX=TRAY.x, curY=TRAY.y, dragging=false;
+    disc.addEventListener("mousedown",e=>{
+      e.preventDefault(); dragging=true; disc.style.transition="";
+      const move=ev=>{
+        const loc=toLocal(ev.clientX,ev.clientY);
+        curX=loc.x; curY=loc.y; place(curX,curY,false);
+      };
+      const up=()=>{
+        document.removeEventListener("mousemove",move); document.removeEventListener("mouseup",up);
+        dragging=false;
+        const dist=Math.hypot(curX-SLOT.x,curY-SLOT.y);
+        if(dist<44) setInserted(true,true); else setInserted(false,true);
+      };
+      document.addEventListener("mousemove",move); document.addEventListener("mouseup",up);
+    });
+    disc.addEventListener("touchstart",e=>{
+      e.preventDefault(); dragging=true; disc.style.transition="";
+      const move=ev=>{
+        const t=ev.touches[0]; const loc=toLocal(t.clientX,t.clientY);
+        curX=loc.x; curY=loc.y; place(curX,curY,false);
+      };
+      const up=()=>{
+        document.removeEventListener("touchmove",move); document.removeEventListener("touchend",up);
+        dragging=false;
+        const dist=Math.hypot(curX-SLOT.x,curY-SLOT.y);
+        if(dist<44) setInserted(true,true); else setInserted(false,true);
+      };
+      document.addEventListener("touchmove",move,{passive:false}); document.addEventListener("touchend",up);
+    },{passive:false});
+
+    $("#mtInsert").onclick=()=>setInserted(!inserted,true);
+    $("#mtNext").onclick=()=>go("mm-cal");
+  }
+};
+</script>
+<script>
+/* ============================================================
+   ② 눈금 보정 / ④ 재보정 공용 로직
+   ============================================================ */
+function calView(mag){
+  const cfg=MAGCFG[mag];
+  const vbW=Math.round(Math.max(cfg.objShow*cfg.objPxPerDiv, cfg.ocShow*OPX)+220);
+  return {
+    title:mag===100?"② 눈금 보정 (100배)":"④ 배율 변경 후 재보정 (400배)",
+    sub:"대부분의 지점은 두 눈금이 살짝 어긋나 있습니다. 그중 정확히 겹치는 단 한 지점을 찾아 클릭하세요",
+    vb:`0 0 ${vbW} 460`,
+    legend:[["var(--oc)","접안마이크로미터"],["var(--obj)","대물마이크로미터"],["var(--red)","선택한 일치 지점"]],
+    calc:true, calcTitle:"눈금 값 계산",
+    ctrl(){
+      return (mag===400?`<div class="lbl" style="padding:8px 12px;background:var(--obj-soft);border-radius:7px;color:var(--red2);font-weight:800">
+        배율을 100배 → 400배로 바꿨습니다. 대물마이크로미터의 상이 커져 다시 보정해야 합니다.</div>`:``)+
+      `<span class="spacer"></span><button class="btn" id="calReset">다시 찾기</button>
+       <button class="btn primary" id="calNextBtn" ${MICRO.cal[mag].done?"":"disabled"}>다음: 시료 측정하기 →</button>`;
+    },
+    quiz:{
+      q: mag===100
+        ? "배율 100배에서 보정했더니, 대물마이크로미터 6칸과 접안마이크로미터 25칸이 정확히 겹쳤습니다. 접안마이크로미터 눈금 한 칸의 길이는?"
+        : "배율이 400배로 오르면 접안마이크로미터 눈금 한 칸이 나타내는 실제 길이는 100배일 때보다 어떻게 될까요?",
+      o: mag===100
+        ? ["1.2 μm","2.4 μm","4.2 μm","6 μm"]
+        : ["4배 커진다","변하지 않는다","4배 작아진다","2배 커진다"],
+      a: mag===100?1:2,
+      e: mag===100
+        ? "공식 <b>(대물 눈금 수 ÷ 접안 눈금 수) × 10 μm</b>에 대입하면 (6 ÷ 25) × 10 = <b>2.4 μm</b>입니다."
+        : "배율이 4배 오르면 대물마이크로미터의 상도 4배 커져, 같은 접안 눈금 칸 수에 맞물리는 대물 눈금 수가 <b>4분의 1</b>로 줄어듭니다. 그 결과 접안 눈금 한 칸이 나타내는 실제 길이도 <b>4분의 1</b>로 작아져 더 정밀하게 잴 수 있습니다."
+    },
+    svg(){
+      const x0=110, yOc=190, yObj=190;
+      let s="";
+      s+=`<rect x="40" y="70" width="${vbW-80}" height="250" rx="10" fill="#FCFAF5" stroke="var(--rule)" stroke-width="1.4"/>`;
+      s+=`<text class="lbl-s" x="60" y="100">두 눈금은 왼쪽 0점이 이미 맞춰져 있습니다. 눈금 사이 간격이 서로 달라 오른쪽으로 갈수록 어긋남이 커졌다 작아졌다 합니다.</text>`;
+      s+=objectiveTicks(x0,yObj,cfg.objShow,cfg.objPxPerDiv);
+      s+=ocularTicks(x0,yOc,cfg.ocShow,OPX);
+      s+=`<rect id="calHit" x="${x0-14}" y="${yOc-32}" width="${cfg.objShow*cfg.objPxPerDiv+28}" height="100" fill="transparent"/>`;
+      s+=`<g id="calMark" class="hide"><line x1="0" y1="${yOc-52}" x2="0" y2="${yObj+50}" stroke="var(--red)" stroke-width="2.6" stroke-dasharray="5 4"/>
+          <circle cx="0" cy="${yOc-52}" r="5" fill="var(--red)"/></g>`;
+      return s;
+    },
+    info:{},
+    init(svg){
+      const x0=110, yOc=190;
+      const hit=svg.querySelector("#calHit"), mark=svg.querySelector("#calMark");
+      let solved=MICRO.cal[mag].done;
+      renderCalc();
+      if(solved) placeMark(x0+cfg.targetNobj*cfg.objPxPerDiv);
+
+      hit.addEventListener("click",e=>{
+        if(solved) return;
+        const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+        const loc=pt.matrixTransform(svg.getScreenCTM().inverse());
+        const clickX=loc.x-x0;
+        // 클릭 지점에서 가장 가까운 대물눈금을 찾고, 그 대물눈금에 가장 가까운 접안눈금과 몇 px 어긋나는지로 판정한다.
+        // 진짜로 겹치는 지점(설계상 targetNobj)만 오차가 거의 0이고, 나머지는 전부 눈에 띄게 어긋난다.
+        const nObj=Math.round(clickX/cfg.objPxPerDiv);
+        if(nObj<1||nObj>cfg.objShow){ return; }
+        const objX=nObj*cfg.objPxPerDiv;
+        const nOc=Math.round(objX/OPX);
+        const ocX=nOc*OPX;
+        const offset=Math.abs(objX-ocX);
+        if(offset>2.2){
+          flashHint(`그 지점은 눈금이 어긋나 있습니다 (대물 ${nObj}칸 자리는 접안 눈금과 정확히 맞물리지 않습니다). 다른 지점을 찾아보세요.`,false);
+          return;
+        }
+        placeMark(x0+objX);
+        solved=true;
+        flashHint("정확히 찾았습니다. 이제 두 눈금을 세어 아래에 입력해 보세요.",true);
+        renderCalc();
+      });
+      function placeMark(x){
+        mark.classList.remove("hide");
+        mark.querySelector("line").setAttribute("x1",x); mark.querySelector("line").setAttribute("x2",x);
+        mark.querySelector("circle").setAttribute("cx",x);
+      }
+      function flashHint(msg,ok){
+        const el=document.getElementById("calHintBox");
+        if(el){ el.textContent=msg; el.className="result show"+(ok===true?" ok":ok===false?" no":""); }
+      }
+      function renderCalc(){
+        const st=MICRO.cal[mag];
+        let h=`<div class="formula">접안마이크로미터 눈금 1칸의 길이 =
+          <span class="frac"><span class="num">대물마이크로미터 눈금 수</span><span class="den">접안마이크로미터 눈금 수</span></span> × 10 μm</div>`;
+        h+=`<div id="calHintBox" class="result${solved?"":" show"}">${solved?"":"먼저 도식에서 눈금이 겹치는 지점을 찾아 클릭하세요."}</div>`;
+        if(solved){
+          h+=`<div class="readrow">대물마이크로미터 눈금 <input id="inObj" maxlength="3" placeholder="?"> 칸</div>`;
+          h+=`<div class="readrow">접안마이크로미터 눈금 <input id="inOc" maxlength="3" placeholder="?"> 칸</div>`;
+          h+=`<div class="readrow">접안마이크로미터 눈금 1칸 = <input id="inVal" maxlength="6" placeholder="?"> μm</div>`;
+          h+=`<div class="ansbox"><button class="btn primary" id="calCheck">확인</button></div>`;
+          h+=`<div id="calRes" class="result"></div>`;
+        }
+        $("#calc").innerHTML=h;
+        if(solved){
+          if(st.done){ $("#inObj").value=st.nObj; $("#inOc").value=st.nOc; $("#inVal").value=st.val;
+            [$("#inObj"),$("#inOc"),$("#inVal")].forEach(i=>{i.classList.add("ok");i.disabled=true;});
+            $("#calCheck").disabled=true; $("#calCheck").textContent="완료";
+            $("#calRes").className="result show ok";
+            $("#calRes").innerHTML=`정답입니다. 접안마이크로미터 눈금 1칸 = <b>${st.val} μm</b> (배율 ${mag}배 기준)`;
+          }
+          $("#calCheck").onclick=()=>{
+            const a=+$("#inObj").value, b=+$("#inOc").value, c=parseFloat($("#inVal").value);
+            const okA=a===cfg.targetNobj, okB=b===cfg.targetNoc, okC=Math.abs(c-cfg.calib)<0.01;
+            [["inObj",okA],["inOc",okB],["inVal",okC]].forEach(([id,ok])=>{
+              const el=$("#"+id); el.classList.remove("ok","no"); el.classList.add(ok?"ok":"no");
+            });
+            const res=$("#calRes"); res.classList.add("show");
+            if(okA&&okB&&okC){
+              res.className="result show ok";
+              res.innerHTML=`정답입니다. (${a}÷${b})×10 = <b>${c} μm</b>. 배율 ${mag}배에서 접안마이크로미터 눈금 1칸은 ${c} μm를 나타냅니다.`;
+              MICRO.cal[mag]={done:true,nObj:a,nOc:b,val:c};
+              [$("#inObj"),$("#inOc"),$("#inVal")].forEach(i=>i.disabled=true);
+              $("#calCheck").disabled=true; $("#calCheck").textContent="완료";
+              const nx=$("#calNextBtn"); if(nx) nx.disabled=false;
+              const segM=document.querySelector('.seg [data-p="measure"]'); if(segM) segM.disabled=false;
+            } else {
+              res.className="result show no";
+              res.innerHTML="다시 확인해 보세요. 도식에서 표시된 지점까지 눈금을 하나씩 세어 보세요.";
+            }
+          };
+        }
+      }
+      $("#calReset").onclick=()=>{
+        solved=false; MICRO.cal[mag]={done:false,nObj:null,nOc:null,val:null};
+        mark.classList.add("hide"); renderCalc();
+        $("#calNextBtn").disabled=true;
+      };
+      $("#calNextBtn").onclick=()=>go(mag===100?"mm-measure":"mm-re");
+    }
+  };
+}
+VIEW["mm-cal"]=calView(100);
+</script>
+<script>
+/* ============================================================
+   ③ 시료 측정 / ④ 재측정 공용 로직
+   ============================================================ */
+function measView(mag){
+  const cfg=MAGCFG[mag];
+  const vbW=90+100*OPX+80;
+  return {
+    title:mag===100?"③ 시료 크기 측정 (100배)":"④ 배율을 바꿔 다시 측정 (400배)",
+    sub:"손잡이를 드래그해 세포의 양쪽 끝에 맞추고, 접안마이크로미터 눈금 수를 읽어보세요",
+    vb:`0 0 ${vbW} 380`,
+    legend:[["var(--oc)","접안마이크로미터"],["var(--cellL)","시료(세포)"],["var(--red)","측정 손잡이"]],
+    calc:true, calcTitle:"실제 크기 계산",
+    ctrl(){
+      return (mag===400?`<div class="lbl" style="padding:8px 12px;background:var(--blue-soft);border-radius:7px;color:#255183;font-weight:800">
+        같은 세포를 400배에서 다시 측정합니다. 배율이 올랐으니 칸 수도 달라집니다.</div>`:``)+
+      `<span class="spacer"></span><button class="btn" id="measReset">손잡이 초기화</button>`+
+      (mag===100?`<button class="btn primary" id="measNextBtn" disabled>다음: 배율을 바꿔 재측정 →</button>`:``);
+    },
+    quiz:{
+      q: mag===100
+        ? "세포의 양 끝이 접안마이크로미터 눈금 15칸을 차지했습니다. 접안 1칸이 2.4 μm일 때 세포의 실제 크기는?"
+        : "같은 세포를 배율만 올려 다시 쟀더니 접안마이크로미터 눈금 60칸을 차지했습니다. 이 측정으로 계산한 세포의 실제 크기는 100배일 때와 비교하면?",
+      o: mag===100
+        ? ["15 μm","17 μm","36 μm","60 μm"]
+        : ["더 커야 한다","더 작아야 한다","거의 같아야 한다","비교할 수 없다"],
+      a: mag===100?2:2,
+      e: mag===100
+        ? "실제 크기 = 눈금 수 × 1칸의 길이 = 15 × 2.4 μm = <b>36 μm</b>입니다."
+        : "세포의 <b>실제 크기는 배율과 관계없이 변하지 않습니다.</b> 배율을 올리면 눈금 칸 수는 늘어나지만(15→60칸), 그만큼 1칸이 나타내는 길이는 줄어들므로(2.4→0.6 μm) 계산 결과는 <b>거의 같은 값(약 36 μm)</b>이 나와야 정상입니다. 배율을 높이는 이유는 크기를 바꾸기 위해서가 아니라 더 세밀하게, 정밀하게 보기 위해서입니다."
+    },
+    svg(){
+      const x0=90, y=190;
+      const calibDone=MICRO.cal[mag].done;
+      const calibVal=calibDone?MICRO.cal[mag].val:cfg.calib;
+      let s="";
+      s+=`<rect x="40" y="60" width="${vbW-80}" height="260" rx="10" fill="#FCFAF5" stroke="var(--rule)" stroke-width="1.4"/>`;
+      s+=`<text class="lbl-s" x="60" y="88">대물마이크로미터는 치우고, 이제 시료가 담긴 프레파라트를 재물대에 올려 관찰합니다.</text>`;
+      s+=ocularTicks(x0,y,100,OPX);
+      const cellX=x0+cfg.specLeft*OPX, cellW=(cfg.specRight-cfg.specLeft)*OPX;
+      // 세포의 양 끝을 specLeft/specRight 정수 눈금과 정확히 일치시킨다.
+      s+=cellShape(cellX+cellW/2,y+70,cellW/2,34,"measCell");
+      // 측정 손잡이 (드래그)
+      s+=`<g id="handleL" class="drag"><circle class="dhandle" cx="0" cy="${y-10}" r="15"/><path d="M0 ${y} l-11 -18 l22 0 z" fill="var(--red)" stroke="#7A1F16" stroke-width="1"/><line x1="0" y1="${y}" x2="0" y2="${y+120}" stroke="var(--red)" stroke-width="2" stroke-dasharray="4 4"/><rect x="-16" y="${y-24}" width="32" height="${150}" fill="transparent"/></g>`;
+      s+=`<g id="handleR" class="drag"><circle class="dhandle" cx="0" cy="${y-10}" r="15"/><path d="M0 ${y} l-11 -18 l22 0 z" fill="var(--red)" stroke="#7A1F16" stroke-width="1"/><line x1="0" y1="${y}" x2="0" y2="${y+120}" stroke="var(--red)" stroke-width="2" stroke-dasharray="4 4"/><rect x="-16" y="${y-24}" width="32" height="${150}" fill="transparent"/></g>`;
+      s+=`<text id="measCount" class="lbl" x="${x0+400}" y="${y+170}" text-anchor="middle"></text>`;
+      return s;
+    },
+    info:{},
+    init(svg){
+      const x0=90, y=190;
+      const cfg2=MAGCFG[mag];
+      const st=MICRO.meas[mag];
+      let left = st.done? cfg2.specLeft : Math.max(0,cfg2.specLeft-6);
+      let right= st.done? cfg2.specRight: Math.min(100,cfg2.specRight+6);
+      const hL=svg.querySelector("#handleL"), hR=svg.querySelector("#handleR"), cntTxt=svg.querySelector("#measCount");
+      function place(){
+        hL.setAttribute("transform",`translate(${x0+left*OPX} 0)`);
+        hR.setAttribute("transform",`translate(${x0+right*OPX} 0)`);
+        cntTxt.textContent=`측정한 칸 수: ${right-left} 칸  (오른쪽 ${right} − 왼쪽 ${left})`;
+      }
+      place(); renderCalc();
+
+      function drag(handle,which){
+        handle.addEventListener("mousedown",e=>{
+          e.preventDefault();
+          const move=ev=>{
+            const pt=svg.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY;
+            const loc=pt.matrixTransform(svg.getScreenCTM().inverse());
+            let div=Math.round((loc.x-x0)/OPX); div=Math.max(0,Math.min(100,div));
+            if(which==="L"){ if(div<right){ left=div; } } else { if(div>left){ right=div; } }
+            place();
+          };
+          const up=()=>{ document.removeEventListener("mousemove",move); document.removeEventListener("mouseup",up); };
+          document.addEventListener("mousemove",move); document.addEventListener("mouseup",up);
+        });
+        // 터치 기기 대응
+        handle.addEventListener("touchstart",e=>{
+          e.preventDefault();
+          const move=ev=>{
+            const t=ev.touches[0];
+            const pt=svg.createSVGPoint(); pt.x=t.clientX; pt.y=t.clientY;
+            const loc=pt.matrixTransform(svg.getScreenCTM().inverse());
+            let div=Math.round((loc.x-x0)/OPX); div=Math.max(0,Math.min(100,div));
+            if(which==="L"){ if(div<right){ left=div; } } else { if(div>left){ right=div; } }
+            place();
+          };
+          const up=()=>{ document.removeEventListener("touchmove",move); document.removeEventListener("touchend",up); };
+          document.addEventListener("touchmove",move,{passive:false}); document.addEventListener("touchend",up);
+        },{passive:false});
+      }
+      drag(hL,"L"); drag(hR,"R");
+
+      $("#measReset").onclick=()=>{
+        left=Math.max(0,cfg2.specLeft-6); right=Math.min(100,cfg2.specRight+6); place();
+      };
+
+      function renderCalc(){
+        const calibKnown=MICRO.cal[mag].done;
+        let h="";
+        if(!calibKnown){
+          h=`<div class="result show no">먼저 ${mag===100?"② 눈금 보정":"④의 눈금 보정"} 단계를 완료해야 접안마이크로미터 1칸의 값을 알 수 있습니다.</div>`;
+          $("#calc").innerHTML=h; return;
+        }
+        const calib=MICRO.cal[mag].val;
+        h+=`<div class="formula">실제 길이 = 측정한 접안 눈금 수 × 접안마이크로미터 눈금 1칸의 길이<br>
+            = 측정한 칸 수 × ${calib} μm</div>`;
+        h+=`<div class="readrow">측정한 접안 눈금 수 <input id="mCnt" maxlength="3" placeholder="?"> 칸</div>`;
+        h+=`<div class="readrow">시료의 실제 크기 <input id="mVal" maxlength="6" placeholder="?"> μm</div>`;
+        h+=`<div class="ansbox"><button class="btn primary" id="mCheck">확인</button></div>`;
+        h+=`<div id="mRes" class="result${st.done?" show ok":""}">${st.done?`정답입니다. 시료의 실제 크기는 <b>${st.val} μm</b>입니다.`:""}</div>`;
+        $("#calc").innerHTML=h;
+        if(st.done){ $("#mCnt").value=st.cnt; $("#mVal").value=st.val;
+          $("#mCnt").classList.add("ok"); $("#mVal").classList.add("ok");
+          $("#mCnt").disabled=true; $("#mVal").disabled=true;
+          $("#mCheck").disabled=true; $("#mCheck").textContent="완료";
+        }
+        $("#mCheck").onclick=()=>{
+          const trueCnt=right-left;
+          const a=+$("#mCnt").value, b=parseFloat($("#mVal").value);
+          const okA=a===trueCnt, okB=Math.abs(b-trueCnt*calib)<0.6;
+          $("#mCnt").classList.remove("ok","no"); $("#mCnt").classList.add(okA?"ok":"no");
+          $("#mVal").classList.remove("ok","no"); $("#mVal").classList.add(okB?"ok":"no");
+          const res=$("#mRes"); res.classList.add("show");
+          if(okA&&okB){
+            res.className="result show ok";
+            res.innerHTML=`정답입니다. ${a} × ${calib} = <b>${b} μm</b>. 이것이 이 시료의 실제 크기입니다.`;
+            MICRO.meas[mag]={done:true,cnt:a,val:b};
+            $("#mCnt").disabled=true; $("#mVal").disabled=true;
+            $("#mCheck").disabled=true; $("#mCheck").textContent="완료";
+            const nx=$("#measNextBtn"); if(nx) nx.disabled=false;
+            const fin=$("#mmReFinish"); if(fin) fin.disabled=false;
+          } else {
+            res.className="result show no";
+            res.innerHTML="다시 확인해 보세요. 손잡이가 가리키는 두 눈금 번호를 다시 세어 보고, 계산식을 다시 확인하세요.";
+          }
+        };
+      }
+      $("#measNextBtn") && ($("#measNextBtn").onclick=()=>go("mm-re"));
+    }
+  };
+}
+VIEW["mm-measure"]=measView(100);
+</script>
+<script>
+/* ============================================================
+   ④ 배율 변경 후 재보정 (400배) — 재보정 단계와 재측정 단계를
+   한 탭 안에서 이어서 진행한다 (calView/measView 재사용)
+   ============================================================ */
+const MMRE={phase:"cal"};
+VIEW["mm-re"]={
+  get title(){ return MMRE.phase==="cal" ? "④ 배율 변경 후 재보정 (400배)" : "④ 배율을 바꿔 다시 측정 (400배)"; },
+  get sub(){ return MMRE.phase==="cal" ? calView(400).sub : measView(400).sub; },
+  get vb(){ return MMRE.phase==="cal" ? calView(400).vb : measView(400).vb; },
+  get legend(){ return MMRE.phase==="cal" ? calView(400).legend : measView(400).legend; },
+  get quiz(){ return MMRE.phase==="cal" ? calView(400).quiz : measView(400).quiz; },
+  quizTitle:"확인 질문",
+  calc:true,
+  get calcTitle(){ return MMRE.phase==="cal" ? "눈금 값 계산" : "실제 크기 계산"; },
+  ctrl(){
+    const phaseSeg=`<div class="seg">
+        <button data-p="cal" aria-selected="${MMRE.phase==="cal"}">1단계 재보정</button>
+        <button data-p="measure" aria-selected="${MMRE.phase==="measure"}" ${MICRO.cal[400].done?"":"disabled"}>2단계 재측정</button>
+      </div>`;
+    const base=MMRE.phase==="cal" ? calView(400).ctrl() : measView(400).ctrl();
+    const finish=MMRE.phase==="measure" ? `<button class="btn primary" id="mmReFinish" ${MICRO.meas[400].done?"":"disabled"}>측정 완료 — 핵심 요약 보기</button>` : "";
+    return phaseSeg+base+finish;
+  },
+  svg(){ return MMRE.phase==="cal" ? calView(400).svg() : measView(400).svg(); },
+  info:{},
+  init(svg){
+    if(MMRE.phase==="cal") calView(400).init(svg); else measView(400).init(svg);
+    $$(".seg [data-p]").forEach(b=>b.onclick=()=>{ if(b.disabled) return; MMRE.phase=b.dataset.p; go("mm-re"); });
+    if(MMRE.phase==="cal"){
+      const nx=$("#calNextBtn"); if(nx) nx.onclick=()=>{ MMRE.phase="measure"; go("mm-re"); };
+    } else {
+      const fin=$("#mmReFinish");
+      if(fin) fin.onclick=()=>summary("배율을 바꿔 다시 측정하기","핵심 정리",[
+        "배율을 100배에서 400배(4배)로 올리면, 대물마이크로미터의 상도 <b>4배 커져</b> 처음의 보정값을 그대로 쓸 수 없다. 그래서 <b>다시 보정</b>해야 한다.",
+        "재보정 결과: 대물 3칸 = 접안 50칸 → 접안마이크로미터 눈금 1칸 = <b>0.6 μm</b>. 100배일 때(2.4 μm)의 4분의 1이다.",
+        "같은 세포를 다시 재면 접안 눈금을 <b>더 많은 칸(60칸)</b>으로 차지한다. 눈금 하나가 더 작은 길이를 나타내기 때문이다.",
+        "실제 크기 = 60칸 × 0.6 μm = <b>36 μm</b>. 100배에서 잰 값(36 μm)과 <b>같다.</b>",
+        "이것이 핵심이다. <b>배율을 바꿔도 시료의 실제 크기는 변하지 않는다.</b> 배율을 올리는 이유는 크기를 다르게 재기 위해서가 아니라, 더 정밀하고 자세하게 관찰하기 위해서다.",
+        "그래서 배율을 바꿀 때마다 접안마이크로미터를 <b>매번 새로 보정</b>해야 한다는 것을 잊지 않아야 한다."
+      ]);
+    }
+  }
+};
+</script>
+<script>
+/* ---------- 시작 ---------- */
+go("ms-parts");
+</script>
+</body>
+</html>

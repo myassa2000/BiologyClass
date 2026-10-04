@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>세포의 구조와 세포소기관</title>
+<style>
+:root{
+  --paper:#FAF7F0; --card:#FFFFFF;
+  --ink:#25231E; --ink2:#5E584D; --ink3:#918977;
+  --rule:#E0D8C7; --rule2:#CFC5AE;
+
+  --cyto:#F6F1E2;          /* 세포질 */
+  --cyto2:#EFE8D4;
+  --memb:#58A9D8;          /* 세포막 */
+  --memb2:#2E6C96;
+  --wall:#7BA83E;          /* 세포벽 */
+  --wall2:#4E7223;
+  --nuc:#7B5BA8;           /* 핵 */
+  --nuc2:#3F2A66;
+  --nucleolus:#2E1B4D;
+  --er:#8B6FB5;            /* 소포체 */
+  --er2:#5B4483;
+  --golgi:#3F9E96;         /* 골지체 */
+  --golgi2:#1F6862;
+  --mito:#A03A48;          /* 마이토콘드리아 */
+  --mito2:#5E1826;
+  --lyso:#C4548E;          /* 라이소솜 */
+  --lyso2:#8A2F5F;
+  --chloro:#4F8A32;        /* 엽록체 */
+  --chloro2:#2C5119;
+  --vac:#DDEBD4;           /* 액포 */
+  --vac2:#7FA868;
+  --cent:#4E9CB5;          /* 중심체 */
+  --cent2:#266479;
+  --skel:#7FB35E;          /* 세포골격 */
+  --ribo:#E8963C;          /* 라이보솜 */
+  --magenta:#BE3487;
+  --blue:#3A7BC0; --blue-soft:#D3E3F4;
+  --orange:#DE7A2C; --orange-soft:#F9DCC0;
+  --green-soft:#DDEDD4; --purple-soft:#E6DCF4;
+  --red:#C0392B;
+
+  --sans:"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR","Nanum Gothic",sans-serif;
+  --serif:"Times New Roman","Nanum Myeongjo",Batang,"Batang",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+header{border-bottom:1px solid var(--rule2);background:var(--paper);position:sticky;top:0;z-index:40}
+.hbar{max-width:1560px;margin:0 auto;padding:14px 22px 0;display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px;padding-bottom:12px}
+.brand h1{font-size:19px;font-weight:800;letter-spacing:-.03em}
+.brand span{font-size:12px;color:var(--ink3);letter-spacing:.06em}
+.maintabs{display:flex;gap:6px;margin-left:auto}
+.maintabs button{
+  font-family:inherit;font-size:15px;font-weight:700;letter-spacing:-.02em;
+  border:1px solid var(--rule2);border-bottom:none;background:#F2ECE0;color:var(--ink2);
+  padding:10px 24px;border-radius:9px 9px 0 0;cursor:pointer;position:relative;top:1px;transition:background .15s,color .15s}
+.maintabs button:hover{background:#EAE2D2}
+.maintabs button[aria-selected="true"]{background:var(--paper);color:var(--ink);box-shadow:0 -3px 0 0 var(--orange) inset}
+.subbar{border-top:1px solid var(--rule2);background:#F6F1E6}
+.subtabs{max-width:1560px;margin:0 auto;padding:0 22px;display:flex;gap:2px;flex-wrap:wrap}
+.subtabs button{
+  font-family:inherit;font-size:13.5px;font-weight:600;border:none;background:none;color:var(--ink3);
+  padding:11px 16px;cursor:pointer;border-bottom:3px solid transparent;letter-spacing:-.02em;transition:color .15s}
+.subtabs button:hover{color:var(--ink2)}
+.subtabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--orange)}
+
+main{max-width:1560px;margin:0 auto;padding:20px 22px 8px;display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:20px;align-items:start}
+.stage-col{min-width:0}
+.stagehead{display:flex;align-items:baseline;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.stagehead h2{font-size:17px;font-weight:800;letter-spacing:-.03em}
+.stagehead p{font-size:12.5px;color:var(--ink3)}
+.stage{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:8px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.btn{font-family:inherit;font-size:13px;font-weight:700;letter-spacing:-.02em;border:1px solid var(--rule2);
+  background:var(--card);color:var(--ink);padding:8px 14px;border-radius:7px;cursor:pointer;transition:.15s}
+.btn:hover{background:#F4EFE4}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.primary:hover{background:#3b3830}
+.btn:disabled{opacity:.38;cursor:default}
+.btn[aria-pressed="true"]{background:var(--orange);border-color:#b8601a;color:#fff}
+.seg{display:inline-flex;border:1px solid var(--rule2);border-radius:7px;overflow:hidden}
+.seg button{font-family:inherit;font-size:13px;font-weight:700;border:none;background:var(--card);color:var(--ink2);
+  padding:8px 13px;cursor:pointer;border-right:1px solid var(--rule)}
+.seg button:last-child{border-right:none}
+.seg button[aria-selected="true"]{background:var(--ink);color:#fff}
+.seg.warm button[aria-selected="true"]{background:var(--orange);color:#fff}
+.tog{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--ink2);
+  border:1px solid var(--rule2);border-radius:7px;padding:7px 12px;cursor:pointer;background:var(--card);user-select:none}
+.tog input{accent-color:var(--orange);width:14px;height:14px;cursor:pointer}
+.spacer{flex:1}
+
+aside{display:flex;flex-direction:column;gap:14px;position:sticky;top:118px}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.panel > h3{font-size:11px;font-weight:800;letter-spacing:.13em;color:var(--ink3);
+  padding:11px 14px 9px;border-bottom:1px solid var(--rule);background:#FCFAF5}
+.pbody{padding:13px 14px 15px}
+.pbody .ph{font-size:16px;font-weight:800;letter-spacing:-.03em;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+.pbody .swatch{width:13px;height:13px;border-radius:3px;flex:none;border:1px solid rgba(0,0,0,.25)}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.tg{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;background:#EFEADC;color:var(--ink2)}
+.tg.y{background:#DDEDD4;color:#3d6b2c}
+.tg.n{background:#FBE4E0;color:#8c3226}
+.tg.b{background:var(--blue-soft);color:#255183}
+.pbody dl{font-size:13px;line-height:1.62}
+.pbody dt{font-weight:700;color:var(--ink2);margin-top:9px;font-size:12px;letter-spacing:.02em}
+.pbody dd{color:var(--ink2)}
+.pbody .hint{color:var(--ink3);font-size:12.5px;line-height:1.6}
+.pbody .adv{margin-top:11px;padding:9px 11px;border-radius:7px;background:#F6F2E8;border-left:3px solid var(--rule2);font-size:12.5px;color:var(--ink2)}
+.pbody .adv b{color:var(--ink);font-weight:800}
+
+.legend{padding:11px 13px 13px;display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}
+.lg{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);font-weight:600}
+.lg i{width:13px;height:13px;border-radius:3px;flex:none;border:1px solid rgba(0,0,0,.22)}
+.lg.full{grid-column:1/-1}
+
+.quiz{padding:13px 14px 15px}
+.quiz .q{font-size:13.5px;font-weight:700;line-height:1.55;margin-bottom:10px}
+.qopts{display:flex;flex-direction:column;gap:6px}
+.qopt{font-family:inherit;text-align:left;font-size:13px;font-weight:600;border:1px solid var(--rule2);
+  background:var(--card);color:var(--ink2);padding:8px 11px;border-radius:7px;cursor:pointer;transition:.12s}
+.qopt:hover{border-color:var(--ink3);background:#FBF8F1}
+.qopt.ok{background:#E3F2E0;border-color:#7CB36E;color:#2f5b28}
+.qopt.no{background:#FBE4E0;border-color:#D89187;color:#8c3226}
+.qfb{margin-top:10px;font-size:12.5px;line-height:1.6;color:var(--ink2);display:none}
+.qfb.show{display:block}
+
+.modal{position:fixed;inset:0;background:rgba(38,35,30,.55);z-index:80;display:none;align-items:center;justify-content:center;padding:24px}
+.modal.open{display:flex}
+.mcard{background:var(--card);border-radius:14px;max-width:760px;width:100%;max-height:86vh;overflow:auto;padding:26px 28px 24px}
+.mcard h3{font-size:19px;font-weight:800;letter-spacing:-.03em;margin-bottom:4px}
+.mcard .sub{font-size:12px;color:var(--ink3);margin-bottom:16px}
+.mcard ul{margin:0;padding-left:0;list-style:none}
+.mcard li{font-size:13.5px;line-height:1.65;color:var(--ink2);padding:9px 0 9px 16px;border-top:1px solid var(--rule);position:relative}
+.mcard li:before{content:"";position:absolute;left:0;top:17px;width:6px;height:6px;border-radius:50%;background:var(--orange)}
+.mcard li b{color:var(--ink);font-weight:800}
+.mclose{margin-top:18px}
+table.cmp{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:6px}
+table.cmp th,table.cmp td{border:1px solid var(--rule);padding:6px 9px;text-align:left}
+table.cmp th{background:#F6F1E6;font-weight:700;font-size:11.5px}
+table.cmp td.no{color:#a33;font-weight:700}
+table.cmp td.yes{color:#2f6b3e;font-weight:700}
+table.cmp td.mid{color:#8a6a12;font-weight:700}
+
+footer{max-width:1560px;margin:16px auto 0;padding:16px 22px 26px;font-size:11.5px;color:var(--ink3);
+  border-top:1px solid var(--rule);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* ---- SVG 공통 ---- */
+.hot{cursor:pointer}
+.hot:focus{outline:none}
+.hot:focus-visible .ring{opacity:1}
+.hot .hit{fill:transparent;stroke:none}
+.hot .ring{fill:none;stroke:var(--orange);stroke-width:2.5;opacity:0;stroke-dasharray:4 4;transition:opacity .15s}
+.hot:hover .ring{opacity:.9}
+.hot.sel .ring{opacity:1;stroke-dasharray:none;stroke-width:3.4}
+.hot .lead{stroke:var(--ink3);stroke-width:1}
+.hot:hover .lead,.hot.sel .lead{stroke:var(--orange);stroke-width:1.6}
+.hot .cap{font-size:13px;font-weight:700;fill:var(--ink)}
+.hot:hover .cap,.hot.sel .cap{fill:var(--orange)}
+.cell-photo-image{pointer-events:none}
+.cell-photo-part .ring{fill:rgba(222,122,44,.10);stroke-width:3;transition:opacity .15s,stroke-width .15s}
+.cell-photo-part:hover .ring,.cell-photo-part.sel .ring{opacity:1}
+.cell-photo-part.sel .ring{fill:rgba(222,122,44,.18);stroke-width:4}
+.pulse .cell-photo-part .ring{opacity:1;fill:rgba(222,122,44,.18);stroke-width:4}
+.hot .cell-memb-hit{fill:none;stroke:transparent;stroke-width:30;pointer-events:stroke}
+.cell-photo-note{font-size:11.5px;font-weight:700;fill:var(--ink3)}
+text{font-family:var(--sans);fill:var(--ink)}
+.f{font-family:var(--serif)}
+.lbl{font-size:13px;font-weight:600}
+.lbl-s{font-size:11.5px;font-weight:600;fill:var(--ink2)}
+.lbl-xs{font-size:10.5px;font-weight:600;fill:var(--ink3)}
+.zone{font-size:12.5px;font-weight:800;letter-spacing:-.02em}
+.note{font-size:11.5px;font-weight:600;fill:var(--magenta)}
+.dim{opacity:.14;transition:opacity .35s}
+.soft{opacity:.32;transition:opacity .35s}
+.hide{opacity:0;pointer-events:none}
+.pulse{animation:pl 1.5s ease-in-out infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.4}}
+.flash{animation:fl .8s ease-out}
+@keyframes fl{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
+.adv-only{display:none}
+body.adv .adv-only{display:block}
+@media (prefers-reduced-motion:reduce){.pulse,.flash{animation:none}*{transition-duration:.01ms !important}}
+@media (max-width:1180px){main{grid-template-columns:1fr}aside{position:static;flex-direction:row;flex-wrap:wrap}aside > .panel{flex:1 1 300px}}
+@media (max-width:640px){
+  .hbar{padding:12px 14px 0}.maintabs{margin-left:0;width:100%}
+  .maintabs button{flex:1;padding:9px 6px;font-size:13px}
+  .subtabs{padding:0 10px}.subtabs button{padding:9px 9px;font-size:12px}
+  main{padding:14px 12px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hbar">
+    <div class="brand">
+      <h1>세포의 구조와 세포소기관</h1>
+      <span>세포와 물질대사 인터랙티브 탐구</span>
+    </div>
+    <nav class="maintabs" id="maintabs" role="tablist">
+      <button role="tab" data-main="pk" aria-selected="true">원핵세포와 진핵세포</button>
+      <button role="tab" data-main="eu" aria-selected="false">진핵세포</button>
+    </nav>
+  </div>
+  <div class="subbar"><nav class="subtabs" id="subtabs" role="tablist"></nav></div>
+</header>
+
+<main>
+  <div class="stage-col">
+    <div class="stagehead"><h2 id="viewTitle">—</h2><p id="viewSub"></p></div>
+    <div class="ctrl" id="ctrl"></div>
+    <div class="stage" id="stage"></div>
+  </div>
+  <aside>
+    <div class="panel"><h3>세포소기관 설명</h3><div class="pbody" id="info"></div></div>
+    <div class="panel" id="quizPanel" hidden><h3 id="quizTitle">확인 질문</h3><div class="quiz" id="quiz"></div></div>
+    <div class="panel"><h3>범례</h3><div class="legend" id="legend"></div></div>
+  </aside>
+</main>
+
+<footer>
+  <span>ⓒ 이재빈, 광덕고등학교 세포와 물질대사</span>
+  <span>도식은 각 소기관의 구조가 드러나도록 크기를 조정한 모식도입니다.</span>
+</footer>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="mcard" id="mcard"></div></div>
+
+<script>
+/* ============================================================
+   세포의 구조와 세포소기관
+   ⓒ 이재빈, 광덕고등학교 세포와 물질대사
+   ============================================================ */
+"use strict";
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+
+/* ---------- 공통 SVG 헬퍼 ---------- */
+function defs(){
+  const mk=(id,c)=>`<marker id="${id}" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">`+
+    `<path d="M0,0.6 L9.4,5 L0,9.4 z" fill="${c}"/></marker>`;
+  // 입체감은 방사형 그러데이션으로 낸다. 광원은 왼쪽 위에 있다고 가정한다.
+  const rg=(id,c0,c1,c2,cx="34%",cy="26%")=>`<radialGradient id="${id}" cx="${cx}" cy="${cy}" r="84%">`+
+    `<stop offset="0" stop-color="${c0}"/>${c2?`<stop offset=".5" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/>`:`<stop offset="1" stop-color="${c1}"/>`}</radialGradient>`;
+  const lg=(id,c0,c1,x2="0%",y2="100%")=>`<linearGradient id="${id}" x1="0%" y1="0%" x2="${x2}" y2="${y2}">`+
+    `<stop offset="0" stop-color="${c0}"/><stop offset="1" stop-color="${c1}"/></linearGradient>`;
+  return `<defs>
+    ${mk("aOr","var(--orange)")}${mk("aBl","var(--blue)")}${mk("aGy","#7d766a")}${mk("aRe","#D0483A")}${mk("aPu","var(--golgi2)")}
+    ${rg("gCytoA","#FDFBF4","#F0E6D2","#DFCFB2","40%","30%")}
+    ${rg("gCytoL","#F6FBEE","#E4EFD6","#CFE0BC","40%","30%")}
+    ${rg("gNucS","#C3A9E8","#7B5BA8","#3F2A66")}
+    ${rg("gNucC","#5E4090","#2E1B4D",null,"46%","36%")}
+    ${rg("gNuclo","#6B4CA0","#241338",null,"38%","32%")}
+    ${rg("gMito","#D4707C","#A03A48","#5E1826","36%","24%")}
+    ${rg("gMitoIn","#F2C3C6","#C87884",null,"38%","28%")}
+    ${rg("gChl","#A6D98A","#4F8A32","#274A15","34%","22%")}
+    ${rg("gChlIn","#DCF0C8","#8CC46A",null,"36%","26%")}
+    ${lg("gGolgi","#69C6BC","#1F6862")}
+    ${lg("gGolgiV","#8FDCD3","#2E7E76")}
+    ${rg("gLyso","#E495BE","#C4548E","#8A2F5F","34%","26%")}
+    ${rg("gCent","#8FD0E4","#4E9CB5","#266479","32%","26%")}
+    ${lg("gER","#B79AE0","#6B4C9A")}
+    ${lg("gSER","#F0C08A","#B5793A")}
+    ${rg("gVac","#FBFEF8","#E2EFD8","#C2D9B0","34%","24%")}
+    ${lg("gWall","#9CC45E","#4E7223")}
+    ${lg("gWallIn","#C6DE96","#7BA83E")}
+    ${lg("gMembRim","#BEE6F7","#5FA8D8")}
+    ${rg("gRibo","#F6C089","#C87137",null,"32%","28%")}
+    <filter id="sh" x="-40%" y="-40%" width="185%" height="185%">
+      <feDropShadow dx="1.6" dy="2.6" stdDeviation="3" flood-color="#3a2f22" flood-opacity=".3"/></filter>
+    <filter id="shS" x="-40%" y="-40%" width="185%" height="185%">
+      <feDropShadow dx="1" dy="1.6" stdDeviation="1.6" flood-color="#3a2f22" flood-opacity=".32"/></filter>
+    <pattern id="bilayer" width="13" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="6.5" cy="4" r="3.4" fill="#BEE6F7" stroke="var(--memb2)" stroke-width=".8"/>
+      <path d="M5 7.4 q-.8 4 0 6 M8 7.4 q.8 4 0 6" stroke="#E0A94E" stroke-width=".9" fill="none"/>
+    </pattern>
+    <pattern id="wallTex" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="url(#gWallIn)"/>
+      <path d="M0 7 h20 M0 14 h20 M7 0 v7 M15 7 v7 M4 14 v6" stroke="#6F9A34" stroke-width="1.1" opacity=".65"/>
+    </pattern>
+  </defs>`;
+}
+function hotC(id,cx,cy,r){
+  return `<g class="hot" data-o="${id}" tabindex="0" role="button">`+
+    `<circle class="hit" cx="${cx}" cy="${cy}" r="${r}"/><circle class="ring" cx="${cx}" cy="${cy}" r="${r}"/></g>`;
+}
+function hotR(id,x,y,w,h,rx=8){
+  return `<g class="hot" data-o="${id}" tabindex="0" role="button">`+
+    `<rect class="hit" x="${x}" y="${y}" width="${w}" height="${h}"/>`+
+    `<rect class="ring" x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/></g>`;
+}
+// 교과서와 같은 번호 원판. 두 도식이 번호를 공유하므로 학생이 곧바로 대조할 수 있다.
+function numDot(x,y,n){
+  return "";
+}
+// 라벨 + 번호 + 지시선 + 클릭 영역을 한 덩어리로
+function tagHot(id,label,tx,ty,anchor,path,hit,num){
+  const [hx,hy,hw,hh,hr]=hit;
+  const n=num!==undefined?num:(ORG[id]&&ORG[id].no);
+  let dot="";
+  if(n){
+    const w=label.length*13+4;
+    dot=numDot(anchor==="start"?tx-13:anchor==="end"?tx+13:tx+w/2+13, ty-4.5, n);
+  }
+  const dotSide=anchor==="start"?"left":"right";
+  return `<g class="hot tag-label" data-o="${id}" data-dot-side="${dotSide}" tabindex="0" role="button">`+
+    `<path class="lead" d="${path}" fill="none"/>${dot}`+
+    `<text class="cap" x="${tx}" y="${ty}" text-anchor="${anchor}">${label}</text>`+
+    `<rect class="hit" x="${hx}" y="${hy}" width="${hw}" height="${hh}"/>`+
+    `<rect class="ring" x="${hx}" y="${hy}" width="${hw}" height="${hh}" rx="${hr||8}"/></g>`;
+}
+function cellPhotoPart(id,groupId,imgX,imgY,shapes,membrane=false){
+  const ellipses=shapes.map(([cx,cy,rx,ry])=>{
+    if(membrane){
+      return `<ellipse class="cell-memb-hit" cx="${imgX+cx}" cy="${imgY+cy}" rx="${rx}" ry="${ry}"/>`+
+        `<ellipse class="ring" cx="${imgX+cx}" cy="${imgY+cy}" rx="${rx}" ry="${ry}"/>`;
+    }
+    return `<ellipse class="hit" cx="${imgX+cx}" cy="${imgY+cy}" rx="${rx}" ry="${ry}"/>`+
+      `<ellipse class="ring" cx="${imgX+cx}" cy="${imgY+cy}" rx="${rx}" ry="${ry}"/>`;
+  }).join("");
+  return `<g id="${groupId}"><g class="hot cell-photo-part" data-o="${id}" tabindex="0" role="button" aria-label="${ORG[id].n}">${ellipses}</g></g>`;
+}
+// 사진 속 구조는 클릭할 수 있지만 별도의 타원 강조선은 표시하지 않는다.
+function cellPhotoHitOnly(id,groupId,imgX,imgY,shapes){
+  const hits=shapes.map(([cx,cy,rx,ry])=>
+    `<ellipse class="hit" cx="${imgX+cx}" cy="${imgY+cy}" rx="${rx}" ry="${ry}"/>`
+  ).join("");
+  return `<g id="${groupId}"><g class="hot cell-photo-part" data-o="${id}" tabindex="0" role="button" aria-label="${ORG[id].n}">${hits}</g></g>`;
+}
+function cellPhotoRect(id,x,y,w,h,rx=8){
+  return `<g class="hot cell-photo-part" data-o="${id}" tabindex="0" role="button" aria-label="${ORG[id].n}">`+
+    `<rect class="hit" x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/>`+
+    `<rect class="ring" x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/></g>`;
+}
+function cellPhotoLabel(id,label,tx,ty,anchor,targetX,targetY){
+  const n=ORG[id]&&ORG[id].no;
+  const dot=n?numDot(anchor==="end"?tx+15:tx-15,ty-4.5,n):"";
+  const dotSide=anchor==="start"?"left":"right";
+  return `<g class="hot tag-label cell-photo-label" data-o="${id}" data-dot-side="${dotSide}" tabindex="0" role="button" aria-label="${label}">`+
+    `<path class="lead" d="M${tx} ${ty} L${targetX} ${targetY}" fill="none"/>${dot}`+
+    `<text class="cap" x="${tx}" y="${ty}" text-anchor="${anchor}">${label}</text>`+
+    `<rect class="hit" x="${tx-2}" y="${ty-14}" width="4" height="20"/>`+
+    `<rect class="ring" x="${tx-2}" y="${ty-14}" width="4" height="20" rx="5"/></g>`;
+}
+function fitCellPhotoLabels(root){
+  root.querySelectorAll(".tag-label").forEach(g=>{
+    const label=g.querySelector(".cap"), hit=g.querySelector("rect.hit");
+    const ring=g.querySelector("rect.ring"), lead=g.querySelector(".lead");
+    if(!label||!hit||!ring) return;
+    const box=label.getBBox(), padX=8, padY=5;
+    const attrs={x:box.x-padX,y:box.y-padY,width:box.width+padX*2,height:box.height+padY*2};
+    [hit,ring].forEach(rect=>Object.entries(attrs).forEach(([name,value])=>rect.setAttribute(name,value)));
+    const leadBox={...attrs};
+    const dot=g.querySelector(".numdot");
+    if(dot){
+      const dotX=g.dataset.dotSide==="left"?attrs.x-15:attrs.x+attrs.width+15;
+      const dotY=attrs.y+attrs.height/2;
+      const circle=dot.querySelector("circle"), text=dot.querySelector("text");
+      circle.setAttribute("cx",dotX); circle.setAttribute("cy",dotY);
+      text.setAttribute("x",dotX); text.setAttribute("y",dotY+3.8);
+      const left=Math.min(leadBox.x,dotX-9.5), right=Math.max(leadBox.x+leadBox.width,dotX+9.5);
+      const top=Math.min(leadBox.y,dotY-9.5), bottom=Math.max(leadBox.y+leadBox.height,dotY+9.5);
+      leadBox.x=left; leadBox.y=top; leadBox.width=right-left; leadBox.height=bottom-top;
+    }
+    if(!lead) return;
+    const end=lead.getPointAtLength(lead.getTotalLength());
+    const cx=leadBox.x+leadBox.width/2, cy=leadBox.y+leadBox.height/2;
+    const dx=end.x-cx, dy=end.y-cy;
+    if(!dx&&!dy) return;
+    const tx=dx?leadBox.width/(2*Math.abs(dx)):Infinity;
+    const ty=dy?leadBox.height/(2*Math.abs(dy)):Infinity;
+    const t=Math.min(tx,ty), gap=4/Math.hypot(dx,dy);
+    lead.setAttribute("d",`M${cx+dx*(t+gap)} ${cy+dy*(t+gap)} L${end.x} ${end.y}`);
+  });
+}
+// 여러 세부 명칭을 하나로 묶는 대괄호 (교과서의 핵, 소포체 라벨 방식)
+function bracket(x,y1,y2,dir=1){
+  const t=8*dir;
+  return `<path d="M${x-t} ${y1} L${x} ${y1} L${x} ${y2} L${x-t} ${y2}" fill="none" stroke="var(--ink3)" stroke-width="1.2"/>`;
+}
+
+/* ---------- 소기관 그리기 ---------- */
+// 핵: 구를 4분의 1 잘라내 핵막, 염색질, 인이 드러나게 한다 (교과서 절개도 방식)
+function drawNucleus(cx,cy,r){
+  const P=(a,rr)=>[cx+Math.cos(a*Math.PI/180)*rr, cy+Math.sin(a*Math.PI/180)*rr];
+  const [x0,y0]=P(-90,r), [x1,y1]=P(6,r);
+  let s=`<g filter="url(#sh)">`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#gNucS)"/>`;
+  // 잘려 나간 부분 = 핵 내부
+  s+=`<path d="M${cx} ${cy} L${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="url(#gNucC)"/>`;
+  // 인 (핵소체)
+  s+=`<circle cx="${cx+r*.34}" cy="${cy-r*.4}" r="${r*.26}" fill="url(#gNuclo)"/>`;
+  // 염색질: 잘린 면에 드러난 실 모양
+  s+=`<g stroke="#9F81CE" stroke-width="${Math.max(1.4,r*.022)}" fill="none" opacity=".7" stroke-linecap="round">`;
+  s+=`<path d="M${cx+r*.08} ${cy-r*.78} q${r*.18} ${r*.16} ${r*.02} ${r*.3} q${-r*.16} ${r*.14} ${r*.06} ${r*.28}"/>`;
+  s+=`<path d="M${cx+r*.5} ${cy-r*.06} q${r*.16} ${-r*.18} ${r*.3} ${-r*.06}"/>`;
+  s+=`<path d="M${cx+r*.2} ${cy-r*.2} q${r*.22} ${r*.1} ${r*.16} ${-r*.16}"/>`;
+  s+=`</g>`;
+  // 잘린 면의 핵막 (2중막) 단면
+  s+=`<path d="M${cx} ${cy} L${x0.toFixed(1)} ${y0.toFixed(1)}" stroke="#D9C6F0" stroke-width="3.4"/>`;
+  s+=`<path d="M${cx} ${cy} L${x1.toFixed(1)} ${y1.toFixed(1)}" stroke="#D9C6F0" stroke-width="3.4"/>`;
+  s+=`<path d="M${cx} ${cy} L${x0.toFixed(1)} ${y0.toFixed(1)}" stroke="#7B5BA8" stroke-width="1" stroke-dasharray="1 3"/>`;
+  // 바깥 표면: 핵막과 핵공, 그리고 핵막에 붙은 라이보솜
+  s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#3F2A66" stroke-width="1.6"/>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="${r-5}" fill="none" stroke="#8E6FC0" stroke-width="1.4" opacity=".7"/>`;
+  for(let i=0;i<22;i++){
+    const a=8+i*16; if(a>-92&&a<8) continue;
+    const [px,py]=P(a,r-2.5);
+    s+=`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${Math.max(1.8,r*.03)}" fill="url(#gRibo)"/>`;
+  }
+  for(let i=0;i<7;i++){
+    const a=20+i*22;
+    const [ax,ay]=P(a,r-9), [bx,by]=P(a+5,r-9);
+    s+=`<path d="M${ax.toFixed(1)} ${ay.toFixed(1)} L${bx.toFixed(1)} ${by.toFixed(1)}" stroke="#2E1B4D" stroke-width="2.6" opacity=".55" stroke-linecap="round"/>`;
+  }
+  s+=`</g>`;
+  return s;
+}
+// 마이토콘드리아: 2중막과 크리스타. 교과서처럼 진한 적갈색.
+function drawMito(cx,cy,rot=0,sc=1){
+  const w=84*sc,h=46*sc;
+  let s=`<g transform="translate(${cx} ${cy}) rotate(${rot})" filter="url(#shS)">`;
+  s+=`<rect x="${-w/2}" y="${-h/2}" width="${w}" height="${h}" rx="${h/2}" fill="url(#gMito)" stroke="#4E1220" stroke-width="1.4"/>`;
+  s+=`<rect x="${-w/2+4.5}" y="${-h/2+4.5}" width="${w-9}" height="${h-9}" rx="${(h-9)/2}" fill="url(#gMitoIn)" stroke="#8E2D3B" stroke-width="1.1"/>`;
+  for(let i=-2;i<=2;i++){
+    const x=i*(w/6.2);
+    s+=`<path d="M${x} ${-h/2+4.5} q${10*sc} ${h*.26} 0 ${h*.44} q${-10*sc} ${h*.2} 0 ${h*.26}" fill="none" stroke="#8E2D3B" stroke-width="${2*sc}" stroke-linecap="round"/>`;
+  }
+  s+=`<ellipse cx="${-w*.16}" cy="${-h*.3}" rx="${w*.2}" ry="${h*.1}" fill="#fff" opacity=".28"/>`;
+  s+=`</g>`;
+  return s;
+}
+// 엽록체: 2중막, 그라나(타이라코이드 더미), 스트로마
+function drawChloro(cx,cy,rot=0,sc=1){
+  const w=98*sc,h=54*sc;
+  let s=`<g transform="translate(${cx} ${cy}) rotate(${rot})" filter="url(#shS)">`;
+  s+=`<ellipse rx="${w/2}" ry="${h/2}" fill="url(#gChl)" stroke="#274A15" stroke-width="1.4"/>`;
+  s+=`<ellipse rx="${w/2-4}" ry="${h/2-4}" fill="url(#gChlIn)" stroke="#3F6E28" stroke-width="1"/>`;
+  [[-28,-5],[-5,7],[19,-7],[32,7]].forEach(([gx,gy])=>{
+    for(let i=0;i<5;i++)
+      s+=`<rect x="${(gx-9.5)*sc}" y="${(gy-9+i*4.2)*sc}" width="${19*sc}" height="${3*sc}" rx="${1.5*sc}" fill="#3F7A26" stroke="#274A15" stroke-width=".6"/>`;
+  });
+  s+=`<path d="M${-24*sc} ${-1*sc} q${20*sc} ${9*sc} ${44*sc} ${-5*sc}" fill="none" stroke="#4F8A32" stroke-width="1.6" opacity=".85"/>`;
+  s+=`<ellipse cx="${-w*.18}" cy="${-h*.3}" rx="${w*.16}" ry="${h*.09}" fill="#fff" opacity=".3"/>`;
+  s+=`</g>`;
+  return s;
+}
+// 골지체: 납작한 주머니가 겹쳐 쌓인 구조 + 소낭. 교과서처럼 청록색.
+function drawGolgi(cx,cy,rot=0,sc=1){
+  let s=`<g transform="translate(${cx} ${cy}) rotate(${rot})" filter="url(#shS)">`;
+  for(let i=0;i<5;i++){
+    const y=(i*13-26)*sc, wq=(48-Math.abs(i-2)*5)*sc;
+    s+=`<path d="M${-wq} ${y} q${wq} ${-10*sc} ${wq*2} 0 q${-wq} ${8*sc} ${-wq*2} 0 z" fill="url(#gGolgi)" stroke="#1F6862" stroke-width="1.3"/>`;
+    s+=`<path d="M${-wq*.8} ${y-1.5*sc} q${wq*.8} ${-6*sc} ${wq*1.6} 0" fill="none" stroke="#B6EAE4" stroke-width="${1.2*sc}" opacity=".6"/>`;
+  }
+  [[-60,-30,5.5],[64,-18,6.5],[-66,10,5],[68,22,7],[-52,34,4.5]].forEach(([vx,vy,vr])=>
+    s+=`<circle cx="${vx*sc}" cy="${vy*sc}" r="${vr*sc}" fill="url(#gGolgiV)" stroke="#1F6862" stroke-width="1"/>`);
+  s+=`</g>`;
+  return s;
+}
+// 거친면소포체: 라이보솜(주황 점)이 붙은 납작한 주머니
+function drawRER(path,dots){
+  let s=`<g filter="url(#shS)"><path d="${path}" fill="url(#gER)" stroke="#5B4483" stroke-width="1.6"/>`;
+  dots.forEach(([x,y])=>s+=`<circle cx="${x}" cy="${y}" r="3.6" fill="url(#gRibo)" stroke="#A85A24" stroke-width=".5"/>`);
+  s+=`</g>`;
+  return s;
+}
+// 매끈면소포체: 라이보솜이 없는 관 모양
+function drawSER(path){
+  return `<g filter="url(#shS)"><path d="${path}" fill="none" stroke="#A56A2E" stroke-width="11" stroke-linecap="round"/>`+
+         `<path d="${path}" fill="none" stroke="url(#gSER)" stroke-width="7.5" stroke-linecap="round"/>`+
+         `<path d="${path}" fill="none" stroke="#F7DEB8" stroke-width="2" stroke-linecap="round" opacity=".55"/></g>`;
+}
+// 라이소솜: 단일막 주머니 + 가수분해 효소
+function drawLyso(cx,cy,r=17){
+  let s=`<g filter="url(#shS)"><circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#gLyso)" stroke="#7A2854" stroke-width="1.4"/>`;
+  [[-.35,-.3],[.3,-.35],[0,.1],[-.3,.4],[.4,.3]].forEach(([dx,dy])=>
+    s+=`<circle cx="${cx+dx*r}" cy="${cy+dy*r}" r="${r*.12}" fill="#4E1533" opacity=".8"/>`);
+  s+=`<ellipse cx="${cx-r*.3}" cy="${cy-r*.42}" rx="${r*.3}" ry="${r*.16}" fill="#fff" opacity=".4"/></g>`;
+  return s;
+}
+// 중심체: 중심립 2개가 직각으로 배열
+function drawCentro(cx,cy){
+  const barrel=(x,y,rot)=>{
+    let g=`<g transform="translate(${x} ${y}) rotate(${rot})">`;
+    g+=`<rect x="-25" y="-11.5" width="50" height="23" rx="3.5" fill="url(#gCent)" stroke="#1F556B" stroke-width="1.4"/>`;
+    for(let i=-2;i<=2;i++) g+=`<line x1="${i*9.2}" y1="-11.5" x2="${i*9.2}" y2="11.5" stroke="#1F556B" stroke-width="1.2" opacity=".8"/>`;
+    g+=`<rect x="-25" y="-11.5" width="50" height="7" rx="3" fill="#fff" opacity=".22"/>`;
+    g+=`</g>`; return g;
+  };
+  return `<g filter="url(#shS)">${barrel(cx-14,cy+12,0)}${barrel(cx+16,cy-12,90)}</g>`;
+}
+// 라이보솜: 대단위체와 소단위체 (막이 없다). 교과서처럼 주황 알갱이.
+function drawRibo(cx,cy,sc=1){
+  return `<g><ellipse cx="${cx}" cy="${cy-1.6*sc}" rx="${5.2*sc}" ry="${3.6*sc}" fill="url(#gRibo)" stroke="#A85A24" stroke-width=".6"/>`+
+    `<ellipse cx="${cx}" cy="${cy+2.4*sc}" rx="${4*sc}" ry="${2.4*sc}" fill="#D9873F" stroke="#A85A24" stroke-width=".5"/></g>`;
+}
+// 액포: 단일막. 성숙한 식물세포에서는 크게 발달한다.
+function drawVac(path,label){
+  return `<g><path d="${path}" fill="url(#gVac)" stroke="#7FA868" stroke-width="2.4" opacity=".95"/>`+
+         `<path d="${path}" fill="none" stroke="#fff" stroke-width="1.2" opacity=".7" transform="translate(0 3)"/></g>`;
+}
+// 세포골격: 가는 단백질 섬유
+function drawSkel(lines,op=.55){
+  return `<g opacity="${op}" stroke="#7FB35E" fill="none" stroke-linecap="round">`+
+    lines.map(([d,w])=>`<path d="${d}" stroke-width="${w||1.6}"/>`).join("")+`</g>`;
+}
+</script>
+<script>
+/* ============================================================
+   세포소기관 자료 (모든 탭이 공유)
+   p: 원핵세포 / a: 동물세포 / l: 식물세포   1=있음 0=없음 2=있으나 작게 발달
+   ============================================================ */
+const ORG={
+  memb:{n:"세포막",c:"var(--memb)",no:1,p:1,a:1,l:1,r:"모든 세포의 경계",
+    d:[["구조","인지질 2중층에 단백질이 군데군데 박혀 있다. 인지질과 단백질이 움직일 수 있어 유동 모자이크막이라 한다."],
+       ["기능","세포 안팎을 구분하고, 어떤 물질을 얼마나 들여보낼지 <b>선택적으로 조절</b>한다."],
+       ["막이 몇 겹인가","1겹(단일막)"],
+       ["어디에 있나","원핵세포, 동물세포, 식물세포 <b>모두</b>. 예외가 없다."],
+       ["세포벽과의 차이","세포벽은 물질을 가리지 않고 통과시킨다(전투과성). 물질을 가려 받는 것은 세포막이다."]],
+    adv:"인지질은 물과 친한 머리와 물을 싫어하는 꼬리를 함께 가진다. 그래서 물속에서 꼬리끼리 마주 보며 저절로 2중층을 이룬다."},
+
+  nucleus:{n:"핵",c:"var(--nuc)",no:2,p:0,a:1,l:1,r:"유전정보의 저장고",
+    d:[["구조","<b>핵막</b>(2중막)으로 싸여 있고, 핵막에는 <b>핵공</b>이라는 구멍이 뚫려 있다. 안에는 <b>염색질</b>(DNA와 단백질)와 <b>인</b>이 있다."],
+       ["기능","유전정보(DNA)를 보관하고 세포의 생명 활동을 조절한다."],
+       ["핵공이 하는 일","mRNA처럼 큰 물질이 핵과 세포질을 드나드는 통로. DNA 자체는 핵 밖으로 나가지 않는다."],
+       ["인","라이보솜을 만드는 재료(rRNA)가 합성되는 곳"],
+       ["어디에 있나","진핵세포에만. <b>원핵세포에는 핵막이 없어</b> DNA가 세포질에 그대로 놓여 있다."],
+       ["이름의 유래","진핵세포의 '진핵'은 제대로 된 핵을 가졌다는 뜻이다."]],
+    adv:"핵막은 소포체와 이어져 있다. 핵막의 바깥막에도 라이보솜이 붙어 있어 거친면 소포체와 사실상 연결된 구조다."},
+
+  er:{n:"소포체",c:"var(--er)",no:3,p:0,a:1,l:1,r:"물질의 합성과 수송 통로",
+    d:[["구조","막으로 된 납작한 주머니와 관이 그물처럼 이어진 구조. <b>핵막과 연결</b>되어 있다."],
+       ["거친면 소포체","표면에 <b>라이보솜이 붙어 있어</b> 거칠어 보인다. 라이보솜이 만든 단백질을 받아 가공하고 골지체로 보낸다."],
+       ["매끈면 소포체","라이보솜이 붙어 있지 않다. <b>지질을 합성</b>하고, 해로운 물질을 해독하며, 칼슘 이온을 저장한다."],
+       ["막이 몇 겹인가","1겹(단일막)"],
+       ["어디에 있나","동물세포와 식물세포 모두. 원핵세포에는 없다."],
+       ["구별 요령","도식에서 <b>점(라이보솜)이 붙어 있으면 거친면</b>, 매끈하면 매끈면이다."]],
+    adv:"간세포는 알코올과 약물을 해독해야 하므로 매끈면 소포체가 특히 발달해 있다."},
+
+  ribo:{n:"라이보솜",c:"var(--ribo)",no:4,p:1,a:1,l:1,r:"단백질을 만드는 공장",
+    d:[["구조","<b>막이 없다.</b> rRNA와 단백질로 이루어진 큰 단위체와 작은 단위체가 합쳐진 알갱이."],
+       ["기능","mRNA의 유전정보를 읽어 <b>단백질을 합성</b>한다."],
+       ["어디에 있나","세포질에 떠 있거나 <b>거친면 소포체 표면</b>에 붙어 있다."],
+       ["중요","<b>원핵세포에도 있다.</b> 막으로 싸인 소기관은 없어도 라이보솜은 있다. 단백질은 모든 세포에 필요하기 때문이다."],
+       ["자주 하는 실수","막이 없으므로 '막으로 둘러싸인 세포소기관'을 묻는 문제의 답이 될 수 없다."]],
+    adv:"마이토콘드리아와 엽록체 안에도 라이보솜이 따로 들어 있다. 그 크기가 원핵세포의 라이보솜과 비슷하다는 점이 세포내공생설의 근거가 된다."},
+
+  golgi:{n:"골지체",c:"var(--golgi)",no:5,p:0,a:1,l:1,r:"가공과 포장, 배송 센터",
+    d:[["구조","납작한 주머니가 여러 겹 <b>쌓여 있는</b> 구조. 주머니끼리 서로 이어져 있지는 않다."],
+       ["기능","소포체에서 온 단백질을 <b>가공하고 농축해 소낭에 포장</b>한 뒤 목적지로 보낸다."],
+       ["막이 몇 겹인가","1겹(단일막)"],
+       ["소포체와의 차이","소포체는 그물처럼 이어져 있고 핵막과 연결된다. 골지체는 <b>따로 떨어진 주머니가 쌓인 더미</b>다."],
+       ["발달한 세포","소화 효소를 내보내는 이자, 침샘처럼 <b>분비 작용이 활발한 세포</b>"],
+       ["어디에 있나","동물세포와 식물세포 모두"]],
+    adv:"라이소솜은 골지체에서 떨어져 나온 소낭이다. 골지체가 만든 것 중 하나가 라이소솜인 셈이다."},
+
+  mito:{n:"마이토콘드리아",c:"var(--mito)",no:7,p:0,a:1,l:1,r:"세포호흡으로 ATP를 만드는 곳",
+    d:[["구조","<b>2중막</b>. 내막이 안쪽으로 접혀 주름을 이루고, 그 안쪽 공간이 <b>바탕질</b>이다."],
+       ["기능","<b>세포호흡</b>으로 포도당을 산화하여 ATP를 만든다."],
+       ["내막이 접힌 이유","전자전달계와 ATP 합성효소가 박힐 <b>표면적을 넓히기 위해서</b>다."],
+       ["많이 들어 있는 세포","근육 세포, 간세포처럼 에너지를 많이 쓰는 세포"],
+       ["어디에 있나","동물세포와 식물세포 <b>모두</b>. 식물도 호흡을 하므로 반드시 있다."],
+       ["자주 하는 실수","식물세포에는 엽록체가 있으니 마이토콘드리아가 없다고 착각하기 쉽다. 둘 다 있다."]],
+    adv:"자체 DNA와 라이보솜을 가지고 스스로 분열한다. 이것이 옛날 원핵세포가 다른 세포 안에 들어와 살게 되었다는 세포내공생설의 근거다."},
+
+  lyso:{n:"라이소솜",c:"var(--lyso)",no:8,p:0,a:1,l:2,r:"세포 안의 소화 기관",
+    d:[["구조","<b>1겹의 막</b>으로 싸인 주머니 안에 <b>가수분해 효소</b>가 가득 들어 있다."],
+       ["기능","세포 안으로 들어온 물질이나 <b>수명이 다한 소기관을 분해</b>한다."],
+       ["어디서 오나","<b>골지체</b>에서 떨어져 나온다."],
+       ["예","백혈구가 세균을 잡아먹은 뒤 라이소솜이 융합해 분해한다. 올챙이 꼬리가 없어지는 것도 라이소솜의 작용이다."],
+       ["어디에 있나","<b>동물세포에 발달</b>해 있다. 식물세포에는 거의 없고, 그 역할을 액포가 대신한다."]],
+    adv:"자기 자신을 소화하는 효소를 막 없이 세포질에 두면 세포가 망가진다. 그래서 반드시 막에 가두어 두는 것이다."},
+
+  skel:{n:"세포골격",c:"var(--skel)",no:9,p:0,a:1,l:1,r:"세포의 뼈대이자 도로",
+    d:[["구조","가느다란 <b>단백질 섬유</b>가 세포질 전체에 그물처럼 뻗어 있다."],
+       ["기능","세포의 <b>모양을 유지</b>하고, 소기관을 제자리에 고정하거나 <b>이동시킨다</b>. 세포의 운동에도 관여한다."],
+       ["막이 있나","없다."],
+       ["어디에 있나","동물세포와 식물세포 모두"],
+       ["세포벽과의 차이","세포벽은 세포 <b>바깥</b>을 감싸는 껍질, 세포골격은 세포 <b>안</b>을 채우는 뼈대다."]],
+    adv:"미세소관, 중간섬유, 미세섬유 세 종류가 있다. 중심립과 방추사도 미세소관으로 이루어져 있다."},
+
+  cent:{n:"중심체",c:"var(--cent)",no:6,p:0,a:1,l:0,r:"방추사가 뻗어 나오는 자리",
+    d:[["구조","<b>중심립</b> 2개가 서로 <b>직각</b>으로 놓여 있다."],
+       ["기능","세포 분열 때 <b>방추사</b>를 만들어 염색체를 양쪽 극으로 끌어당긴다."],
+       ["막이 있나","없다."],
+       ["어디에 있나","<b>동물세포에만</b> 있다. 고등 식물세포에는 없다."],
+       ["시험 포인트","동물세포와 식물세포를 구별하는 대표적인 기준이다. 식물세포도 분열은 하지만 중심체 없이 방추사를 만든다."]],
+    adv:"정자의 꼬리처럼 세포가 움직이는 데 쓰이는 편모와 섬모도 중심립과 같은 구조에서 만들어진다."},
+
+  vac:{n:"액포",c:"var(--vac)",no:10,p:0,a:2,l:1,r:"저장 창고이자 물주머니",
+    d:[["구조","<b>1겹의 막</b>으로 싸인 주머니. 안은 세포액으로 차 있다."],
+       ["기능","물, 양분, 노폐물, <b>색소</b>를 저장한다. 물을 채워 <b>팽압</b>을 유지해 식물이 빳빳하게 서 있게 한다."],
+       ["어디에 있나","<b>성숙한 식물세포에서 매우 크게 발달</b>해 세포 부피의 대부분을 차지한다. 동물세포에도 있지만 아주 작다."],
+       ["꽃잎의 색","꽃과 열매의 색소가 들어 있는 곳이 바로 액포다."],
+       ["시들면 왜 축 처지나","액포의 물이 빠져 팽압이 낮아지기 때문이다."]],
+    adv:"어린 식물세포에는 작은 액포가 여러 개 있다가, 자라면서 서로 합쳐져 하나의 큰 액포가 된다."},
+
+  chloro:{n:"엽록체",c:"var(--chloro)",no:11,p:0,a:0,l:1,r:"광합성이 일어나는 곳",
+    d:[["구조","<b>2중막</b>. 안에 납작한 주머니인 <b>타이라코이드</b>가 쌓여 <b>그라나</b>를 이루고, 그 바깥의 액체가 <b>스트로마</b>다."],
+       ["기능","<b>광합성</b>으로 빛에너지를 이용해 CO₂로 포도당을 만든다."],
+       ["명반응","타이라코이드 막에서 일어난다."],
+       ["탄소고정반응","스트로마에서 일어난다."],
+       ["어디에 있나","<b>식물세포에만</b> 있다. 동물세포에는 없다."],
+       ["마이토콘드리아와 닮은 점","둘 다 2중막이고 자체 DNA와 라이보솜을 가진다."]],
+    adv:"엽록체 역시 세포내공생설로 설명된다. 광합성을 하던 원핵세포가 다른 세포 안에 들어와 함께 살게 되었다는 것이다."},
+
+  wall:{n:"세포벽",c:"var(--wall)",no:12,p:1,a:0,l:1,r:"세포를 감싸는 단단한 껍질",
+    d:[["구조","세포막 <b>바깥</b>을 감싸는 단단한 층. 식물은 <b>셀룰로스</b>가 주성분이다."],
+       ["기능","세포를 보호하고 <b>모양을 유지</b>한다. 물이 많이 들어와도 터지지 않게 막아 준다."],
+       ["투과성","<b>전투과성</b>. 물질을 가리지 않고 그대로 통과시킨다."],
+       ["세포막과의 결정적 차이","세포벽은 아무거나 통과시키고, 세포막은 <b>골라서</b> 통과시킨다. 물질 출입을 조절하는 것은 세포막이다."],
+       ["어디에 있나","<b>식물세포와 원핵세포</b>에 있다. 동물세포에는 없다."],
+       ["동물세포가 터지는 이유","세포벽이 없어 물이 지나치게 들어오면 터진다. 식물세포는 세포벽이 버텨 준다."]],
+    adv:"세균의 세포벽은 셀룰로스가 아니라 펩티도글리칸으로 되어 있다. 페니실린은 이 세포벽 합성을 방해해 세균만 골라 죽인다."},
+
+  nucleoid:{n:"핵양체",c:"var(--nuc)",p:1,a:0,l:0,r:"원핵세포의 DNA가 놓인 자리",
+    d:[["구조","<b>막으로 싸여 있지 않다.</b> DNA가 세포질의 한 부분에 뭉쳐 있을 뿐이다."],
+       ["기능","유전정보를 담고 있다."],
+       ["핵과의 차이","하는 일은 비슷하지만 <b>핵막이 없다</b>. 그래서 핵이라 부르지 않고 핵양체라 한다."],
+       ["어디에 있나","원핵세포에만"],
+       ["핵심","원핵세포에 <b>DNA가 없는 것이 아니다.</b> DNA를 싸는 막이 없을 뿐이다. 이 점을 자주 혼동한다."]],
+    adv:"세균은 핵양체 말고도 플라스미드라는 작고 둥근 DNA를 따로 가지기도 한다."},
+
+  flagel:{n:"편모",c:"var(--skel)",p:1,a:0,l:0,r:"원핵세포의 운동 기관",
+    d:[["구조","세포 밖으로 길게 뻗은 채찍 모양의 구조"],
+       ["기능","회전하여 세포를 <b>이동</b>시킨다."],
+       ["어디에 있나","일부 원핵세포. 모든 세균이 가지는 것은 아니다."]]}
+};
+const ORDER=["memb","nucleus","er","ribo","golgi","cent","mito","lyso","skel","vac","chloro","wall"];
+
+const ANIMAL_VAC={
+  ...ORG.vac,
+  r:"매우 작고 눈에 잘 띄지 않음.",
+  d:[["동물세포의 액포","소낭 형태로 일시적으로 존재하며, 물질의 일시적 저장, 영양분이나 노폐물의 운반 및 소화 보조에 관여한다."]],
+  adv:""
+};
+
+/* ---------- 정보 패널 ---------- */
+function yn(v){ return v===1?["있음","y"]:v===2?["작게 있음","b"]:["없음","n"]; }
+function showOrg(id){
+  if(!id){ $("#info").innerHTML=`<p class="hint">도식에서 <b>세포소기관이나 그 이름표</b>를 누르면 구조와 기능이 여기에 나타납니다.</p>`; return; }
+  const o=(id==="vac" && state.view==="eu-an")?ANIMAL_VAC:ORG[id]; let h="";
+  h+=`<div class="ph"><span class="swatch" style="background:${o.c}"></span>${o.n}</div>`;
+  if(o.r) h+=`<div style="font-size:12.5px;color:var(--ink3);margin-bottom:9px">${o.r}</div>`;
+  const [pt,pc]=yn(o.p),[at,ac]=yn(o.a),[lt,lc]=yn(o.l);
+  h+=`<div class="tags"><span class="tg ${pc}">원핵세포 ${pt}</span><span class="tg ${ac}">동물세포 ${at}</span><span class="tg ${lc}">식물세포 ${lt}</span></div>`;
+  h+=`<dl>`+(o.d||[]).map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")+`</dl>`;
+  if(o.adv) h+=`<div class="adv adv-only"><b>심화</b> ${o.adv}</div>`;
+  $("#info").innerHTML=h;
+}
+function bindHots(root){
+  root.querySelectorAll(".hot").forEach(g=>{
+    const act=()=>{
+      root.querySelectorAll(".hot.sel").forEach(x=>x.classList.remove("sel"));
+      root.querySelectorAll(".hot").forEach(x=>{
+        if(x.dataset.o===g.dataset.o) x.classList.add("sel");
+      });
+      // onPick은 init()에서 지정되므로 반드시 클릭 시점에 읽어야 한다.
+      const f=VIEW[state.view] && VIEW[state.view].onPick;
+      if(f && f(g.dataset.o)===false) return;
+      showOrg(g.dataset.o);
+    };
+    g.addEventListener("click",act);
+    g.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();act();} });
+  });
+}
+
+/* ---------- 범례 / 퀴즈 / 요약 ---------- */
+function setLegend(ids){
+  $("#legend").innerHTML=ids.map(k=>{
+    const o=ORG[k]; const full=o.n.length>6?" full":"";
+    return `<div class="lg${full}"><i style="background:${o.c}"></i><span>${o.n}</span></div>`;
+  }).join("");
+}
+function setQuiz(q,title){
+  const p=$("#quizPanel");
+  if(!q){ p.hidden=true; return; }
+  p.hidden=false; $("#quizTitle").textContent=title||"확인 질문";
+  $("#quiz").innerHTML=`<div class="q">${q.q}</div><div class="qopts">`+
+    q.o.map((t,i)=>`<button class="qopt" data-i="${i}">${t}</button>`).join("")+`</div><div class="qfb" id="qfb"></div>`;
+  $("#quiz").querySelectorAll(".qopt").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;
+    $("#quiz").querySelectorAll(".qopt").forEach(x=>x.disabled=true);
+    b.classList.add(i===q.a?"ok":"no");
+    if(i!==q.a) $("#quiz").querySelector(`.qopt[data-i="${q.a}"]`).classList.add("ok");
+    const fb=$("#qfb"); fb.innerHTML=q.e; fb.classList.add("show");
+  });
+}
+function summary(title,sub,items,extra){
+  $("#mcard").innerHTML=`<h3>${title}</h3><div class="sub">${sub}</div>`+
+    `<ul>${items.map(i=>`<li>${i}</li>`).join("")}</ul>`+(extra||"")+
+    `<button class="btn primary mclose" id="mclose">닫기</button>`;
+  $("#modal").classList.add("open");
+  $("#mclose").onclick=()=>$("#modal").classList.remove("open");
+}
+$("#modal").addEventListener("click",e=>{ if(e.target.id==="modal") $("#modal").classList.remove("open"); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") $("#modal").classList.remove("open"); });
+
+/* ---------- 라우터 ---------- */
+const SUB={
+  pk:[["pk-cmp","원핵세포와 진핵세포"],["pk-one","원핵세포 자세히"]],
+  eu:[["eu-an","동물세포"],["eu-pl","식물세포"],["eu-cmp","동물세포와 식물세포 비교"],["eu-id","세포 구별하기"]]
+};
+const VIEW={};
+let state={main:"pk",view:"pk-cmp",adv:false};
+function renderSubtabs(){
+  $("#subtabs").innerHTML=SUB[state.main].map(([id,t])=>
+    `<button role="tab" data-view="${id}" aria-selected="${id===state.view}">${t}</button>`).join("");
+  $("#subtabs").querySelectorAll("button").forEach(b=>b.onclick=()=>go(b.dataset.view));
+}
+function go(view){
+  const main=view.startsWith("pk")?"pk":"eu";
+  state.main=main; state.view=view;
+  $$("#maintabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.main===main));
+  renderSubtabs();
+  const v=VIEW[view];
+  $("#viewTitle").textContent=v.title;
+  $("#viewSub").textContent=v.sub||"";
+  $("#ctrl").innerHTML=typeof v.ctrl==="function"?v.ctrl():(v.ctrl||"");
+  $("#stage").innerHTML=`<svg viewBox="${v.vb}" role="img" aria-label="${v.title} 도식">${defs()}${v.svg()}</svg>`;
+  const stageSvg=$("#stage").querySelector("svg");
+  fitCellPhotoLabels(stageSvg);
+  setLegend(v.legend||[]);
+  setQuiz(v.quiz||null,v.quizTitle);
+  showOrg(null);
+  bindHots($("#stage"));
+  if(v.init) v.init(stageSvg);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$$("#maintabs button").forEach(b=>b.onclick=()=>go(SUB[b.dataset.main][0][0]));
+function advToggle(id){
+  const el=$("#"+id); if(!el) return;
+  el.checked=state.adv;
+  el.onchange=()=>{ state.adv=el.checked; document.body.classList.toggle("adv",state.adv); };
+  document.body.classList.toggle("adv",state.adv);
+}
+</script>
+<script>
+/* ============================================================
+   원핵세포와 진핵세포 비교 탭
+   ============================================================ */
+// 원핵세포 (막대 모양 세균) 도식
+function prokCell(x,y,w,h,ids){
+  const r=h/2;
+  let s=`<g>`;
+  s+=`<g id="${ids}Wall"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="url(#wallTex)" stroke="var(--wall2)" stroke-width="2"/></g>`;
+  s+=`<g id="${ids}Memb"><rect x="${x+11}" y="${y+11}" width="${w-22}" height="${h-22}" rx="${r-11}" fill="none" stroke="var(--memb)" stroke-width="4.5"/></g>`;
+  s+=`<rect x="${x+15}" y="${y+15}" width="${w-30}" height="${h-30}" rx="${r-15}" fill="var(--cyto)"/>`;
+  // 핵양체: 막이 없는 DNA 뭉치
+  const cx=x+w/2, cy=y+h/2;
+  s+=`<g id="${ids}DNA"><path d="M${cx-64} ${cy} q22 -30 44 -6 q22 24 44 -6 q22 -28 42 4 q-18 34 -42 10 q-24 -22 -44 6 q-22 26 -44 -8 z"
+      fill="none" stroke="var(--nuc2)" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M${cx-52} ${cy+14} q26 22 52 -2 q26 -22 48 6" fill="none" stroke="var(--nuc2)" stroke-width="3.2" stroke-linecap="round"/></g>`;
+  // 라이보솜: 원핵세포에도 있다
+  s+=`<g id="${ids}Ribo">`;
+  const pts=[[-100,-42],[-72,-52],[-40,-46],[-8,-54],[26,-46],[62,-52],[96,-40],[-108,-14],[108,-12],
+             [-100,44],[-70,52],[-36,44],[-4,54],[30,46],[64,52],[98,42],[-114,16],[112,18],[-56,-24],[56,24]];
+  pts.forEach(([dx,dy])=>s+=drawRibo(cx+dx,cy+dy,.9));
+  s+=`</g>`;
+  // 편모
+  s+=`<g id="${ids}Flag"><path d="M${x+w} ${cy} q30 -22 56 0 q26 22 52 0 q26 -22 52 0"
+      fill="none" stroke="#8A8296" stroke-width="4" stroke-linecap="round"/></g>`;
+  s+=`</g>`;
+  return s;
+}
+// 진핵세포 (동물세포) 간략 도식
+function eukCell(cx,cy,ids){
+  let s=`<g>`;
+  const blob=`M${cx} ${cy-196} C${cx+118} ${cy-196} ${cx+196} ${cy-118} ${cx+196} ${cy}
+              C${cx+196} ${cy+118} ${cx+118} ${cy+196} ${cx} ${cy+196}
+              C${cx-118} ${cy+196} ${cx-196} ${cy+118} ${cx-196} ${cy}
+              C${cx-196} ${cy-118} ${cx-118} ${cy-196} ${cx} ${cy-196} Z`;
+  s+=`<path d="${blob}" fill="var(--cyto)"/>`;
+  s+=`<g id="${ids}Memb"><path d="${blob}" fill="none" stroke="var(--memb)" stroke-width="5"/></g>`;
+  s+=`<g id="${ids}Skel">${drawSkel([
+      [`M${cx-150} ${cy-90} q80 60 170 30 q70 -24 130 40`],[`M${cx-120} ${cy+120} q90 -70 190 -30 q60 24 100 -60`],
+      [`M${cx-40} ${cy-170} q30 130 -20 200`],[`M${cx+90} ${cy-150} q-40 140 30 190`]],.42)}</g>`;
+  s+=`<g id="${ids}Nuc">${drawNucleus(cx-52,cy-38,74)}</g>`;
+  s+=`<g id="${ids}ER">${drawRER(`M${cx+18} ${cy-96} q54 -20 92 8 q-40 20 -84 12 q46 12 78 40 q-46 12 -84 -14 q40 26 66 56 q-52 6 -80 -30 z`,
+      [[cx+50,cy-104],[cx+86,cy-90],[cx+66,cy-58],[cx+96,cy-46],[cx+58,cy-20],[cx+88,cy-8],[cx+30,cy-72],[cx+24,cy-24]])}</g>`;
+  s+=`<g id="${ids}Golgi">${drawGolgi(cx+16,cy+118,-8,.62)}</g>`;
+  s+=`<g id="${ids}Mito">${drawMito(cx-118,cy+112,-24,.82)}${drawMito(cx+126,cy+16,64,.82)}</g>`;
+  s+=`<g id="${ids}Ribo">`;
+  [[-160,-96],[-140,60],[-96,150],[-14,168],[70,150],[150,86],[164,-70],[110,-140],[20,-160],[-70,-146],[-172,-16],[176,-4],[-46,86],[54,64]]
+    .forEach(([dx,dy])=>s+=drawRibo(cx+dx,cy+dy,1));
+  s+=`</g>`;
+  s+=`</g>`;
+  return s;
+}
+
+const PKF={
+  memb:{n:"세포막",p:1,e:1,ids:["pMemb"],eids:["eMemb"],
+    t:"두 세포 모두 세포막으로 둘러싸여 있다. 세포막은 <b>모든 세포의 공통점</b>이다. 안팎을 구분하고 물질 출입을 조절한다.",org:"memb"},
+  cyto:{n:"세포질",p:1,e:1,ids:[],eids:[],
+    t:"두 세포 모두 세포막 안쪽이 세포질로 차 있다. 대사 반응이 일어나는 공간이다.",org:null,
+    d:[["원핵세포","세포질에 소기관 없이 라이보솜과 DNA가 그대로 들어 있다."],["진핵세포","세포질 안에 여러 소기관이 자리 잡고 있다."]]},
+  ribo:{n:"라이보솜",p:1,e:1,ids:["pRibo"],eids:["eRibo"],
+    t:"<b>두 세포 모두 라이보솜을 가진다.</b> 원핵세포에 막으로 싸인 소기관이 없다고 해서 라이보솜까지 없는 것이 아니다. 라이보솜은 막이 없는 구조물이고, 단백질은 모든 세포에 반드시 필요하기 때문이다.",org:"ribo"},
+  dna:{n:"DNA",p:1,e:1,ids:["pDNA"],eids:["eNuc"],
+    t:"<b>두 세포 모두 DNA를 가진다.</b> 차이는 DNA가 있느냐 없느냐가 아니라, DNA가 <b>막에 싸여 있느냐</b>다. 원핵세포의 DNA는 세포질에 그대로 놓여 있고(핵양체), 진핵세포의 DNA는 핵막 안에 들어 있다.",org:null,
+    d:[["원핵세포","핵양체. 막으로 싸여 있지 않다."],["진핵세포","핵. 2중의 핵막으로 싸여 있다."]]},
+  nucleus:{n:"핵막으로 싸인 핵",p:0,e:1,ids:[],eids:["eNuc"],
+    t:"이것이 <b>원핵세포와 진핵세포를 가르는 결정적 기준</b>이다. 핵막이 있으면 진핵세포, 없으면 원핵세포다. '진핵'은 제대로 된 핵을 가졌다는 뜻이다.",org:"nucleus"},
+  organelle:{n:"막으로 싸인 소기관",p:0,e:1,ids:[],eids:["eER","eGolgi","eMito"],
+    t:"소포체, 골지체, 마이토콘드리아처럼 <b>막으로 둘러싸인 소기관</b>은 진핵세포에만 있다. 원핵세포는 이런 칸막이가 없어 모든 일이 세포질 한 공간에서 일어난다.",org:null,
+    d:[["진핵세포의 이점","막으로 공간을 나누면 서로 방해되는 반응을 동시에 진행할 수 있다."],["원핵세포","칸막이가 없어 구조가 단순하다."]]},
+  wall:{n:"세포벽",p:1,e:2,ids:["pWall"],eids:[],
+    t:"원핵세포에는 세포벽이 있다. 진핵세포는 경우가 갈린다. <b>식물세포에는 있고 동물세포에는 없다.</b> 오른쪽은 동물세포이므로 세포벽이 없다.",org:"wall"},
+  skel:{n:"세포골격",p:0,e:1,ids:[],eids:["eSkel"],
+    t:"세포의 모양을 유지하고 소기관을 붙들어 두는 단백질 뼈대다. 소기관이 많은 진핵세포에서 발달했다.",org:"skel"}
+};
+
+VIEW["pk-cmp"]={
+  title:"원핵세포와 진핵세포",
+  sub:"무엇이 같고 무엇이 다를까? 아래 항목을 눌러 두 세포를 비교해 보세요",
+  vb:"0 0 1180 720",
+  legend:["memb","nucleus","ribo","er","golgi","mito","skel","wall"],
+  ctrl(){
+    return Object.entries(PKF).map(([k,v])=>`<button class="btn" data-f="${k}">${v.n}</button>`).join("")+
+      `<span class="spacer"></span><label class="tog"><input type="checkbox" id="pkAdv"> 심화 표기</label>
+       <button class="btn" id="pkSize">실제 크기 비교</button><button class="btn" id="pkSum">핵심 요약</button>`;
+  },
+  quiz:{
+    q:"원핵세포에 대한 설명으로 옳은 것은?",
+    o:["DNA가 없다","라이보솜이 없다","DNA는 있지만 핵막이 없다","세포막이 없다"],
+    a:2,
+    e:"원핵세포에도 <b>DNA와 라이보솜, 세포막이 모두 있습니다</b>. 없는 것은 <b>DNA를 싸는 핵막</b>과 막으로 둘러싸인 소기관입니다. '원핵세포는 단순하다'를 '아무것도 없다'로 오해하지 않도록 주의해야 합니다."
+  },
+  svg(){
+    let s="";
+    // 제목 띠
+    s+=`<rect x="40" y="16" width="480" height="34" rx="6" fill="var(--blue-soft)" stroke="#9CC2E4"/>`;
+    s+=`<text class="zone" x="280" y="39" text-anchor="middle" fill="#255183">원핵세포 (세균)</text>`;
+    s+=`<rect x="620" y="16" width="520" height="34" rx="6" fill="var(--green-soft)" stroke="#8FBB77"/>`;
+    s+=`<text class="zone" x="880" y="39" text-anchor="middle" fill="#3d6b2c">진핵세포 (동물세포)</text>`;
+
+    // ---- 원핵세포 ----
+    s+=prokCell(120,270,320,200,"p");
+    s+=`<text class="lbl-xs" x="280" y="512" text-anchor="middle">막으로 싸인 소기관이 없다</text>`;
+    s+=`<text class="lbl-xs" x="280" y="528" text-anchor="middle">크기 약 1~10 μm</text>`;
+    // 원핵 라벨
+    s+=tagHot("wall","세포벽",60,190,"start","M96 196 L164 284",[52,174,72,24,5]);
+    s+=tagHot("memb","세포막",60,232,"start","M96 238 L176 296",[52,216,72,24,5]);
+    s+=tagHot("nucleoid","핵양체 (DNA)",362,196,"start","M400 202 L322 350",[356,180,110,24,5]);
+    s+=tagHot("ribo","라이보솜",362,540,"start","M400 528 L344 462",[356,524,80,24,5]);
+    s+=tagHot("flagel","편모",470,566,"start","M492 556 L516 384",[464,550,52,24,5]);
+
+    // ---- 진핵세포 ----
+    s+=eukCell(880,340,"e");
+    s+=`<text class="lbl-xs" x="880" y="592" text-anchor="middle">막으로 싸인 소기관이 있다   크기 약 10~100 μm</text>`;
+    s+=tagHot("nucleus","핵",640,120,"start","M654 128 L798 274",[634,104,34,24,5]);
+    s+=tagHot("er","소포체",1054,196,"start","M1064 202 L972 250",[1048,180,72,24,5]);
+    s+=tagHot("golgi","골지체",1050,506,"start","M1058 498 L940 462",[1044,490,72,24,5]);
+    s+=tagHot("mito","마이토콘드리아",1006,566,"start","M1040 556 L1006 372",[1000,550,142,24,5]);
+    s+=tagHot("memb","세포막",1096,352,"start","M1094 346 L1078 340",[1090,336,72,24,5]);
+    s+=tagHot("ribo","라이보솜",640,566,"start","M676 556 L740 480",[634,550,80,24,5]);
+    s+=tagHot("skel","세포골격",624,432,"start","M660 426 L716 404",[618,416,80,24,5]);
+
+    // ---- 판정 배지 ----
+    s+=`<g id="pkVerdict" class="hide">
+      <g id="vP"><circle cx="280" cy="150" r="34" fill="#fff" stroke-width="3"/><text id="vPt" x="280" y="162" text-anchor="middle" font-size="38" font-weight="800"></text></g>
+      <g id="vE"><circle cx="880" cy="130" r="34" fill="#fff" stroke-width="3"/><text id="vEt" x="880" y="142" text-anchor="middle" font-size="38" font-weight="800"></text></g>
+    </g>`;
+    s+=`<g id="pkBanner" class="hide"><rect x="300" y="632" width="580" height="66" rx="8" fill="#FCFAF5" stroke="var(--rule2)" stroke-width="1.4"/>
+        <text class="lbl" id="pkBt" x="590" y="658" text-anchor="middle" font-weight="800"></text>
+        <text class="lbl-s" id="pkBs" x="590" y="682" text-anchor="middle"></text></g>`;
+
+    // ---- 실제 크기 비교 (별도 표시) ----
+    s+=`<g id="pkScale" class="hide">
+      <rect x="40" y="600" width="240" height="104" rx="8" fill="#FCFAF5" stroke="var(--rule2)" stroke-width="1.4"/>
+      <text class="lbl-s" x="52" y="622" font-weight="800">실제 크기 비교</text>
+      <circle cx="150" cy="666" r="30" fill="var(--green-soft)" stroke="#8FBB77" stroke-width="1.6"/>
+      <text class="lbl-xs" x="150" y="702" text-anchor="middle">진핵세포 약 50 μm</text>
+      <rect x="238" y="663" width="6" height="3" rx="1.5" fill="#4C7FB4"/>
+      <text class="lbl-xs" x="254" y="652">원핵세포</text><text class="lbl-xs" x="254" y="666">약 2 μm</text>
+      <text class="lbl-xs" x="52" y="644">지름이 약 25배 차이 난다</text>
+    </g>`;
+    return s;
+  },
+  onPick(id){ /* 라벨 클릭은 기본 동작(소기관 설명) 그대로 */ },
+  init(svg){
+    const ALL=["pWall","pMemb","pDNA","pRibo","pFlag","eMemb","eNuc","eER","eGolgi","eMito","eRibo","eSkel"];
+    let cur=null;
+    function clear(){
+      ALL.forEach(id=>{const e=svg.querySelector("#"+id); if(e){e.classList.remove("soft");e.classList.remove("pulse");}});
+      svg.querySelector("#pkVerdict").classList.add("hide");
+      svg.querySelector("#pkBanner").classList.add("hide");
+      $$("#ctrl .btn[data-f]").forEach(b=>b.setAttribute("aria-pressed","false"));
+    }
+    function pick(k){
+      if(cur===k){ cur=null; clear(); showOrg(null); return; }
+      cur=k; clear();
+      const f=PKF[k];
+      const on=[...f.ids,...f.eids];
+      ALL.forEach(id=>{ const e=svg.querySelector("#"+id); if(!e) return;
+        if(on.includes(id)) e.classList.add("pulse"); else e.classList.add("soft"); });
+      // 판정 배지
+      const V=svg.querySelector("#pkVerdict"); V.classList.remove("hide");
+      const set=(g,t,v)=>{
+        const col=v===1?"#3d8b3d":v===2?"#B8801A":"#C0392B";
+        svg.querySelector("#"+g).querySelector("circle").setAttribute("stroke",col);
+        const el=svg.querySelector("#"+t); el.textContent=v===1?"○":v===2?"△":"✕"; el.setAttribute("fill",col);
+      };
+      set("vP","vPt",f.p); set("vE","vEt",f.e);
+      const B=svg.querySelector("#pkBanner"); B.classList.remove("hide");
+      svg.querySelector("#pkBt").textContent=f.n;
+      svg.querySelector("#pkBs").textContent =
+        f.p===f.e && f.p===1 ? "두 세포의 공통점입니다" :
+        f.p===1&&f.e===0 ? "원핵세포에만 있습니다" :
+        f.p===0&&f.e===1 ? "진핵세포에만 있습니다" :
+        f.e===2 ? "진핵세포는 종류에 따라 다릅니다 (식물세포 있음, 동물세포 없음)" : "";
+      $(`#ctrl .btn[data-f="${k}"]`).setAttribute("aria-pressed","true");
+      // 설명 패널
+      if(f.org) showOrg(f.org);
+      else $("#info").innerHTML=`<div class="ph">${f.n}</div>`+
+        `<div class="tags"><span class="tg ${f.p===1?'y':'n'}">원핵세포 ${f.p===1?'있음':'없음'}</span>`+
+        `<span class="tg ${f.e===1?'y':f.e===2?'b':'n'}">진핵세포 ${f.e===1?'있음':f.e===2?'종류에 따라':'없음'}</span></div>`+
+        `<dl>${(f.d||[]).map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl>`+
+        `<div class="adv" style="border-left-color:var(--orange)">${f.t}</div>`;
+      if(f.org) $("#info").insertAdjacentHTML("beforeend",`<div class="adv" style="border-left-color:var(--orange)">${f.t}</div>`);
+    }
+    $$("#ctrl .btn[data-f]").forEach(b=>b.onclick=()=>pick(b.dataset.f));
+    const sc=$("#pkSize"); let on=false;
+    sc.onclick=()=>{ on=!on; svg.querySelector("#pkScale").classList.toggle("hide",!on); sc.setAttribute("aria-pressed",on); };
+    advToggle("pkAdv");
+    $("#pkSum").onclick=()=>summary("원핵세포와 진핵세포","핵심 정리",[
+      "가르는 기준은 단 하나. <b>핵막으로 싸인 핵이 있는가</b>. 있으면 진핵세포, 없으면 원핵세포다.",
+      "<b>공통점</b>: 세포막, 세포질, <b>라이보솜</b>, <b>DNA</b>를 모두 가진다. 생명 활동에 반드시 필요한 것들이다.",
+      "<b>원핵세포에 없는 것</b>: 핵막, 그리고 소포체, 골지체, 마이토콘드리아처럼 <b>막으로 싸인 소기관</b>",
+      "원핵세포의 DNA는 세포질에 그대로 놓여 있고 이를 <b>핵양체</b>라 한다. DNA가 없는 것이 <b>아니다</b>.",
+      "원핵세포에도 <b>세포벽</b>이 있다. 다만 성분이 셀룰로스가 아니라 펩티도글리칸이다.",
+      "크기는 원핵세포가 약 1~10 μm, 진핵세포가 약 10~100 μm로 <b>진핵세포가 훨씬 크다</b>.",
+      "예: 원핵세포는 대장균, 젖산균 같은 <b>세균</b>. 진핵세포는 동물, 식물, 곰팡이, 원생생물의 세포."
+    ],`<table class="cmp">
+      <tr><th></th><th>원핵세포</th><th>진핵세포</th></tr>
+      <tr><th>핵막으로 싸인 핵</th><td class="no">없음</td><td class="yes">있음</td></tr>
+      <tr><th>DNA</th><td class="yes">있음 (핵양체)</td><td class="yes">있음 (핵 속)</td></tr>
+      <tr><th>라이보솜</th><td class="yes">있음</td><td class="yes">있음</td></tr>
+      <tr><th>세포막</th><td class="yes">있음</td><td class="yes">있음</td></tr>
+      <tr><th>막으로 싸인 소기관</th><td class="no">없음</td><td class="yes">있음</td></tr>
+      <tr><th>세포벽</th><td class="yes">있음</td><td class="mid">식물세포만</td></tr>
+      <tr><th>크기</th><td>약 1~10 μm</td><td>약 10~100 μm</td></tr>
+      <tr><th>예</th><td>대장균, 젖산균</td><td>동물, 식물, 곰팡이</td></tr></table>`);
+  }
+};
+
+/* ============================================================
+   원핵세포 자세히 탭
+   ============================================================ */
+VIEW["pk-one"]={
+  title:"원핵세포 자세히",
+  sub:"막으로 싸인 소기관은 없지만, 살아가는 데 필요한 것은 모두 갖추고 있다",
+  vb:"0 0 1180 640",
+  legend:["wall","memb","ribo","nucleus"],
+  ctrl:`<label class="tog"><input type="checkbox" id="poAdv"> 심화 표기</label>
+        <span class="spacer"></span><button class="btn" id="poSum">핵심 요약</button>`,
+  quiz:{
+    q:"원핵세포에서 단백질은 어디에서 만들어질까요?",
+    o:["소포체","골지체","세포질의 라이보솜","핵양체"],
+    a:2,
+    e:"원핵세포에는 소포체도 골지체도 없습니다. 하지만 <b>라이보솜은 있고</b>, 세포질에 떠 있는 그 라이보솜에서 단백질이 만들어집니다. 소기관이 없어도 단백질 합성은 반드시 일어나야 하기 때문입니다."
+  },
+  svg(){
+    let s="";
+    s+=prokCell(180,190,640,300,"q");
+    s+=`<text class="lbl-xs" x="500" y="534" text-anchor="middle">막대 모양 세균의 모식도. 크기는 약 1~10 μm이다.</text>`;
+    s+=tagHot("wall","세포벽",90,110,"start","M126 118 L242 214",[82,94,72,24,5]);
+    s+=`<text class="lbl-xs" x="90" y="132">세포를 보호하고 모양을 유지</text>`;
+    s+=tagHot("memb","세포막",90,300,"start","M128 296 L196 316",[82,284,72,24,5]);
+    s+=`<text class="lbl-xs" x="90" y="322">물질 출입을 조절</text>`;
+    s+=tagHot("nucleoid","핵양체 (DNA)",560,102,"start","M600 110 L520 300",[554,86,112,24,5]);
+    s+=`<text class="lbl-xs" x="560" y="124">막에 싸여 있지 않은 DNA</text>`;
+    s+=tagHot("ribo","라이보솜",860,240,"start","M886 250 L800 286",[854,224,80,24,5]);
+    s+=`<text class="lbl-xs" x="860" y="262">단백질 합성. 원핵세포에도 있다</text>`;
+    s+=tagHot("flagel","편모",900,470,"start","M918 460 L900 350",[894,454,52,24,5]);
+    s+=`<text class="lbl-xs" x="900" y="492">회전하여 이동. 없는 세균도 많다</text>`;
+    s+=`<text class="lbl-s" x="300" y="560" font-weight="700">세포질</text>`;
+    s+=`<line x1="330" y1="554" x2="380" y2="452" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=`<text class="lbl-xs" x="300" y="578">소기관 없이 라이보솜과 DNA가 그대로 들어 있다</text>`;
+    // 없는 것 목록
+    s+=`<rect x="880" y="66" width="272" height="128" rx="8" fill="#FDF0EC" stroke="#D0483A" stroke-width="1.4"/>`;
+    s+=`<text class="lbl-s" x="894" y="90" font-weight="800" fill="#B23B2E">원핵세포에 없는 것</text>`;
+    ["핵막으로 싸인 핵","소포체, 골지체","마이토콘드리아, 엽록체","라이소솜, 중심체, 액포"].forEach((t,i)=>
+      s+=`<text class="lbl-xs" x="894" y="${114+i*19}" fill="#8c3226">✕  ${t}</text>`);
+    // 있는 것 목록
+    s+=`<rect x="880" y="516" width="272" height="106" rx="8" fill="#E3F2E0" stroke="#7CB36E" stroke-width="1.4"/>`;
+    s+=`<text class="lbl-s" x="894" y="540" font-weight="800" fill="#2f5b28">그래도 있는 것</text>`;
+    ["세포막, 세포벽","라이보솜","DNA (핵양체)"].forEach((t,i)=>
+      s+=`<text class="lbl-xs" x="894" y="${564+i*19}" fill="#2f5b28">○  ${t}</text>`);
+    // 심화: 플라스미드
+    s+=`<g class="adv-only"><circle cx="700" cy="404" r="22" fill="none" stroke="var(--nuc2)" stroke-width="3"/>
+        <text class="lbl-xs" x="700" y="452" text-anchor="middle" fill="var(--nuc2)">플라스미드</text></g>`;
+    return s;
+  },
+  init(){
+    advToggle("poAdv");
+    $("#poSum").onclick=()=>summary("원핵세포","핵심 정리",[
+      "<b>핵막이 없다.</b> DNA가 세포질에 그대로 놓여 있고 이 부분을 <b>핵양체</b>라 한다.",
+      "<b>막으로 싸인 소기관이 없다.</b> 소포체, 골지체, 마이토콘드리아, 엽록체, 라이소솜, 중심체, 액포가 모두 없다.",
+      "그러나 <b>세포막, 세포벽, 라이보솜, DNA는 있다</b>. 살아가는 데 반드시 필요하기 때문이다.",
+      "라이보솜은 <b>막이 없는 구조물</b>이므로 원핵세포에 있어도 모순이 아니다.",
+      "세포벽의 주성분은 식물의 셀룰로스가 아니라 <b>펩티도글리칸</b>이다.",
+      "칸막이가 없어 모든 대사가 <b>세포질 한 공간</b>에서 일어난다. 구조가 단순하고 크기가 작다.",
+      "예: 대장균, 젖산균, 남세균 같은 <b>세균</b>이 모두 원핵세포다."
+    ]);
+  }
+};
+</script>
+<script>
+/* ============================================================
+   동물세포 탭
+   ============================================================ */
+const ANIMAL_BLOB=`M560 120 C740 112 870 200 884 350 C898 500 840 650 690 716
+                   C540 782 340 748 254 636 C168 524 176 316 262 214 C336 128 450 126 560 120 Z`;
+
+/* 찾기 모드: 학생이 이름을 보고 도식에서 직접 찾아 누른다 */
+function makeFinder(list,label){
+  const F={on:false,queue:[],cur:null,ok:0,miss:0};
+  const P=$("#quizPanel"), T=$("#quizTitle"), B=$("#quiz");
+  function paint(){
+    if(!F.on){ return; }
+    T.textContent="찾기 모드";
+    if(!F.cur){
+      B.innerHTML=`<div class="q">${label} 소기관 ${list.length}개를 모두 찾았습니다.</div>
+        <p class="hint" style="margin-bottom:10px">맞힘 ${F.ok}개 / 틀림 ${F.miss}개</p>
+        <button class="btn primary" id="fnAgain">다시 하기</button>`;
+      $("#fnAgain").onclick=()=>{ start(); };
+      return;
+    }
+    B.innerHTML=`<div class="q">도식에서 <span style="color:var(--orange)">${ORG[F.cur].n}</span>을(를) 찾아 누르세요.</div>
+      <p class="hint">남은 개수 ${F.queue.length+1}개, 맞힘 ${F.ok}, 틀림 ${F.miss}</p>
+      <div class="qfb show" id="fnFb"></div>`;
+  }
+  function start(){
+    F.queue=list.slice().sort(()=>Math.random()-.5);
+    F.ok=0; F.miss=0; F.cur=F.queue.shift(); paint();
+  }
+  function check(id){
+    if(!F.on||!F.cur) return true;
+    const fb=$("#fnFb");
+    if(id===F.cur){
+      F.ok++;
+      if(fb){ fb.innerHTML=`<b style="color:#2f5b28">정답입니다.</b> ${ORG[F.cur].n} — ${ORG[F.cur].r}`; }
+      setTimeout(()=>{ F.cur=F.queue.length?F.queue.shift():null; paint(); },900);
+    } else {
+      F.miss++;
+      if(fb) fb.innerHTML=`<b style="color:#8c3226">${ORG[id]?ORG[id].n:"그것"}은(는) 아닙니다.</b> 다시 찾아보세요.`;
+    }
+    return false;
+  }
+  return {F,start,check,paint,
+    toggle(on){ F.on=on; if(on){ P.hidden=false; start(); } }};
+}
+
+VIEW["eu-an"]={
+  title:"동물세포",
+  sub:"교과서와 같은 번호를 매겼습니다. 소기관이나 이름표를 누르면 구조와 기능을 볼 수 있습니다",
+  vb:"0 0 1180 840",
+  legend:["memb","nucleus","er","ribo","golgi","cent","mito","lyso","skel","vac"],
+  ctrl:`<button class="btn primary" id="anFind">찾기 모드 시작</button>
+        <button class="btn" id="anLbl" aria-pressed="false">이름표 가리기</button>
+        <label class="tog"><input type="checkbox" id="anAdv"> 심화 표기</label>
+        <span class="spacer"></span>
+        <button class="btn" id="anNo">식물세포에 없는 것</button>
+        <button class="btn" id="anSum">핵심 요약</button>`,
+  svg(){
+    const BLOB=`M600 244 C792 236 940 336 954 476 C968 616 884 736 704 774
+                C524 812 352 768 302 644 C252 520 278 356 382 284 C452 236 522 248 600 244 Z`;
+    let s="";
+    // ── 세포 본체: 두꺼운 반투명 테두리로 잘린 단면의 두께를 표현한다
+    s+=`<path d="${BLOB}" fill="url(#gCytoA)"/>`;
+    s+=`<g id="aSkel">${drawSkel([
+      [`M340 350 q170 96 350 44 q142 -44 268 62`,2],
+      [`M312 520 q186 -64 344 22 q156 74 316 -44`,2],
+      [`M430 274 q42 250 -22 414 q-32 82 42 146`,1.8],
+      [`M726 258 q-52 228 22 396 q42 94 -42 166`,1.8],
+      [`M352 660 q208 -126 438 -42`,1.5],
+      [`M552 250 q126 208 312 270`,1.5]],.5)}</g>`;
+    // ── 소기관
+    s+=`<g id="aER">${drawRER(
+      `M676 320 q86 -34 148 4 q-64 30 -136 18 q80 14 128 56 q-70 20 -138 -16
+       q70 36 112 84 q-80 16 -132 -38 q52 50 74 102 q-84 2 -116 -64 z`,
+      [[722,314],[796,320],[746,352],[706,382],[790,378],[756,416],[800,438],[730,452],[766,488],[812,466],[708,410],[692,352],[746,510],[786,532],[684,470]])}</g>`;
+    s+=`<g id="aSER">${drawSER(`M470 668 q62 -38 106 4 q44 44 -6 82 q-52 38 -102 2 q-48 -36 -4 -84
+        M482 690 q44 44 106 38 M532 646 q-16 68 24 106`)}</g>`;
+    s+=`<g id="aGolgi">${drawGolgi(690,676,-8,.8)}</g>`;
+    s+=`<g id="aMito">${drawMito(378,596,-26,1)}${drawMito(852,556,58,1)}${drawMito(864,364,-16,1)}</g>`;
+    s+=`<g id="aLyso">${drawLyso(370,462,18)}${drawLyso(452,724,15)}</g>`;
+    s+=`<g id="aVac"><g filter="url(#shS)"><ellipse cx="400" cy="706" rx="32" ry="24" fill="url(#gVac)" stroke="#7FA868" stroke-width="1.8"/></g></g>`;
+    s+=`<g id="aCent">${drawCentro(430,336)}</g>`;
+    s+=`<g id="aNuc">${drawNucleus(566,432,116)}</g>`;
+    s+=`<g id="aRibo">`;
+    [[330,404],[344,556],[406,690],[470,760],[556,608],[624,588],[642,278],[540,268],[402,318],
+     [908,468],[892,634],[818,714],[760,736],[930,412],[356,644],[312,486],[624,752],[836,338],[298,588]]
+      .forEach(([x,y])=>s+=drawRibo(x,y,1.2));
+    s+=`</g>`;
+    // ── 세포막 (두꺼운 반투명 테두리 = 절개 단면의 두께)
+    s+=`<g id="aMemb"><path d="${BLOB}" fill="none" stroke="url(#gMembRim)" stroke-width="17" opacity=".78"/>
+        <path d="${BLOB}" fill="none" stroke="#EAF7FD" stroke-width="6"/>
+        <path d="${BLOB}" fill="none" stroke="#2E6C96" stroke-width="1.4" opacity=".5"/></g>`;
+
+    // ── 동물세포 배지
+    s+=`<circle cx="66" cy="52" r="38" fill="url(#gRibo)" stroke="#B26418" stroke-width="1.5"/>`;
+    s+=`<text x="66" y="47" text-anchor="middle" font-size="14.5" font-weight="800" fill="#fff">동물</text>`;
+    s+=`<text x="66" y="65" text-anchor="middle" font-size="14.5" font-weight="800" fill="#fff">세포</text>`;
+
+    // ── 세포막 확대 인셋 (인지질 2중층과 단백질)
+    s+=`<g id="aInset">`;
+    s+=`<circle cx="246" cy="128" r="66" fill="#F4FAFD" stroke="#5FA8D8" stroke-width="2"/>`;
+    s+=`<clipPath id="insClip"><circle cx="246" cy="128" r="64"/></clipPath>`;
+    s+=`<g clip-path="url(#insClip)">`;
+    s+=`<rect x="180" y="112" width="132" height="34" fill="url(#bilayer)"/>`;
+    s+=`<rect x="180" y="62" width="132" height="50" fill="#DDF0FA"/>`;
+    s+=`<rect x="180" y="146" width="132" height="50" fill="#FBEFD8"/>`;
+    s+=`<ellipse cx="252" cy="129" rx="15" ry="26" fill="#B79AE0" stroke="#5B4483" stroke-width="1.4"/>`;
+    s+=`<ellipse cx="206" cy="112" rx="9" ry="7" fill="#B79AE0" stroke="#5B4483" stroke-width="1.2"/>`;
+    s+=`</g>`;
+    s+=`<line x1="292" y1="166" x2="366" y2="238" stroke="#C0392B" stroke-width="2" marker-end="url(#aRe)"/>`;
+    s+=`<circle cx="372" cy="244" r="9" fill="none" stroke="#C0392B" stroke-width="2"/>`;
+    s+=`<text class="lbl-xs" x="152" y="104" text-anchor="end">인지질</text>`;
+    s+=`<line x1="156" y1="100" x2="216" y2="120" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=`<text class="lbl-xs" x="152" y="164" text-anchor="end">단백질</text>`;
+    s+=`<line x1="156" y1="160" x2="240" y2="140" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=`</g>`;
+
+    // ── 이름표
+    s+=`<g id="aLbls">`;
+    s+=tagHot("memb","세포막",64,222,"start","M108 216 L182 176",[56,206,72,24,5]);
+    // ❷ 핵: 핵막 / 염색질 / 인 을 대괄호로 묶는다
+    s+=`<text class="lbl-s" x="1004" y="248" text-anchor="end">핵막</text>`;
+    s+=`<line x1="1010" y1="244" x2="640" y2="336" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=`<text class="lbl-s" x="1004" y="280" text-anchor="end">염색질</text>`;
+    s+=`<line x1="1010" y1="276" x2="596" y2="366" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=`<text class="lbl-s" x="1004" y="312" text-anchor="end">인</text>`;
+    s+=`<line x1="1010" y1="308" x2="612" y2="392" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=bracket(1022,240,314,1);
+    s+=tagHot("nucleus","핵",1042,286,"start","M1022 280 L1038 280",[1034,268,34,24,5]);
+    // ❸ 소포체: 거친면 / 매끈면
+    s+=`<text class="lbl-s" x="1004" y="388" text-anchor="end">거친면소포체</text>`;
+    s+=`<line x1="1010" y1="384" x2="832" y2="368" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=`<text class="lbl-s" x="1004" y="420" text-anchor="end">매끈면소포체</text>`;
+    s+=`<line x1="1010" y1="416" x2="586" y2="676" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=bracket(1022,380,422,1);
+    s+=tagHot("er","소포체",1042,408,"start","M1022 402 L1038 402",[1034,390,72,24,5]);
+    s+=tagHot("ribo","라이보솜",1104,486,"end","M1024 480 L942 458",[1016,468,88,24,5]);
+    s+=tagHot("mito","마이토콘드리아",1104,566,"end","M980 560 L898 556",[972,548,142,24,5]);
+    s+=tagHot("golgi","골지체",760,824,"middle","M760 810 L706 730",[728,806,66,24,5]);
+    s+=tagHot("cent","중심체",64,344,"start","M112 338 L392 336",[56,328,72,24,5]);
+    s+=tagHot("lyso","라이소솜",64,432,"start","M120 426 L350 456",[56,416,88,24,5]);
+    s+=tagHot("skel","세포골격",64,522,"start","M120 516 L330 528",[56,506,88,24,5]);
+    s+=tagHot("vac","액포",64,606,"start","M100 600 L368 702",[56,590,52,24,5]);
+    s+=`</g>`;
+    // ── 소기관 자체를 눌러도 열린다
+    s+=hotC("nucleus",566,432,118);
+    s+=hotC("cent",430,336,42);
+    s+=hotR("golgi",620,626,142,102,10);
+    s+=hotR("er",668,300,166,240,10);
+    s+=hotR("er",456,644,124,84,10);
+    s+=hotC("lyso",370,462,24);
+    s+=hotC("lyso",452,724,20);
+    s+=hotC("vac",400,706,34);
+    s+=hotC("mito",378,596,48);
+    s+=hotC("mito",852,556,48);
+    s+=hotC("mito",864,364,48);
+    s+=hotC("ribo",908,468,16);
+    s+=hotC("ribo",344,556,16);
+    s+=hotR("memb",166,150,44,80,8);
+    s+=hotR("skel",336,500,90,44,8);
+    // ── 교과서의 보충 설명
+    s+=`<text class="note" x="40" y="694">동물세포에는 중심체가 핵 부근에 존재하며,</text>`;
+    s+=`<text class="note" x="40" y="712">중심체는 세포분열 시 방추사의 형성에 관여한다.</text>`;
+    s+=`<path d="M116 660 L116 682" stroke="var(--magenta)" stroke-width="1.4" marker-end="url(#aPu)"/>`;
+    // ── 심화 표기
+    s+=`<g class="adv-only">
+      <text class="lbl-xs" x="1104" y="504" text-anchor="end">막이 없는 알갱이. 단백질 합성</text>
+      <text class="lbl-xs" x="64" y="362">중심립 2개가 직각으로 배열</text>
+      <text class="lbl-xs" x="64" y="240">인지질 2중층 + 단백질 (유동 모자이크막)</text>
+    </g>`;
+    // ── 식물세포에 없는 것 강조
+    s+=`<g id="aNoBox" class="hide"><rect x="836" y="742" width="330" height="72" rx="8" fill="#FDF0EC" stroke="#D0483A" stroke-width="1.4"/>
+      <text class="lbl-s" x="850" y="766" font-weight="800" fill="#B23B2E">깜박이는 것이 동물세포에만 있는 것</text>
+      <text class="lbl-xs" x="850" y="788" fill="#8c3226">✕ 중심체    ✕ 발달한 라이소솜</text>
+      <text class="lbl-xs" x="850" y="806" fill="#8c3226">나머지는 식물세포에도 모두 있다</text></g>`;
+    return s;
+  },
+  init(svg){
+    const FIND=["nucleus","er","ribo","golgi","cent","mito","lyso","skel","vac","memb"];
+    const fn=makeFinder(FIND,"동물세포의");
+    VIEW["eu-an"].onPick=id=>fn.check(id);
+    const fb=$("#anFind");
+    fb.onclick=()=>{
+      const on=fb.getAttribute("aria-pressed")!=="true";
+      fb.setAttribute("aria-pressed",on); fb.textContent=on?"찾기 모드 끝내기":"찾기 모드 시작";
+      // 이름표가 보이면 답이 그대로 노출되므로 찾기 모드에서는 가린다.
+      svg.querySelector("#aLbls").classList.toggle("hide",on);
+      const lbb=$("#anLbl");
+      lbb.setAttribute("aria-pressed",on); lbb.textContent=on?"이름표 보이기":"이름표 가리기"; lbb.disabled=on;
+      fn.toggle(on);
+      if(!on){ setQuiz(VIEW["eu-an"].quiz,"확인 질문"); showOrg(null); }
+    };
+    const lb=$("#anLbl");
+    lb.onclick=()=>{
+      const on=lb.getAttribute("aria-pressed")!=="true";
+      lb.setAttribute("aria-pressed",on); lb.textContent=on?"이름표 보이기":"이름표 가리기";
+      svg.querySelector("#aLbls").classList.toggle("hide",on);
+    };
+    const nb=$("#anNo"); let no=false;
+    nb.onclick=()=>{
+      no=!no; nb.setAttribute("aria-pressed",no);
+      svg.querySelector("#aNoBox").classList.toggle("hide",!no);
+      ["aCent","aLyso"].forEach(id=>svg.querySelector("#"+id).classList.toggle("pulse",no));
+      ["aNuc","aER","aSER","aGolgi","aMito","aRibo","aSkel","aVac"].forEach(id=>svg.querySelector("#"+id).classList.toggle("soft",no));
+    };
+    advToggle("anAdv");
+    $("#anSum").onclick=()=>summary("동물세포","핵심 정리",[
+      "<b>세포막</b>으로 둘러싸여 있고 <b>세포벽은 없다</b>. 그래서 모양이 둥글고 일정하지 않다.",
+      "<b>핵</b>: 핵막(2중막)과 핵공, 인, 염색질. 유전정보를 보관하고 세포를 조절한다.",
+      "<b>소포체</b>: 거친면(라이보솜 붙음, 단백질 수송)과 매끈면(지질 합성, 해독)으로 나뉜다.",
+      "<b>라이보솜</b>: 막이 없는 알갱이. 단백질을 합성한다.",
+      "<b>골지체</b>: 소포체에서 온 단백질을 가공하고 포장해 내보낸다.",
+      "<b>마이토콘드리아</b>: 세포호흡으로 ATP를 만든다. <b>식물세포에도 있다.</b>",
+      "<b>중심체</b>: 방추사를 만든다. <b>동물세포에만</b> 있다.",
+      "<b>라이소솜</b>: 가수분해 효소로 세포 안을 소화한다. <b>동물세포에 발달</b>해 있다.",
+      "<b>세포골격</b>: 모양 유지와 소기관 이동. <b>액포</b>는 있지만 매우 작다.",
+      "동물세포에만 있는 것은 <b>중심체</b>와 <b>발달한 라이소솜</b> 둘뿐이다. 나머지는 식물세포에도 있다."
+    ]);
+  },
+  quiz:{
+    q:"동물세포에는 있지만 식물세포에는 없는 것으로 옳게 짝지은 것은?",
+    o:["중심체와 라이소솜","마이토콘드리아와 골지체","핵과 소포체","라이보솜과 세포막"],
+    a:0,
+    e:"<b>중심체</b>는 고등 식물세포에 없고, <b>라이소솜</b>은 동물세포에 발달해 있으며 식물세포에서는 그 역할을 액포가 대신합니다. 마이토콘드리아, 골지체, 핵, 소포체, 라이보솜, 세포막은 <b>두 세포 모두</b> 가집니다. 특히 식물세포에도 마이토콘드리아가 있다는 점을 자주 혼동합니다."
+  }
+};
+</script>
+<script>
+/* ============================================================
+   식물세포 탭
+   ============================================================ */
+VIEW["eu-pl"]={
+  title:"식물세포",
+  sub:"교과서와 같은 번호를 매겼습니다. 큰 액포가 가운데를 차지해 소기관이 가장자리로 밀려나 있습니다",
+  vb:"0 0 1180 820",
+  legend:["wall","memb","nucleus","er","ribo","golgi","mito","chloro","vac","skel"],
+  ctrl:`<button class="btn primary" id="plFind">찾기 모드 시작</button>
+        <button class="btn" id="plLbl" aria-pressed="false">이름표 가리기</button>
+        <label class="tog"><input type="checkbox" id="plAdv"> 심화 표기</label>
+        <span class="spacer"></span>
+        <button class="btn" id="plOnly">동물세포에 없는 것</button>
+        <button class="btn" id="plSum">핵심 요약</button>`,
+  svg(){
+    let s="";
+    // ── 세포벽: 바깥을 감싸는 두꺼운 녹색 층 (교과서처럼 여러 겹)
+    s+=`<g id="lWall" filter="url(#sh)">
+        <rect x="176" y="96" width="800" height="620" rx="20" fill="url(#gWall)" stroke="#3E5C1B" stroke-width="2"/>
+        <rect x="192" y="112" width="768" height="588" rx="15" fill="url(#wallTex)" stroke="#4E7223" stroke-width="1.4"/></g>`;
+    // ── 세포질
+    s+=`<rect x="216" y="136" width="720" height="540" rx="11" fill="url(#gCytoL)"/>`;
+    s+=`<g id="lSkel">${drawSkel([
+      [`M248 206 q126 64 158 190 q32 126 -10 292`,2],
+      [`M906 206 q-126 74 -158 200 q-28 136 16 288`,2],
+      [`M256 176 q320 -22 690 32`,1.5],
+      [`M256 640 q340 32 690 -22`,1.5]],.5)}</g>`;
+    // ── 세포막 (세포벽 안쪽)
+    s+=`<g id="lMemb"><rect x="216" y="136" width="720" height="540" rx="11" fill="none" stroke="url(#gMembRim)" stroke-width="10" opacity=".85"/>
+        <rect x="216" y="136" width="720" height="540" rx="11" fill="none" stroke="#EAF7FD" stroke-width="3.4"/>
+        <rect x="216" y="136" width="720" height="540" rx="11" fill="none" stroke="#2E6C96" stroke-width="1.2" opacity=".5"/></g>`;
+    // ── 큰 액포
+    const VAC=`M448 208 q214 -20 428 8 q24 108 0 216 q-6 90 -14 150 q-210 22 -414 2 q-20 -118 -8 -228 q2 -82 8 -148 z`;
+    s+=`<g id="lVac" filter="url(#sh)">${drawVac(VAC)}
+        <ellipse cx="600" cy="286" rx="130" ry="42" fill="#fff" opacity=".45"/></g>`;
+    // ── 소기관
+    s+=`<g id="lER">${drawRER(
+      `M256 396 q74 -26 124 6 q-54 24 -112 14 q66 16 106 50 q-60 16 -114 -16 q50 34 70 78 q-68 8 -100 -46 z`,
+      [[298,390],[358,404],[306,430],[268,452],[344,448],[300,482],[344,486],[280,498],[314,524],[264,414]])}</g>`;
+    s+=`<g id="lSER">${drawSER(`M304 588 q46 -28 78 4 q32 32 -4 60 q-38 28 -74 2 q-36 -26 0 -62`)}</g>`;
+    s+=`<g id="lGolgi">${drawGolgi(360,214,0,.58)}</g>`;
+    s+=`<g id="lChloro">${drawChloro(720,616,-6,.9)}${drawChloro(892,240,74,.9)}${drawChloro(886,470,96,.9)}${drawChloro(506,632,8,.9)}${drawChloro(660,166,-4,.78)}</g>`;
+    s+=`<g id="lMito">${drawMito(262,662,-14,.92)}${drawMito(896,650,44,.92)}${drawMito(872,182,38,.86)}</g>`;
+    s+=`<g id="lNuc">${drawNucleus(308,282,74)}</g>`;
+    s+=`<g id="lRibo">`;
+    [[240,362],[236,520],[400,158],[452,166],[560,650],[608,662],[832,660],[930,340],[924,560],
+     [258,596],[400,660],[248,180],[930,180],[934,438],[624,142],[280,660]]
+      .forEach(([x,y])=>s+=drawRibo(x,y,1.15));
+    s+=`</g>`;
+    // ── 액포 안 설명
+    s+=`<text class="zone" x="666" y="396" text-anchor="middle" font-size="20" fill="#4E7223">액포</text>`;
+    s+=`<text class="lbl-xs" x="666" y="420" text-anchor="middle" fill="#5F8A2E">물, 양분, 노폐물, 색소를 저장하고 팽압을 유지한다</text>`;
+
+    // ── 식물세포 배지
+    s+=`<circle cx="1114" cy="52" r="38" fill="url(#gChl)" stroke="#2C5119" stroke-width="1.5"/>`;
+    s+=`<text x="1114" y="47" text-anchor="middle" font-size="14.5" font-weight="800" fill="#fff">식물</text>`;
+    s+=`<text x="1114" y="65" text-anchor="middle" font-size="14.5" font-weight="800" fill="#fff">세포</text>`;
+
+    // ── 이름표
+    s+=`<g id="lLbls">`;
+    // ❷ 핵: 핵막 / 인 / 염색질
+    s+=`<text class="lbl-s" x="176" y="34">핵막</text>`;
+    s+=`<line x1="174" y1="30" x2="286" y2="212" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=`<text class="lbl-s" x="176" y="62">인</text>`;
+    s+=`<line x1="174" y1="58" x2="336" y2="252" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=`<text class="lbl-s" x="176" y="90">염색질</text>`;
+    s+=`<line x1="174" y1="86" x2="322" y2="238" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=bracket(164,26,94,-1);
+    s+=tagHot("nucleus","핵",144,64,"end","M164 58 L148 58",[126,46,34,24,5]);
+    // ❸ 소포체
+    s+=`<text class="lbl-s" x="176" y="184">거친면소포체</text>`;
+    s+=`<line x1="174" y1="180" x2="268" y2="404" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=`<text class="lbl-s" x="176" y="212">매끈면소포체</text>`;
+    s+=`<line x1="174" y1="208" x2="298" y2="600" stroke="var(--ink3)" stroke-width="1"/>`;
+    s+=bracket(164,176,216,-1);
+    s+=tagHot("er","소포체",144,200,"end","M164 194 L148 194",[110,182,72,24,5]);
+    s+=tagHot("ribo","라이보솜",56,306,"start","M116 300 L228 358",[48,290,88,24,5]);
+    s+=tagHot("golgi","골지체",56,388,"start","M104 382 L316 232",[48,372,66,24,5]);
+    s+=tagHot("skel","세포골격",56,470,"start","M116 464 L252 490",[48,454,88,24,5]);
+    s+=tagHot("mito","마이토콘드리아",56,562,"start","M146 556 L232 650",[48,546,142,24,5]);
+    s+=tagHot("vac","액포",802,54,"middle","M802 68 L742 236",[780,36,52,24,5]);
+    s+=tagHot("wall","세포벽",1124,306,"end","M1042 300 L964 300",[1036,288,72,24,5]);
+    s+=tagHot("memb","세포막",1124,386,"end","M1042 380 L932 380",[1036,368,72,24,5]);
+    s+=tagHot("chloro","엽록체",1124,486,"end","M1042 480 L928 472",[1036,468,72,24,5]);
+    s+=`</g>`;
+    // ── 소기관 자체 클릭
+    s+=hotC("nucleus",308,282,76);
+    s+=hotR("er",244,382,144,150,10);
+    s+=hotR("er",288,570,110,84,10);
+    s+=hotR("golgi",298,174,124,80,10);
+    s+=hotC("chloro",720,616,52);
+    s+=hotC("chloro",892,240,52);
+    s+=hotC("chloro",506,632,52);
+    s+=hotC("chloro",886,470,52);
+    s+=hotC("chloro",660,166,44);
+    s+=hotC("mito",262,662,44);
+    s+=hotC("mito",896,650,44);
+    s+=hotC("ribo",930,340,16);
+    s+=hotC("ribo",240,362,16);
+    s+=hotC("ribo",400,158,16);
+    s+=hotR("vac",470,216,340,250,12);
+    s+=hotR("wall",180,320,34,120,6);
+    s+=hotR("wall",938,320,34,120,6);
+    s+=hotR("memb",212,320,14,120,6);
+    s+=hotR("memb",924,320,14,120,6);
+    s+=hotR("skel",236,460,64,60,8);
+    // ── 교과서의 보충 설명
+    s+=`<text class="note" x="608" y="782" text-anchor="middle">성숙한 식물세포에는 액포가 크게 발달해 있다. 광합성이 일어나는 엽록체가 있으며,</text>`;
+    s+=`<text class="note" x="608" y="800" text-anchor="middle">세포막 바깥을 단단한 세포벽이 둘러싼다.</text>`;
+    // ── 심화
+    s+=`<g class="adv-only">
+      <text class="lbl-xs" x="1124" y="324" text-anchor="end">셀룰로스가 주성분. 전투과성</text>
+      <text class="lbl-xs" x="1124" y="404" text-anchor="end">선택적 투과성. 물질을 골라 받는다</text>
+      <text class="lbl-xs" x="1124" y="504" text-anchor="end">2중막, 그라나와 스트로마</text>
+    </g>`;
+    // ── 없는 것
+    s+=`<rect x="20" y="700" width="238" height="82" rx="8" fill="#FDF0EC" stroke="#D0483A" stroke-width="1.4"/>`;
+    s+=`<text class="lbl-s" x="32" y="724" font-weight="800" fill="#B23B2E">식물세포에 없는 것</text>`;
+    s+=`<text class="lbl-xs" x="32" y="746" fill="#8c3226">✕  중심체</text>`;
+    s+=`<text class="lbl-xs" x="32" y="766" fill="#8c3226">✕  발달한 라이소솜 (액포가 대신)</text>`;
+    // ── 동물세포에 없는 것 강조
+    s+=`<g id="lOnlyBox" class="hide"><rect x="940" y="700" width="228" height="104" rx="8" fill="#E3F2E0" stroke="#7CB36E" stroke-width="1.4"/>
+      <text class="lbl-s" x="952" y="724" font-weight="800" fill="#2f5b28">깜박이는 것이</text>
+      <text class="lbl-s" x="952" y="742" font-weight="800" fill="#2f5b28">식물세포에만 있는 것</text>
+      <text class="lbl-xs" x="952" y="764" fill="#2f5b28">○  세포벽 ⑫</text>
+      <text class="lbl-xs" x="952" y="782" fill="#2f5b28">○  엽록체 ⑪</text>
+      <text class="lbl-xs" x="952" y="800" fill="#2f5b28">○  크게 발달한 액포 ⑩</text></g>`;
+    return s;
+  },
+  init(svg){
+    const FIND=["wall","memb","nucleus","er","ribo","golgi","mito","chloro","vac","skel"];
+    const fn=makeFinder(FIND,"식물세포의");
+    VIEW["eu-pl"].onPick=id=>fn.check(id);
+    const fb=$("#plFind");
+    fb.onclick=()=>{
+      const on=fb.getAttribute("aria-pressed")!=="true";
+      fb.setAttribute("aria-pressed",on); fb.textContent=on?"찾기 모드 끝내기":"찾기 모드 시작";
+      svg.querySelector("#lLbls").classList.toggle("hide",on);
+      const lbb=$("#plLbl");
+      lbb.setAttribute("aria-pressed",on); lbb.textContent=on?"이름표 보이기":"이름표 가리기"; lbb.disabled=on;
+      fn.toggle(on);
+      if(!on){ setQuiz(VIEW["eu-pl"].quiz,"확인 질문"); showOrg(null); }
+    };
+    const lb=$("#plLbl");
+    lb.onclick=()=>{
+      const on=lb.getAttribute("aria-pressed")!=="true";
+      lb.setAttribute("aria-pressed",on); lb.textContent=on?"이름표 보이기":"이름표 가리기";
+      svg.querySelector("#lLbls").classList.toggle("hide",on);
+    };
+    const ob=$("#plOnly"); let only=false;
+    ob.onclick=()=>{
+      only=!only; ob.setAttribute("aria-pressed",only);
+      svg.querySelector("#lOnlyBox").classList.toggle("hide",!only);
+      ["lWall","lChloro","lVac"].forEach(id=>svg.querySelector("#"+id).classList.toggle("pulse",only));
+      ["lNuc","lER","lGolgi","lMito","lRibo","lSkel","lMemb"].forEach(id=>svg.querySelector("#"+id).classList.toggle("soft",only));
+    };
+    advToggle("plAdv");
+    $("#plSum").onclick=()=>summary("식물세포","핵심 정리",[
+      "<b>세포벽</b>이 세포막 바깥을 감싼다. 셀룰로스가 주성분이며 <b>전투과성</b>이라 물질을 가리지 않고 통과시킨다.",
+      "물질 출입을 <b>골라서</b> 조절하는 것은 세포벽이 아니라 <b>세포막</b>이다. 이 둘을 구별해야 한다.",
+      "<b>엽록체</b>: 2중막, 그라나와 스트로마. 광합성이 일어난다. <b>식물세포에만</b> 있다.",
+      "<b>액포</b>: 크게 발달해 세포 부피의 대부분을 차지한다. 물, 양분, 색소를 저장하고 <b>팽압</b>을 유지한다.",
+      "<b>마이토콘드리아도 있다.</b> 식물도 세포호흡을 해야 하므로 엽록체와 마이토콘드리아를 <b>둘 다</b> 가진다.",
+      "<b>중심체가 없다.</b> 그래도 세포 분열은 하며, 중심체 없이 방추사를 만든다.",
+      "라이소솜은 거의 없고 그 역할을 <b>액포</b>가 대신한다.",
+      "핵, 소포체, 골지체, 라이보솜, 세포골격, 세포막은 동물세포와 <b>똑같이</b> 가지고 있다.",
+      "액포가 커서 <b>핵과 소기관이 가장자리로 밀려나</b> 있는 것이 식물세포 도식의 특징이다."
+    ]);
+  },
+  quiz:{
+    q:"식물세포에 대한 설명으로 <b>옳지 않은</b> 것은?",
+    o:["세포벽이 있어 모양이 일정하다","엽록체가 있어 광합성을 한다",
+       "엽록체가 있으므로 마이토콘드리아는 없다","액포가 크게 발달해 있다"],
+    a:2,
+    e:"식물세포는 <b>엽록체와 마이토콘드리아를 모두</b> 가집니다. 광합성으로 포도당을 만드는 것과, 그 포도당을 산화해 ATP를 얻는 것은 <b>별개의 과정</b>이기 때문입니다. 식물도 밤낮없이 세포호흡을 하므로 마이토콘드리아가 반드시 필요합니다."
+  }
+};
+</script>
+<script>
+/* ============================================================
+   동물세포와 식물세포 비교 탭
+   ============================================================ */
+const CMP_TABLE=`<table class="cmp">
+  <tr><th>세포소기관</th><th>동물세포</th><th>식물세포</th><th>하는 일</th></tr>
+  <tr><th>세포막</th><td class="yes">있음</td><td class="yes">있음</td><td>경계, 물질 출입 조절</td></tr>
+  <tr><th>핵</th><td class="yes">있음</td><td class="yes">있음</td><td>유전정보 저장과 조절</td></tr>
+  <tr><th>소포체</th><td class="yes">있음</td><td class="yes">있음</td><td>물질의 합성과 수송</td></tr>
+  <tr><th>라이보솜</th><td class="yes">있음</td><td class="yes">있음</td><td>단백질 합성</td></tr>
+  <tr><th>골지체</th><td class="yes">있음</td><td class="yes">있음</td><td>가공, 포장, 분비</td></tr>
+  <tr><th>마이토콘드리아</th><td class="yes">있음</td><td class="yes">있음</td><td>세포호흡으로 ATP 생성</td></tr>
+  <tr><th>세포골격</th><td class="yes">있음</td><td class="yes">있음</td><td>모양 유지, 소기관 이동</td></tr>
+  <tr><th>중심체</th><td class="yes">있음</td><td class="no">없음</td><td>방추사 형성</td></tr>
+  <tr><th>라이소솜</th><td class="yes">발달</td><td class="mid">거의 없음</td><td>세포내 소화</td></tr>
+  <tr><th>액포</th><td class="mid">작음</td><td class="yes">크게 발달</td><td>저장, 팽압 유지</td></tr>
+  <tr><th>엽록체</th><td class="no">없음</td><td class="yes">있음</td><td>광합성</td></tr>
+  <tr><th>세포벽</th><td class="no">없음</td><td class="yes">있음</td><td>보호, 모양 유지</td></tr></table>`;
+
+VIEW["eu-cmp"]={
+  title:"동물세포와 식물세포 비교",
+  sub:"대부분은 같다. 다른 것은 다섯 가지뿐이다",
+  vb:"0 0 1180 660",
+  legend:["wall","chloro","vac","cent","lyso","mito","nucleus","golgi"],
+  ctrl:`<div class="seg warm" id="cmpF">
+          <button data-f="all">전체 보기</button>
+          <button data-f="same">공통점</button>
+          <button data-f="an">동물세포에만</button>
+          <button data-f="pl">식물세포에만</button>
+        </div>
+        <span class="spacer"></span>
+        <button class="btn" id="cmpTbl">비교표</button>
+        <button class="btn" id="cmpSum">핵심 요약</button>`,
+  quiz:{
+    q:"어떤 진핵세포를 관찰했더니 <b>마이토콘드리아와 골지체</b>가 보였습니다. 이 세포는?",
+    o:["동물세포다","식물세포다","동물세포인지 식물세포인지 알 수 없다","원핵세포다"],
+    a:2,
+    e:"마이토콘드리아와 골지체는 <b>두 세포 모두</b> 가지고 있으므로 구별의 근거가 되지 못합니다. 구별하려면 <b>세포벽, 엽록체, 큰 액포</b>(있으면 식물세포)나 <b>중심체</b>(있으면 동물세포)를 확인해야 합니다. 공통점으로는 아무것도 판정할 수 없다는 점이 핵심입니다."
+  },
+  svg(){
+    let s="";
+    s+=`<rect x="40" y="14" width="480" height="32" rx="6" fill="#FDE7EF" stroke="var(--pink-line,#DCA3BE)"/>`;
+    s+=`<text class="zone" x="280" y="36" text-anchor="middle" fill="#8e3560">동물세포</text>`;
+    s+=`<rect x="620" y="14" width="500" height="32" rx="6" fill="var(--green-soft)" stroke="#8FBB77"/>`;
+    s+=`<text class="zone" x="870" y="36" text-anchor="middle" fill="#3d6b2c">식물세포</text>`;
+
+    // ---- 동물세포 (간략) ----
+    const AB=`M280 80 C400 74 470 150 476 250 C482 350 440 450 340 496 C240 542 120 520 70 440 C20 360 26 200 84 132 C132 76 200 84 280 80 Z`;
+    s+=`<path d="${AB}" fill="var(--cyto)"/>`;
+    s+=`<g id="cASkel">${drawSkel([[`M80 200 q120 70 240 30 q90 -30 150 40`,1.6],[`M110 380 q140 -50 260 20`,1.4]],.4)}</g>`;
+    s+=`<g id="cAMemb"><path d="${AB}" fill="none" stroke="var(--memb)" stroke-width="5"/></g>`;
+    s+=`<g id="cANuc">${drawNucleus(180,230,54)}</g>`;
+    s+=`<g id="cAER">${drawRER(`M254 168 q42 -16 72 4 q-32 16 -68 8 q38 10 62 32 q-38 10 -68 -12 z`,[[276,164],[314,172],[268,192],[300,204],[248,182]])}</g>`;
+    s+=`<g id="cAGolgi">${drawGolgi(360,166,-6,.42)}</g>`;
+    s+=`<g id="cAMito">${drawMito(120,352,-22,.62)}${drawMito(360,340,58,.62)}</g>`;
+    s+=`<g id="cACent">${drawCentro(238,120)}</g>`;
+    s+=`<g id="cALyso">${drawLyso(300,412,13)}${drawLyso(96,150,11)}</g>`;
+    s+=`<g id="cAVac"><ellipse cx="216" cy="440" rx="20" ry="15" fill="#D6EBF7" stroke="var(--vac2)" stroke-width="1.6"/></g>`;
+    s+=`<g id="cARibo">`;
+    [[110,290],[160,400],[260,300],[400,260],[430,400],[70,240],[200,150],[340,90],[130,470],[280,470]]
+      .forEach(([x,y])=>s+=drawRibo(x,y,.95));
+    s+=`</g>`;
+    s+=`<text class="lbl-xs" x="280" y="560" text-anchor="middle">세포벽이 없어 모양이 둥글고 일정하지 않다</text>`;
+
+    // ---- 식물세포 (간략) ----
+    s+=`<g id="cLWall"><rect x="640" y="80" width="470" height="440" rx="18" fill="url(#wallTex)" stroke="var(--wall2)" stroke-width="2"/></g>`;
+    s+=`<rect x="662" y="102" width="426" height="396" rx="11" fill="var(--cyto)"/>`;
+    s+=`<g id="cLSkel">${drawSkel([[`M680 140 q90 60 110 160 q20 100 -6 190`,1.6],[`M1070 140 q-90 60 -110 170 q-16 100 8 180`,1.6]],.4)}</g>`;
+    s+=`<g id="cLMemb"><rect x="662" y="102" width="426" height="396" rx="11" fill="none" stroke="var(--memb)" stroke-width="4.5"/></g>`;
+    const LV=`M790 178 q118 -12 232 4 q14 70 0 140 q-2 58 -8 96 q-114 14 -224 2 q-12 -76 -6 -148 q2 -52 6 -94 z`;
+    s+=`<g id="cLVac"><path d="${LV}" fill="#D6EBF7" stroke="var(--vac2)" stroke-width="2.2"/>
+        <text class="zone" x="902" y="306" text-anchor="middle" font-size="15" fill="#2b6285">액포</text>
+        <text class="lbl-xs" x="902" y="326" text-anchor="middle" fill="#3E7FA8">크게 발달</text></g>`;
+    s+=`<g id="cLNuc">${drawNucleus(724,240,50)}</g>`;
+    s+=`<g id="cLER">${drawRER(`M690 340 q42 -16 72 4 q-32 16 -68 8 q38 10 62 32 q-38 10 -68 -12 z`,[[712,336],[750,344],[704,364],[736,376],[684,354]])}</g>`;
+    s+=`<g id="cLGolgi">${drawGolgi(880,140,0,.4)}</g>`;
+    s+=`<g id="cLChloro">${drawChloro(1020,138,-8,.6)}${drawChloro(1058,300,86,.6)}${drawChloro(760,462,6,.6)}${drawChloro(980,466,-6,.6)}</g>`;
+    s+=`<g id="cLMito">${drawMito(690,460,-16,.62)}${drawMito(1062,436,60,.62)}</g>`;
+    s+=`<g id="cLRibo">`;
+    [[690,150],[760,120],[960,120],[700,300],[1076,200],[1070,376],[860,478],[690,400],[900,116],[1044,486]]
+      .forEach(([x,y])=>s+=drawRibo(x,y,.95));
+    s+=`</g>`;
+    s+=`<text class="lbl-xs" x="876" y="560" text-anchor="middle">세포벽이 있어 모양이 각지고 일정하다</text>`;
+
+    // 강조 상자
+    s+=`<g id="cmpBan" class="hide"><rect x="240" y="588" width="700" height="58" rx="8" fill="#FCFAF5" stroke="var(--rule2)" stroke-width="1.4"/>
+      <text class="lbl" id="cmpBt" x="590" y="612" text-anchor="middle" font-weight="800"></text>
+      <text class="lbl-s" id="cmpBs" x="590" y="634" text-anchor="middle"></text></g>`;
+    // 클릭 영역
+    s+=hotC("nucleus",180,230,56); s+=hotC("nucleus",724,240,52);
+    s+=hotC("cent",238,120,40);
+    s+=hotC("lyso",300,412,18);
+    s+=hotC("mito",120,352,32); s+=hotC("mito",690,460,32);
+    s+=hotR("golgi",322,132,78,68,8); s+=hotR("golgi",844,110,74,62,8);
+    s+=hotR("er",240,150,96,72,8); s+=hotR("er",676,326,96,72,8);
+    s+=hotR("vac",840,240,124,88,10); s+=hotC("vac",216,440,22);
+    s+=hotC("chloro",1020,138,34); s+=hotC("chloro",760,462,34);
+    s+=hotR("wall",644,240,18,120,5);
+    s+=hotR("memb",664,240,14,120,5); s+=hotR("memb",22,240,26,90,5);
+    s+=hotC("ribo",400,260,14); s+=hotC("ribo",960,120,14);
+    s+=hotR("skel",100,360,80,44,8);
+    return s;
+  },
+  init(svg){
+    const A={memb:"cAMemb",nucleus:"cANuc",er:"cAER",ribo:"cARibo",golgi:"cAGolgi",mito:"cAMito",
+             skel:"cASkel",cent:"cACent",lyso:"cALyso",vac:"cAVac"};
+    const L={memb:"cLMemb",nucleus:"cLNuc",er:"cLER",ribo:"cLRibo",golgi:"cLGolgi",mito:"cLMito",
+             skel:"cLSkel",wall:"cLWall",chloro:"cLChloro",vac:"cLVac"};
+    const SAME=["memb","nucleus","er","ribo","golgi","mito","skel"];
+    const ALL=[...new Set([...Object.values(A),...Object.values(L)])];
+    const MODE={
+      all:{on:ALL,t:"",s:""},
+      same:{on:[...SAME.map(k=>A[k]),...SAME.map(k=>L[k])],
+        t:"공통점: 세포막, 핵, 소포체, 라이보솜, 골지체, 마이토콘드리아, 세포골격",
+        s:"두 세포가 가진 것의 대부분은 같다. 특히 마이토콘드리아는 식물세포에도 반드시 있다."},
+      an:{on:[A.cent,A.lyso],
+        t:"동물세포에만: 중심체, 발달한 라이소솜",
+        s:"중심체는 방추사를 만들고, 라이소솜은 세포내 소화를 한다. 식물세포는 라이소솜 역할을 액포가 대신한다."},
+      pl:{on:[L.wall,L.chloro,L.vac],
+        t:"식물세포에만: 세포벽, 엽록체, 크게 발달한 액포",
+        s:"이 셋 중 하나라도 보이면 식물세포다. 동물세포를 판정하는 가장 빠른 방법이기도 하다."}
+    };
+    function set(m){
+      const M=MODE[m];
+      ALL.forEach(id=>{ const e=svg.querySelector("#"+id); if(!e) return;
+        e.classList.remove("pulse","soft");
+        if(m!=="all"){ M.on.includes(id)?e.classList.add("pulse"):e.classList.add("soft"); }});
+      const B=svg.querySelector("#cmpBan");
+      B.classList.toggle("hide",m==="all");
+      svg.querySelector("#cmpBt").textContent=M.t;
+      svg.querySelector("#cmpBs").textContent=M.s;
+      $$("#cmpF button").forEach(b=>b.setAttribute("aria-selected",b.dataset.f===m));
+    }
+    $$("#cmpF button").forEach(b=>b.onclick=()=>set(b.dataset.f));
+    $("#cmpTbl").onclick=()=>summary("동물세포와 식물세포 비교표","포함 여부와 하는 일",[],CMP_TABLE);
+    $("#cmpSum").onclick=()=>summary("동물세포와 식물세포","핵심 정리",[
+      "<b>같은 것</b>: 세포막, 핵, 소포체, 라이보솜, 골지체, 마이토콘드리아, 세포골격. 대부분이 같다.",
+      "<b>식물세포에만</b>: <b>세포벽</b>, <b>엽록체</b>, <b>크게 발달한 액포</b>",
+      "<b>동물세포에만</b>: <b>중심체</b>, <b>발달한 라이소솜</b>",
+      "가장 흔한 오해는 <b>식물세포에 마이토콘드리아가 없다</b>고 생각하는 것이다. 식물도 세포호흡을 하므로 반드시 있다.",
+      "액포는 동물세포에도 있지만 <b>아주 작다</b>. 크기 차이지 유무의 차이가 아니다.",
+      "구별할 때는 <b>세포벽, 엽록체, 큰 액포</b>가 보이는지부터 확인하는 것이 가장 빠르다.",
+      "공통으로 가진 소기관(마이토콘드리아, 골지체 등)으로는 <b>아무것도 판정할 수 없다</b>."
+    ],CMP_TABLE);
+    set("all");
+  }
+};
+
+/* ============================================================
+   세포 구별하기 탭 (탐구)
+   ============================================================ */
+const IDQ=[
+  {n:"세포 A",a:2,
+   e:"<b>식물세포</b>입니다. 결정적 단서는 <b>세포벽, 엽록체, 큰 액포</b>입니다. 이 셋은 동물세포에도 원핵세포에도 없습니다. 핵이 있으므로 원핵세포가 아니고, 세포벽과 엽록체가 있으므로 동물세포도 아닙니다.",
+   clue:["iAWall","iAChl","iAVac"]},
+  {n:"세포 B",a:1,
+   e:"<b>동물세포</b>입니다. 핵이 있으므로 진핵세포이고, <b>세포벽과 엽록체가 없으며 중심체가 있으므로</b> 동물세포입니다. 마이토콘드리아가 보이는 것은 판정의 근거가 되지 못합니다. 식물세포에도 있기 때문입니다.",
+   clue:["iBCent","iBLyso"]},
+  {n:"세포 C",a:0,
+   e:"<b>원핵세포</b>입니다. 세포벽이 있지만 <b>핵막으로 싸인 핵이 없고</b> 막으로 싸인 소기관도 없습니다. DNA가 세포질에 그대로 놓여 있습니다(핵양체). 세포벽만 보고 식물세포라 답하지 않도록 주의해야 합니다. 크기가 훨씬 작다는 점도 단서입니다.",
+   clue:["iCDNA"]}
+];
+
+VIEW["eu-id"]={
+  title:"세포 구별하기",
+  sub:"세 세포를 관찰하고 각각 어떤 세포인지 판정해 보세요",
+  vb:"0 0 1180 620",
+  legend:["wall","nucleus","chloro","vac","cent","lyso","mito","ribo"],
+  quizTitle:"탐구 문제",
+  ctrl:`<button class="btn primary" id="idStart">처음부터</button>
+        <button class="btn" id="idClue">단서 보기</button>
+        <span class="spacer"></span>
+        <button class="btn" id="idSum">판정 요령</button>`,
+  svg(){
+    let s="";
+    // ---- 세포 A (식물세포) ----
+    s+=`<g id="cellA">`;
+    s+=`<g id="iAWall"><rect x="40" y="120" width="300" height="300" rx="14" fill="url(#wallTex)" stroke="var(--wall2)" stroke-width="2"/></g>`;
+    s+=`<rect x="58" y="138" width="264" height="264" rx="8" fill="var(--cyto)"/>`;
+    s+=`<rect x="58" y="138" width="264" height="264" rx="8" fill="none" stroke="var(--memb)" stroke-width="4"/>`;
+    s+=`<g id="iAVac"><path d="M136 186 q76 -8 150 4 q10 46 0 92 q0 40 -6 66 q-74 10 -144 2 q-8 -50 -4 -98 q2 -34 4 -66 z" fill="#D6EBF7" stroke="var(--vac2)" stroke-width="2"/></g>`;
+    s+=`${drawNucleus(96,190,34)}`;
+    s+=`<g id="iAChl">${drawChloro(300,180,80,.44)}${drawChloro(112,368,4,.44)}${drawChloro(248,372,-6,.44)}</g>`;
+    s+=`${drawMito(94,300,-20,.5)}${drawMito(304,332,64,.5)}`;
+    s+=`${drawGolgi(190,158,0,.3)}`;
+    [[76,240],[300,250],[180,392],[76,150],[300,146]].forEach(([x,y])=>s+=drawRibo(x,y,.85));
+    s+=`<text class="zone" x="190" y="452" text-anchor="middle" font-size="16">세포 A</text>`;
+    s+=`</g>`;
+    // ---- 세포 B (동물세포) ----
+    s+=`<g id="cellB">`;
+    const BB=`M560 118 C660 112 726 176 730 262 C734 348 690 412 600 440 C510 468 424 440 400 360 C376 280 396 178 452 138 C490 110 510 120 560 118 Z`;
+    s+=`<path d="${BB}" fill="var(--cyto)"/><path d="${BB}" fill="none" stroke="var(--memb)" stroke-width="4.5"/>`;
+    s+=`${drawNucleus(500,250,46)}`;
+    s+=`<g id="iBCent">${drawCentro(596,166)}</g>`;
+    s+=`<g id="iBLyso">${drawLyso(636,348,12)}${drawLyso(432,196,10)}</g>`;
+    s+=`${drawMito(444,378,-18,.55)}${drawMito(684,262,72,.55)}`;
+    s+=`${drawGolgi(660,190,-6,.32)}`;
+    s+=`${drawRER(`M566 314 q34 -12 58 4 q-26 12 -54 6 q30 8 50 26 q-30 8 -54 -10 z`,[[584,310],[614,318],[578,332],[604,344]])}`;
+    [[430,300],[520,400],[700,340],[540,140],[646,420]].forEach(([x,y])=>s+=drawRibo(x,y,.85));
+    s+=`<text class="zone" x="562" y="480" text-anchor="middle" font-size="16">세포 B</text>`;
+    s+=`</g>`;
+    // ---- 세포 C (원핵세포) ----
+    s+=`<g id="cellC">`;
+    s+=`<rect x="840" y="230" width="250" height="140" rx="70" fill="url(#wallTex)" stroke="var(--wall2)" stroke-width="2"/>`;
+    s+=`<rect x="850" y="240" width="230" height="120" rx="60" fill="none" stroke="var(--memb)" stroke-width="4"/>`;
+    s+=`<rect x="854" y="244" width="222" height="112" rx="56" fill="var(--cyto)"/>`;
+    s+=`<g id="iCDNA"><path d="M912 300 q18 -22 36 -4 q18 18 36 -4 q18 -20 34 4 q-14 26 -34 8 q-20 -16 -36 4 q-18 20 -36 -8 z" fill="none" stroke="var(--nuc2)" stroke-width="2.8" stroke-linecap="round"/></g>`;
+    [[880,268],[920,262],[1000,264],[1046,272],[876,336],[930,340],[1010,338],[1050,330],[866,300],[1062,300]]
+      .forEach(([x,y])=>s+=drawRibo(x,y,.8));
+    s+=`<text class="zone" x="965" y="410" text-anchor="middle" font-size="16">세포 C</text>`;
+    s+=`<text class="lbl-xs" x="965" y="432" text-anchor="middle">크기가 다른 두 세포보다 훨씬 작다</text>`;
+    s+=`</g>`;
+    // 안내
+    s+=`<rect x="40" y="20" width="1100" height="34" rx="6" fill="#FCFAF5" stroke="var(--rule2)"/>`;
+    s+=`<text class="lbl-s" x="590" y="42" text-anchor="middle">세 세포의 도식을 관찰하고, 오른쪽 문제에 답해 보세요. 어떤 소기관이 보이고 어떤 소기관이 보이지 않는지가 단서입니다.</text>`;
+    // 선택 표시
+    s+=`<g id="idSel" class="hide"><rect id="idSelR" x="30" y="110" width="320" height="360" rx="12" fill="none" stroke="var(--orange)" stroke-width="3.5" stroke-dasharray="8 6"/></g>`;
+    // 판정 결과
+    s+=`<g id="idMarks">
+      <text id="mA" class="zone" x="300" y="452" font-size="22" text-anchor="middle"></text>
+      <text id="mB" class="zone" x="672" y="480" font-size="22" text-anchor="middle"></text>
+      <text id="mC" class="zone" x="1075" y="410" font-size="22" text-anchor="middle"></text>
+    </g>`;
+    return s;
+  },
+  init(svg){
+    const BOX=[[30,110,320,360],[380,100,370,400],[820,210,290,240]];
+    let i=0, clue=false;
+    function mark(k,ok){ const e=svg.querySelector("#m"+k); e.textContent=ok?"○":"✕"; e.setAttribute("fill",ok?"#3d8b3d":"#C0392B"); }
+    function showClue(on){
+      IDQ.forEach(q=>q.clue.forEach(id=>{ const e=svg.querySelector("#"+id); if(e) e.classList.toggle("pulse",on); }));
+      $("#idClue").setAttribute("aria-pressed",on);
+    }
+    function render(){
+      const S=svg.querySelector("#idSel"), R=svg.querySelector("#idSelR");
+      if(i<IDQ.length){
+        S.classList.remove("hide");
+        const [x,y,w,h]=BOX[i];
+        R.setAttribute("x",x);R.setAttribute("y",y);R.setAttribute("width",w);R.setAttribute("height",h);
+      } else S.classList.add("hide");
+      const P=$("#quizPanel"); P.hidden=false; $("#quizTitle").textContent="탐구 문제";
+      if(i>=IDQ.length){
+        $("#quiz").innerHTML=`<div class="q">세 세포를 모두 판정했습니다.</div>
+          <p class="hint" style="margin-bottom:10px">판정의 순서를 기억해 두세요. ① 핵막이 있는가 → ② 세포벽과 엽록체가 있는가</p>
+          <button class="btn primary" id="idAgain">다시 하기</button>`;
+        $("#idAgain").onclick=()=>{ i=0; ["A","B","C"].forEach(k=>svg.querySelector("#m"+k).textContent=""); render(); };
+        return;
+      }
+      const q=IDQ[i];
+      $("#quiz").innerHTML=`<div class="q">${q.n}는 어떤 세포일까요?</div>
+        <div class="qopts">${["원핵세포","동물세포","식물세포"].map((t,k)=>`<button class="qopt" data-i="${k}">${t}</button>`).join("")}</div>
+        <div class="qfb" id="qfb"></div>`;
+      $("#quiz").querySelectorAll(".qopt").forEach(b=>b.onclick=()=>{
+        const k=+b.dataset.i;
+        $("#quiz").querySelectorAll(".qopt").forEach(x=>x.disabled=true);
+        b.classList.add(k===q.a?"ok":"no");
+        if(k!==q.a) $("#quiz").querySelector(`.qopt[data-i="${q.a}"]`).classList.add("ok");
+        mark(["A","B","C"][i],k===q.a);
+        const fb=$("#qfb");
+        fb.innerHTML=q.e+`<br><br><button class="btn primary" id="idNext">${i<IDQ.length-1?"다음 세포 →":"마치기"}</button>`;
+        fb.classList.add("show");
+        $("#idNext").onclick=()=>{ i++; render(); };
+      });
+    }
+    $("#idStart").onclick=()=>{ i=0; ["A","B","C"].forEach(k=>svg.querySelector("#m"+k).textContent=""); showClue(false); clue=false; render(); };
+    $("#idClue").onclick=()=>{ clue=!clue; showClue(clue); };
+    $("#idSum").onclick=()=>summary("세포를 판정하는 순서","무엇부터 확인해야 할까",[
+      "<b>① 핵막으로 싸인 핵이 있는가?</b> 없으면 <b>원핵세포</b>다. 여기서 이미 갈린다.",
+      "<b>② 핵이 있다면 진핵세포다.</b> 이제 세포벽, 엽록체, 큰 액포를 찾는다. 하나라도 있으면 <b>식물세포</b>다.",
+      "<b>③ 세포벽도 엽록체도 없고 중심체가 보이면 <b>동물세포</b>다.",
+      "<b>함정 1</b>: 세포벽이 있다고 무조건 식물세포가 아니다. <b>원핵세포에도 세포벽이 있다.</b> 핵막부터 확인해야 하는 이유다.",
+      "<b>함정 2</b>: 마이토콘드리아가 보인다고 동물세포가 아니다. <b>식물세포에도 있다.</b>",
+      "<b>함정 3</b>: 라이보솜이 보인다고 진핵세포가 아니다. <b>원핵세포에도 있다.</b>",
+      "판정에 쓸 수 있는 것은 <b>어느 한쪽에만 있는 것</b>뿐이다. 공통점으로는 아무것도 가릴 수 없다."
+    ]);
+    render();
+  }
+};
+
+/* 사진에 추가로 표시된 원핵세포 구조 */
+ORG.capsule={n:"피막",c:"#D1A63A",p:1,a:0,l:0,r:"세균 바깥을 감싸는 보호층",
+  d:[["구조","일부 세균의 세포벽 바깥을 감싸는 끈적한 층"],["기능","건조를 막고 표면에 달라붙게 하며, 외부 환경으로부터 세균을 보호한다."],["주의","모든 원핵세포가 피막을 가지는 것은 아니다."]]};
+ORG.plasmid={n:"플라스미드",c:"#A55335",p:1,a:0,l:0,r:"세균이 추가로 가지는 작은 원형 DNA",
+  d:[["구조","주된 염색체 DNA와 별도로 존재하는 작은 고리 모양 DNA"],["기능","항생제 저항성처럼 생존에 유리한 유전정보를 담을 수 있다."],["특징","세균 사이에서 전달되기도 하며, 생명공학에서는 유전자 운반체로 사용한다."]]};
+
+/* ---------- 원핵세포와 진핵세포 비교: 두 세포를 사진 기반으로 교체 ---------- */
+const drawPkComparisonDiagram=VIEW["pk-cmp"].svg;
+VIEW["pk-cmp"].svg=function(){
+  let s=drawPkComparisonDiagram();
+  let prok=`<g transform="translate(40 125) scale(.32)">`;
+  prok+=`<image class="cell-photo-image" href="./prokaryotic.png" x="0" y="0" width="1510" height="1101"
+    preserveAspectRatio="xMidYMid meet" aria-label="원핵세포 입체 이미지"/>`;
+  prok+=cellPhotoHitOnly("wall","pWall",0,0,[[655,575,55,230]]);
+  prok+=cellPhotoHitOnly("memb","pMemb",0,0,[[615,555,42,220]]);
+  prok+=cellPhotoPart("nucleoid","pDNA",0,0,[[870,480,240,170]]);
+  prok+=cellPhotoPart("ribo","pRibo",0,0,[[1040,360,250,190]]);
+  prok+=cellPhotoPart("flagel","pFlag",0,0,[[380,960,330,115]]);
+  prok+=cellPhotoHitOnly("capsule","pCapsule",0,0,[[720,610,65,245]]);
+  prok+=cellPhotoPart("plasmid","pPlasmid",0,0,[[960,540,72,45]]);
+  prok+=cellPhotoRect("ribo",305,250,285,88);
+  prok+=cellPhotoRect("nucleoid",228,385,300,88);
+  prok+=cellPhotoRect("memb",95,574,230,88);
+  prok+=cellPhotoRect("wall",95,671,230,88);
+  prok+=cellPhotoRect("capsule",164,777,165,88);
+  prok+=cellPhotoRect("plasmid",1078,778,340,90);
+  prok+=`</g>`;
+  s=s.replace(prokCell(120,270,320,200,"p"),prok);
+  [
+    tagHot("wall","세포벽",60,190,"start","M96 196 L164 284",[52,174,72,24,5]),
+    tagHot("memb","세포막",60,232,"start","M96 238 L176 296",[52,216,72,24,5]),
+    tagHot("nucleoid","핵양체 (DNA)",362,196,"start","M400 202 L322 350",[356,180,110,24,5]),
+    tagHot("ribo","라이보솜",362,540,"start","M400 528 L344 462",[356,524,80,24,5]),
+    tagHot("flagel","편모",470,566,"start","M492 556 L516 384",[464,550,52,24,5])
+  ].forEach(old=>{ s=s.replace(old,""); });
+
+  let photo=`<g transform="translate(670 100) scale(.58)">`;
+  photo+=`<image class="cell-photo-image" href="./cell.png" x="0" y="0" width="744" height="684"
+    preserveAspectRatio="xMidYMid meet" aria-label="진핵세포 입체 이미지"/>`;
+  photo+=cellPhotoPart("memb","eMemb",0,0,[[372,342,337,316]],true);
+  photo+=cellPhotoPart("skel","eSkel",0,0,[[637,315,62,105]]);
+  photo+=cellPhotoPart("er","eER",0,0,[[156,318,98,135],[368,268,178,92]]);
+  photo+=cellPhotoPart("nucleus","eNuc",0,0,[[360,126,145,116]]);
+  photo+=cellPhotoPart("golgi","eGolgi",0,0,[[365,490,112,66]]);
+  photo+=cellPhotoPart("mito","eMito",0,0,[[585,122,55,36],[558,319,58,42],[198,454,55,39]]);
+  photo+=cellPhotoPart("ribo","eRibo",0,0,[[246,246,31,19],[365,300,36,20],[435,270,31,18]]);
+  photo+=`</g>`;
+  s=s.replace(eukCell(880,340,"e"),photo);
+
+  const labels=[
+    [tagHot("nucleus","핵",640,120,"start","M654 128 L798 274",[634,104,34,24,5]),
+      cellPhotoLabel("nucleus","핵",650,130,"end",879,173)],
+    [tagHot("er","소포체",1054,196,"start","M1064 202 L972 250",[1048,180,72,24,5]),
+      cellPhotoLabel("er","소포체",650,230,"end",883,255)],
+    [tagHot("golgi","골지체",1050,506,"start","M1058 498 L940 462",[1044,490,72,24,5]),
+      cellPhotoLabel("golgi","골지체",1145,470,"end",882,384)],
+    [tagHot("mito","마이토콘드리아",1006,566,"start","M1040 556 L1006 372",[1000,550,142,24,5]),
+      cellPhotoLabel("mito","마이토콘드리아",1145,130,"end",1009,171)],
+    [tagHot("memb","세포막",1096,352,"start","M1094 346 L1078 340",[1090,336,72,24,5]),
+      cellPhotoLabel("memb","세포막",1145,270,"end",1081,298)],
+    [tagHot("ribo","라이보솜",640,566,"start","M676 556 L740 480",[634,550,80,24,5]),
+      cellPhotoLabel("ribo","라이보솜",650,330,"end",813,243)],
+    [tagHot("skel","세포골격",624,432,"start","M660 426 L716 404",[618,416,80,24,5]),
+      cellPhotoLabel("skel","세포골격",650,430,"end",1040,283)]
+  ];
+  labels.forEach(([before,after])=>{ s=s.replace(before,after); });
+  return s;
+};
+
+/* ---------- 원핵세포 자세히: prokaryotic.png 사진 기반 화면 ---------- */
+VIEW["pk-one"].sub="prokaryotic.png의 이름표 또는 구조를 눌러 원핵세포의 각 부분을 확인해 보세요";
+VIEW["pk-one"].vb="0 0 1180 860";
+VIEW["pk-one"].legend=["wall","memb","ribo","nucleoid","capsule","plasmid","flagel"];
+VIEW["pk-one"].svg=function(){
+  let s=`<g transform="translate(30 20) scale(.74)">`;
+  s+=`<image class="cell-photo-image" href="./prokaryotic.png" x="0" y="0" width="1510" height="1101"
+    preserveAspectRatio="xMidYMid meet" aria-label="원핵세포 입체 이미지"/>`;
+  s+=cellPhotoHitOnly("wall","qWall",0,0,[[655,575,55,230]]);
+  s+=cellPhotoHitOnly("memb","qMemb",0,0,[[615,555,42,220]]);
+  s+=cellPhotoPart("nucleoid","qDNA",0,0,[[870,480,240,170]]);
+  s+=cellPhotoPart("ribo","qRibo",0,0,[[1040,360,250,190]]);
+  s+=cellPhotoPart("flagel","qFlag",0,0,[[380,960,330,115]]);
+  s+=cellPhotoHitOnly("capsule","qCapsule",0,0,[[720,610,65,245]]);
+  s+=cellPhotoPart("plasmid","qPlasmid",0,0,[[960,540,72,45]]);
+  s+=cellPhotoRect("ribo",305,250,285,88);
+  s+=cellPhotoRect("nucleoid",228,385,300,88);
+  s+=cellPhotoRect("memb",95,574,230,88);
+  s+=cellPhotoRect("wall",95,671,230,88);
+  s+=cellPhotoRect("capsule",164,777,165,88);
+  s+=cellPhotoRect("plasmid",1078,778,340,90);
+  s+=`</g>`;
+  s+=`<text class="cell-photo-note" x="590" y="846" text-anchor="middle">사진의 이름표 또는 구조를 누르면 해당 부분이 강조됩니다.</text>`;
+  return s;
+};
+
+/* ---------- 동물세포: cell.png 사진 기반 화면 ---------- */
+VIEW["eu-an"].sub="cell.png의 입체 세포 이미지에서 소기관을 직접 눌러 구조와 기능을 확인해 보세요";
+VIEW["eu-an"].svg=function(){
+  const imgX=218, imgY=78;
+  let s=`<image class="cell-photo-image" href="./cell.png" x="${imgX}" y="${imgY}" width="744" height="684"
+    preserveAspectRatio="xMidYMid meet" aria-label="동물세포 입체 이미지"/>`;
+
+  // 사진 속 소기관 클릭 영역. 세포막을 먼저 두어 안쪽 소기관이 우선 클릭되게 한다.
+  s+=cellPhotoPart("memb","aMemb",imgX,imgY,[[372,342,337,316]],true);
+  s+=cellPhotoPart("skel","aSkel",imgX,imgY,[[637,315,62,105]]);
+  s+=cellPhotoPart("er","aSER",imgX,imgY,[[156,318,98,135]]);
+  s+=cellPhotoPart("er","aER",imgX,imgY,[[368,268,178,92]]);
+  s+=cellPhotoPart("nucleus","aNuc",imgX,imgY,[[360,126,145,116]]);
+  s+=cellPhotoPart("golgi","aGolgi",imgX,imgY,[[365,490,112,66]]);
+  s+=cellPhotoPart("mito","aMito",imgX,imgY,[[585,122,55,36],[558,319,58,42],[198,454,55,39]]);
+  s+=cellPhotoPart("cent","aCent",imgX,imgY,[[570,224,35,34]]);
+  s+=cellPhotoPart("lyso","aLyso",imgX,imgY,[[645,257,25,25],[507,368,23,23]]);
+  s+=cellPhotoPart("vac","aVac",imgX,imgY,[[480,550,46,29],[615,500,27,31]]);
+  s+=cellPhotoPart("ribo","aRibo",imgX,imgY,[[246,246,31,19],[365,300,36,20],[435,270,31,18]]);
+
+  s+=`<g id="aLbls">`;
+  s+=cellPhotoLabel("memb","세포막",160,110,"end",imgX+78,imgY+118);
+  s+=cellPhotoLabel("nucleus","핵",160,205,"end",imgX+360,imgY+126);
+  s+=cellPhotoLabel("er","소포체",160,300,"end",imgX+330,imgY+270);
+  s+=cellPhotoLabel("ribo","라이보솜",160,380,"end",imgX+246,imgY+246);
+  s+=cellPhotoLabel("golgi","골지체",160,520,"end",imgX+365,imgY+490);
+  s+=cellPhotoLabel("cent","중심체",1020,205,"start",imgX+570,imgY+224);
+  s+=cellPhotoLabel("mito","마이토콘드리아",1020,300,"start",imgX+585,imgY+122);
+  s+=cellPhotoLabel("lyso","라이소솜",1020,390,"start",imgX+645,imgY+257);
+  s+=cellPhotoLabel("skel","세포골격",1020,485,"start",imgX+637,imgY+315);
+  s+=cellPhotoLabel("vac","액포",1020,590,"start",imgX+480,imgY+550);
+  s+=`</g>`;
+
+  s+=`<text class="cell-photo-note" x="590" y="812" text-anchor="middle">이름표 또는 사진 속 소기관을 누르면 해당 부분이 강조됩니다.</text>`;
+  s+=`<g class="adv-only"><text class="lbl-xs" x="590" y="832" text-anchor="middle">입체 이미지는 소기관의 상대적 위치와 형태를 학습하기 위한 모식 표현입니다.</text></g>`;
+  s+=`<g id="aNoBox" class="hide"><rect x="812" y="736" width="342" height="76" rx="8" fill="#FDF0EC" stroke="#D0483A" stroke-width="1.4"/>
+    <text class="lbl-s" x="828" y="760" font-weight="800" fill="#B23B2E">깜박이는 것이 동물세포에만 있는 것</text>
+    <text class="lbl-xs" x="828" y="784" fill="#8c3226">○ 중심체　　○ 발달한 라이소솜</text>
+    <text class="lbl-xs" x="828" y="802" fill="#8c3226">나머지는 식물세포에도 모두 있다</text></g>`;
+  return s;
+};
+
+/* ---------- 식물세포: plant.png 사진 기반 화면 ---------- */
+VIEW["eu-pl"].sub="plant.png에 표시된 이름표 또는 구조를 눌러 식물세포의 각 부분을 확인해 보세요";
+VIEW["eu-pl"].svg=function(){
+  const imgX=78, imgY=28;
+  let s=`<image class="cell-photo-image" href="./plant.png" x="${imgX}" y="${imgY}" width="1024" height="762"
+    preserveAspectRatio="xMidYMid meet" aria-label="식물세포 입체 이미지"/>`;
+
+  s+=cellPhotoHitOnly("wall","lWall",imgX,imgY,[[930,420,38,158]]);
+  s+=cellPhotoHitOnly("memb","lMemb",imgX,imgY,[[830,520,31,94]]);
+  s+=cellPhotoPart("nucleus","lNuc",imgX,imgY,[[420,205,116,101]]);
+  s+=cellPhotoPart("er","lER",imgX,imgY,[[350,332,125,90]]);
+  s+=cellPhotoPart("ribo","lRibo",imgX,imgY,[[400,325,88,82]]);
+  s+=cellPhotoPart("golgi","lGolgi",imgX,imgY,[[300,420,103,62]]);
+  s+=cellPhotoPart("mito","lMito",imgX,imgY,[[505,430,72,47],[400,390,48,32]]);
+  s+=cellPhotoPart("chloro","lChloro",imgX,imgY,[[525,520,112,58]]);
+  s+=cellPhotoPart("vac","lVac",imgX,imgY,[[625,260,215,210]]);
+  s+=cellPhotoPart("skel","lSkel",imgX,imgY,[[360,520,172,67]]);
+
+  // 사진에 인쇄된 글자만 정확히 감싸도록 각 이름표의 실제 좌표를 사용한다.
+  const labelRegions=[
+    ["nucleus",220,4,134,93],
+    ["er",96,121,228,68],
+    ["ribo",54,322,86,35],["golgi",70,421,80,35],
+    ["skel",80,562,94,35],["mito",79,628,133,35],
+    ["vac",857,53,67,35],["wall",921,444,76,35],
+    ["memb",862,523,82,35],["chloro",781,626,84,35]
+  ];
+  s+=`<g id="lLbls">`;
+  const labelBoxOffsetY=4;
+  labelRegions.forEach(([id,x,y,w,h])=>s+=cellPhotoRect(id,imgX+x,imgY+y+labelBoxOffsetY,w,h,7));
+  s+=`</g>`;
+
+  // 찾기 모드와 이름표 가리기에서 사진에 인쇄된 글자만 덮는다.
+  s+=`<g id="lLblMasks" class="hide">`;
+  labelRegions.forEach(([,x,y,w,h])=>s+=`<rect x="${imgX+x}" y="${imgY+y}" width="${w}" height="${h}" rx="5" fill="#fff"/>`);
+  s+=`</g>`;
+
+  s+=`<g id="lOnlyBox" class="hide"><rect x="812" y="690" width="342" height="112" rx="8" fill="#E3F2E0" stroke="#7CB36E" stroke-width="1.4"/>
+    <text class="lbl-s" x="828" y="716" font-weight="800" fill="#2f5b28">식물세포에만 있는 구조</text>
+    <text class="lbl-xs" x="828" y="742" fill="#2f5b28">○ 세포벽　　○ 엽록체</text>
+    <text class="lbl-xs" x="828" y="764" fill="#2f5b28">○ 크게 발달한 액포</text>
+    <text class="lbl-xs" x="828" y="788" fill="#2f5b28">사진 속 강조 영역을 확인하세요.</text></g>`;
+  return s;
+};
+VIEW["eu-pl"].init=function(svg){
+  const FIND=["wall","memb","nucleus","er","ribo","golgi","mito","chloro","vac","skel"];
+  const fn=makeFinder(FIND,"식물세포의");
+  VIEW["eu-pl"].onPick=id=>fn.check(id);
+  const masks=svg.querySelector("#lLblMasks"), labels=svg.querySelector("#lLbls");
+  let findOn=false, labelsHidden=false, only=false;
+  const syncLabels=()=>{
+    const hide=findOn||labelsHidden;
+    masks.classList.toggle("hide",!hide);
+    labels.classList.toggle("hide",hide);
+  };
+  const fb=$("#plFind");
+  fb.onclick=()=>{
+    findOn=!findOn;
+    fb.setAttribute("aria-pressed",findOn); fb.textContent=findOn?"찾기 모드 끝내기":"찾기 모드 시작";
+    const lb=$("#plLbl"); lb.disabled=findOn;
+    syncLabels(); fn.toggle(findOn);
+    if(!findOn){ setQuiz(VIEW["eu-pl"].quiz,"확인 질문"); showOrg(null); }
+  };
+  const lb=$("#plLbl");
+  lb.onclick=()=>{
+    labelsHidden=!labelsHidden; lb.setAttribute("aria-pressed",labelsHidden);
+    lb.textContent=labelsHidden?"이름표 보이기":"이름표 가리기"; syncLabels();
+  };
+  $("#plOnly").onclick=()=>{
+    only=!only; $("#plOnly").setAttribute("aria-pressed",only);
+    svg.querySelector("#lOnlyBox").classList.toggle("hide",!only);
+    ["lWall","lChloro","lVac"].forEach(id=>svg.querySelector("#"+id).classList.toggle("pulse",only));
+    ["lNuc","lER","lGolgi","lMito","lRibo","lSkel","lMemb"].forEach(id=>svg.querySelector("#"+id).classList.toggle("soft",only));
+  };
+  advToggle("plAdv");
+  $("#plSum").onclick=()=>summary("식물세포","핵심 정리",[
+    "<b>세포벽</b>이 세포막 바깥을 감싸며 세포를 보호하고 모양을 유지한다.",
+    "<b>엽록체</b>에서는 광합성이 일어나고, <b>마이토콘드리아</b>에서는 세포호흡이 일어난다.",
+    "<b>큰 액포</b>는 물과 물질을 저장하고 팽압을 유지한다.",
+    "핵, 소포체, 라이보솜, 골지체, 마이토콘드리아와 세포골격은 동물세포에도 있다.",
+    "식물세포에는 중심체가 없고, 발달한 라이소솜의 역할은 주로 액포가 대신한다."
+  ]);
+};
+
+/* ---------- 동물세포와 식물세포 비교: 실제 사진 기반 화면 ---------- */
+VIEW["eu-cmp"].sub="cell.png와 plant.png 실제 사진에서 두 세포의 공통점과 차이점을 비교해 보세요";
+VIEW["eu-cmp"].vb="0 0 1180 720";
+VIEW["eu-cmp"].svg=function(){
+  let s="";
+  s+=`<rect x="40" y="14" width="490" height="32" rx="6" fill="#FDE7EF" stroke="var(--pink-line,#DCA3BE)"/>`;
+  s+=`<text class="zone" x="285" y="36" text-anchor="middle" fill="#8e3560">동물세포</text>`;
+  s+=`<rect x="590" y="14" width="550" height="32" rx="6" fill="var(--green-soft)" stroke="#8FBB77"/>`;
+  s+=`<text class="zone" x="865" y="36" text-anchor="middle" fill="#3d6b2c">식물세포</text>`;
+
+  s+=`<rect x="38" y="60" width="490" height="450" rx="12" fill="#fff" stroke="var(--rule2)"/>`;
+  s+=`<g transform="translate(45 66) scale(.64)">`;
+  s+=`<image class="cell-photo-image" href="./cell.png" x="0" y="0" width="744" height="684"
+    preserveAspectRatio="xMidYMid meet" aria-label="동물세포 실제 이미지"/>`;
+  s+=cellPhotoPart("memb","cAMemb",0,0,[[372,342,337,316]],true);
+  s+=cellPhotoPart("skel","cASkel",0,0,[[637,315,62,105]]);
+  s+=cellPhotoPart("er","cAER",0,0,[[156,318,98,135],[368,268,178,92]]);
+  s+=cellPhotoPart("nucleus","cANuc",0,0,[[360,126,145,116]]);
+  s+=cellPhotoPart("golgi","cAGolgi",0,0,[[365,490,112,66]]);
+  s+=cellPhotoPart("mito","cAMito",0,0,[[585,122,55,36],[558,319,58,42],[198,454,55,39]]);
+  s+=cellPhotoPart("cent","cACent",0,0,[[570,224,35,34]]);
+  s+=cellPhotoPart("lyso","cALyso",0,0,[[645,257,25,25],[507,368,23,23]]);
+  s+=cellPhotoPart("vac","cAVac",0,0,[[480,550,46,29],[615,500,27,31]]);
+  s+=cellPhotoPart("ribo","cARibo",0,0,[[246,246,31,19],[365,300,36,20],[435,270,31,18]]);
+  s+=`</g>`;
+  s+=`<text class="lbl-xs" x="283" y="532" text-anchor="middle">세포벽과 엽록체가 없고, 중심체와 발달한 라이소솜이 있다</text>`;
+
+  s+=`<rect x="585" y="60" width="560" height="420" rx="12" fill="#fff" stroke="var(--rule2)"/>`;
+  s+=`<g transform="translate(590 64) scale(.54)">`;
+  s+=`<image class="cell-photo-image" href="./plant.png" x="0" y="0" width="1024" height="762"
+    preserveAspectRatio="xMidYMid meet" aria-label="식물세포 실제 이미지"/>`;
+  s+=cellPhotoPart("wall","cLWall",0,0,[[930,420,38,158]]);
+  s+=cellPhotoPart("memb","cLMemb",0,0,[[830,520,31,94]]);
+  s+=cellPhotoPart("nucleus","cLNuc",0,0,[[420,205,116,101]]);
+  s+=cellPhotoPart("er","cLER",0,0,[[350,332,125,90]]);
+  s+=cellPhotoPart("ribo","cLRibo",0,0,[[400,325,88,82]]);
+  s+=cellPhotoPart("golgi","cLGolgi",0,0,[[300,420,103,62]]);
+  s+=cellPhotoPart("mito","cLMito",0,0,[[505,430,72,47],[400,390,48,32]]);
+  s+=cellPhotoPart("chloro","cLChloro",0,0,[[525,520,112,58]]);
+  s+=cellPhotoPart("vac","cLVac",0,0,[[625,260,215,210]]);
+  s+=cellPhotoPart("skel","cLSkel",0,0,[[360,520,172,67]]);
+  s+=`</g>`;
+  s+=`<text class="lbl-xs" x="865" y="502" text-anchor="middle">세포벽과 엽록체가 있고, 큰 액포가 발달한다</text>`;
+
+  s+=`<g id="cmpBan" class="hide"><rect x="240" y="570" width="700" height="70" rx="8" fill="#FCFAF5" stroke="var(--rule2)" stroke-width="1.4"/>
+    <text class="lbl" id="cmpBt" x="590" y="596" text-anchor="middle" font-weight="800"></text>
+    <text class="lbl-s" id="cmpBs" x="590" y="622" text-anchor="middle"></text></g>`;
+  return s;
+};
+
+/* ---------- 시작 ---------- */
+go("pk-cmp");
+</script>
+</body>
+</html>

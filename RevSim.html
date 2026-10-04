@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>진화 시뮬레이션 · 대립유전자 빈도</title>
+<style>
+  :root{
+    --bg:#0b1a1d; --surface:#11262a; --surface2:#18333a; --line:#25454c;
+    --ink:#eaf2f0; --ink-2:#8aa6a6; --grid:#21424a;
+    --A:#eaa43a; --a:#46bccb; --accent:#7ec98c; --focal:#ffd97a;
+    --warn:#e0915a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:
+      radial-gradient(1100px 600px at 82% -12%, #16383d66, transparent),
+      radial-gradient(800px 500px at 10% 110%, #14302f55, transparent), var(--bg);
+    color:var(--ink);
+    font-family:"Pretendard","Pretendard Variable",-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1120px; margin:0 auto; padding:28px 20px 46px;}
+  .eyebrow{font-size:12px; letter-spacing:.26em; text-transform:uppercase; color:var(--accent); font-weight:700;}
+  h1{font-size:clamp(23px,4vw,33px); margin:.1em 0 .1em; letter-spacing:-.015em;}
+  .sub{color:var(--ink-2); font-size:14px; margin:0 0 16px; max-width:760px;}
+  .sub b{color:var(--ink);}
+
+  /* 시나리오 칩 */
+  .presets{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
+  .chip{font:inherit; font-size:13px; font-weight:700; cursor:pointer; border:1px solid var(--line);
+        background:var(--surface); color:var(--ink-2); border-radius:999px; padding:8px 14px; transition:.15s;}
+  .chip:hover{border-color:var(--accent); color:var(--ink);}
+  .chip.on{background:var(--accent); border-color:var(--accent); color:#08221a;}
+
+  .grid{display:grid; grid-template-columns:1.55fr 1fr; gap:16px; align-items:start;}
+  @media (max-width:900px){ .grid{grid-template-columns:1fr;} }
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:0 14px 40px #0005;}
+  .viz{padding:14px 16px 10px;}
+  .vhead{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;}
+  .vhead h2{font-size:14px; margin:0; font-weight:700; letter-spacing:.01em;}
+  .vhead .gen{font-variant-numeric:tabular-nums; font-weight:800; color:var(--focal); font-size:13px;}
+  .chartleg{display:flex; flex-wrap:wrap; gap:8px 18px; margin:6px 2px 2px; font-size:12px; color:var(--ink-2);}
+  .chartleg .cl{display:inline-flex; align-items:center; gap:7px;}
+  .chartleg .dash{width:20px; height:3px; border-radius:2px; display:inline-block;}
+  svg.chart{width:100%; height:auto; display:block;}
+
+  .poolwrap{margin-top:6px; border-top:1px solid var(--line); padding-top:11px;}
+  .poolhead{display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--ink-2); margin-bottom:8px;}
+  .legend{display:flex; gap:13px;}
+  .legend .l{display:inline-flex; align-items:center; gap:6px; font-weight:700; color:var(--ink);}
+  .legend .d{width:13px; height:13px; border-radius:50%; display:inline-block;}
+  #pool{display:flex; flex-wrap:wrap; gap:4px; align-content:flex-start;}
+  .tok{width:13px; height:13px; border-radius:50%; background:var(--a); transition:background-color .5s ease;}
+  .tok.A{background:var(--A);}
+
+  /* 오른쪽 패널 */
+  .panel{padding:16px 18px 18px;}
+  .panel h2{font-size:14px; margin:0 0 11px; font-weight:700; letter-spacing:.06em; color:var(--ink-2); text-transform:uppercase;}
+  .freqbar{height:30px; border-radius:8px; overflow:hidden; display:flex; border:1px solid var(--line); margin-bottom:7px;}
+  .freqbar .fa{background:var(--A);} .freqbar .fq{background:var(--a);}
+  .freqbar span{display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#0a1a17; transition:width .5s ease;}
+  .freqrow{display:flex; justify-content:space-between; font-size:13px; margin-bottom:14px;}
+  .freqrow b{font-variant-numeric:tabular-nums;}
+  .statgrid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px;}
+  .stat{background:var(--surface2); border:1px solid var(--line); border-radius:10px; padding:9px 8px; text-align:center;}
+  .stat .k{font-size:11px; color:var(--ink-2);}
+  .stat .v{font-size:17px; font-weight:800; font-variant-numeric:tabular-nums;}
+  .hw{font-size:12.5px; color:var(--ink-2); border-top:1px dashed var(--line); padding-top:10px; margin-bottom:12px;}
+  .hw b{color:var(--ink); font-variant-numeric:tabular-nums;}
+  .explain{font-size:13.5px; color:#d7e6e3; background:var(--surface2); border:1px solid var(--line);
+           border-radius:11px; padding:11px 13px;}
+  .explain .m{display:block; margin:3px 0;}
+  .explain .tag{font-weight:800;}
+
+  /* 컨트롤 */
+  .controls{margin-top:16px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:15px 17px;}
+  .sliders{display:grid; grid-template-columns:repeat(3,1fr); gap:14px 22px;}
+  @media (max-width:680px){ .sliders{grid-template-columns:1fr 1fr;} }
+  .ctl label{display:block; font-size:12px; font-weight:700; color:var(--ink-2); margin-bottom:4px;}
+  .ctl .val{color:var(--ink); font-variant-numeric:tabular-nums;}
+  input[type=range]{width:100%; accent-color:var(--accent); height:5px;}
+  .transport{display:flex; flex-wrap:wrap; gap:9px; align-items:center; margin-top:16px; border-top:1px solid var(--line); padding-top:14px;}
+  button.ctrl{font:inherit; font-weight:700; font-size:14px; cursor:pointer; border-radius:10px;
+              border:1px solid var(--line); background:var(--surface2); color:var(--ink); padding:9px 15px; transition:.15s;}
+  button.ctrl:hover{border-color:var(--accent);}
+  button.play{background:var(--accent); color:#08221a; border-color:var(--accent);}
+  .speed{display:inline-flex; border:1px solid var(--line); border-radius:9px; overflow:hidden; margin-left:auto;}
+  .speed button{font:inherit; font-size:12.5px; font-weight:700; border:0; background:var(--surface2); color:var(--ink-2); padding:8px 11px; cursor:pointer;}
+  .speed button.on{background:var(--accent); color:#08221a;}
+  .scrub{display:flex; align-items:center; gap:10px; margin-top:13px; font-size:12.5px; color:var(--ink-2);}
+  .scrub input{flex:1;}
+
+  footer{margin-top:22px; text-align:center; font-size:12.5px; color:var(--ink-2); border-top:1px solid var(--line); padding-top:14px;}
+  footer b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">진화 · 집단유전학</div>
+  <h1>대립유전자 빈도는 어떻게 변할까?</h1>
+  <p class="sub">한 집단의 모든 대립유전자를 모은 것이 <b>유전자 풀</b>이고, 그중 특정 대립유전자(여기선 <b>A</b>)가 차지하는 비율이 <b>대립유전자 빈도</b>입니다. 그래프의 <b>선 하나가 집단 하나</b>예요 — 같은 조건의 여러 집단을 동시에 굴려, 우연(부동)이 집단마다 다르게 작용하는 모습을 비교합니다. 아래 요인들을 켜고 끄며 빈도가 세대에 따라 어떻게 변하는지 살펴보세요.</p>
+
+  <div class="presets" id="presets">
+    <button class="chip" data-preset="hw">하디·바인베르크 (변화 없음)</button>
+    <button class="chip" data-preset="drift-small">유전적 부동 · 작은 집단</button>
+    <button class="chip" data-preset="drift-big">유전적 부동 · 큰 집단</button>
+    <button class="chip" data-preset="mutation">돌연변이</button>
+    <button class="chip" data-preset="geneflow">유전자 흐름(이주)</button>
+  </div>
+
+  <div class="grid">
+    <!-- 시각화 -->
+    <section class="card viz">
+      <div class="vhead">
+        <h2>대립유전자 A 빈도의 세대별 변화 <span style="font-weight:400;color:var(--ink-2)">· 선 하나 = 집단 하나</span></h2>
+        <span class="gen" id="genLabel">세대 0</span>
+      </div>
+      <div class="chartleg">
+        <span class="cl"><span class="dash" style="background:var(--focal);height:4px"></span>관찰 집단 (아래 유전자 풀로 자세히 봄)</span>
+        <span class="cl" id="otherLeg"><span class="dash" style="background:#6fb6c4;opacity:.62"></span>같은 조건의 다른 집단들 (독립적으로 진행)</span>
+      </div>
+      <svg class="chart" viewBox="0 0 580 320" id="chart" role="img" aria-label="세대별 대립유전자 빈도 그래프"></svg>
+
+      <div class="poolwrap">
+        <div class="poolhead">
+          <span>유전자 풀 — 관찰 집단(<span id="poolNote">2N개 대립유전자</span>)</span>
+          <span class="legend">
+            <span class="l"><span class="d" style="background:var(--A)"></span>A</span>
+            <span class="l"><span class="d" style="background:var(--a)"></span>a</span>
+          </span>
+        </div>
+        <div id="pool"></div>
+      </div>
+    </section>
+
+    <!-- 수치/설명 -->
+    <aside class="card panel">
+      <h2>관찰 집단</h2>
+      <div class="freqbar" id="freqbar">
+        <span class="fa" id="barA">A</span><span class="fq" id="barQ">a</span>
+      </div>
+      <div class="freqrow">
+        <span>A 빈도 <b id="pVal" style="color:var(--A)">0.50</b></span>
+        <span>a 빈도 <b id="qVal" style="color:var(--a)">0.50</b></span>
+        <span id="stateVal" style="font-weight:800"></span>
+      </div>
+
+      <div class="statgrid">
+        <div class="stat"><div class="k">고정(A)</div><div class="v" id="cFix" style="color:var(--A)">0</div></div>
+        <div class="stat"><div class="k">소실(A)</div><div class="v" id="cLost" style="color:var(--a)">0</div></div>
+        <div class="stat"><div class="k">분리 유지</div><div class="v" id="cSeg">0</div></div>
+      </div>
+
+      <div class="hw" id="hw"></div>
+      <div class="explain" id="explain"></div>
+    </aside>
+  </div>
+
+  <!-- 컨트롤 -->
+  <div class="controls">
+    <div class="sliders">
+      <div class="ctl"><label>집단 크기 N <span class="val" id="lblN">50</span></label>
+        <input type="range" id="sN" min="0" max="6" step="1" value="2"></div>
+      <div class="ctl"><label>돌연변이율 <span class="val" id="lblU">0</span> <span style="color:var(--ink-2);font-weight:400">(과장)</span></label>
+        <input type="range" id="sU" min="0" max="0.05" step="0.002" value="0"></div>
+      <div class="ctl"><label>이주율 m <span class="val" id="lblM">0</span></label>
+        <input type="range" id="sM" min="0" max="0.3" step="0.01" value="0"></div>
+      <div class="ctl"><label>이주원 A 빈도 <span class="val" id="lblPm">1.00</span></label>
+        <input type="range" id="sPm" min="0" max="1" step="0.05" value="1"></div>
+      <div class="ctl"><label>시작 A 빈도 <span class="val" id="lblP0">0.50</span> <span style="color:var(--ink-2);font-weight:400">(초기화 시 적용)</span></label>
+        <input type="range" id="sP0" min="0" max="1" step="0.05" value="0.5"></div>
+      <div class="ctl"><label>집단 수 <span class="val" id="lblPops">6</span> <span style="color:var(--ink-2);font-weight:400">(그래프 선 개수 · 초기화 시 적용)</span></label>
+        <input type="range" id="sPops" min="1" max="8" step="1" value="6"></div>
+    </div>
+
+    <div class="transport">
+      <button class="ctrl" id="stepBtn">▸ 한 세대</button>
+      <button class="ctrl play" id="playBtn">▷ 재생</button>
+      <button class="ctrl" id="resetBtn">⟲ 초기화</button>
+      <div class="speed" id="speed">
+        <button data-s="2">느림</button><button data-s="6" class="on">보통</button><button data-s="16">빠름</button>
+      </div>
+    </div>
+    <div class="scrub">
+      <span>세대 되돌려보기</span>
+      <input type="range" id="scrub" min="0" max="0" step="1" value="0">
+      <span id="scrubLbl" style="font-variant-numeric:tabular-nums; min-width:38px; text-align:right">0</span>
+    </div>
+  </div>
+
+  <footer>© 2026 <b>광덕고 이재빈</b> · 진화 시뮬레이션 · 교육용으로 자유롭게 사용·수정 가능</footer>
+</div>
+
+<script>
+/* ===== 모델 ===== */
+function gauss(){ let u=0,v=0; while(!u)u=Math.random(); while(!v)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+function binom(n,p){
+  if(p<=0)return 0; if(p>=1)return n;
+  if(n<=200 || n*p<12 || n*(1-p)<12){ let k=0; for(let i=0;i<n;i++) if(Math.random()<p)k++; return k; }
+  let k=Math.round(n*p + Math.sqrt(n*p*(1-p))*gauss()); return Math.max(0,Math.min(n,k));
+}
+function step(p,N,u,m,pm){
+  let x = p + u*(1-2*p);
+  x = (1-m)*x + m*pm;
+  if(!isFinite(N)) return Math.max(0,Math.min(1,x));
+  return binom(2*N, x)/(2*N);
+}
+
+/* ===== 상태 ===== */
+const NVALS=[10,20,50,100,200,500,Infinity];
+const MAXGEN=200;
+const POPCOL=['#ffd97a','#6fb6c4','#cf8fb0','#9bd17a','#e0915a','#8a9ad6','#d9c46a','#69c0a3'];
+let P={ Nidx:2, u:0, m:0, pm:1, p0:0.5, nPops:6 };
+let pops=[];      // 각 원소: {hist:[p,...]}
+let gen=0, viewGen=0, playing=false, raf=null, lastT=0, gps=6, acc=0;
+
+const $=id=>document.getElementById(id);
+const N=()=>NVALS[P.Nidx];
+
+function reset(){
+  pops=[]; for(let i=0;i<P.nPops;i++) pops.push({hist:[P.p0]});
+  gen=0; viewGen=0; $('scrub').max=0; $('scrub').value=0;
+  drawAll();
+}
+function stepOnce(){
+  if(gen>=MAXGEN) return false;
+  for(const pop of pops){ pop.hist.push(step(pop.hist[gen], N(), P.u, P.m, P.pm)); }
+  gen++; viewGen=gen; $('scrub').max=gen; $('scrub').value=gen;
+  return true;
+}
+
+/* ===== 차트 ===== */
+const W=580,H=320,PADL=40,PADR=14,PADT=14,PADB=26;
+const gx=g=> PADL + g/MAXGEN*(W-PADL-PADR);
+const gy=p=> PADT + (1-p)*(H-PADT-PADB);
+function drawChart(){
+  let s='';
+  // 격자 + y라벨
+  [0,0.25,0.5,0.75,1].forEach(v=>{
+    const y=gy(v), major=(v===0||v===0.5||v===1);
+    s+=`<line x1="${PADL}" y1="${y}" x2="${W-PADR}" y2="${y}" stroke="var(--grid)" stroke-width="${major?1.2:0.7}" opacity="${major?0.9:0.5}"/>`;
+    if(major) s+=`<text x="${PADL-7}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--ink-2)">${v}</text>`;
+  });
+  s+=`<text x="${PADL-7}" y="${gy(0.5)-10}" text-anchor="end" font-size="10" fill="var(--ink-2)"></text>`;
+  s+=`<text x="${(W+PADL)/2}" y="${H-4}" text-anchor="middle" font-size="11" fill="var(--ink-2)">세대 →</text>`;
+
+  // 끌림 목표선: 이주(pm) / 돌연변이 평형(0.5)
+  if(P.m>0){ const y=gy(P.pm);
+    s+=`<line x1="${PADL}" y1="${y}" x2="${W-PADR}" y2="${y}" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="6 5" opacity=".85"/>`;
+    s+=`<text x="${W-PADR}" y="${y-5}" text-anchor="end" font-size="10.5" fill="var(--accent)" font-weight="700">이주원 빈도 ${P.pm.toFixed(2)}</text>`; }
+  else if(P.u>0){ const y=gy(0.5);
+    s+=`<line x1="${PADL}" y1="${y}" x2="${W-PADR}" y2="${y}" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="4 5" opacity=".7"/>`;
+    s+=`<text x="${W-PADR}" y="${y-5}" text-anchor="end" font-size="10.5" fill="var(--accent)" font-weight="700">돌연변이 평형 0.5</text>`; }
+
+  // 궤적 (관찰 집단은 맨 위, 굵게)
+  for(let i=pops.length-1;i>=0;i--){
+    const h=pops[i].hist; let pts='';
+    for(let g=0;g<=Math.min(viewGen,h.length-1);g++) pts+=`${gx(g).toFixed(1)},${gy(h[g]).toFixed(1)} `;
+    const focal=(i===0), col=POPCOL[i%POPCOL.length];
+    s+=`<polyline points="${pts.trim()}" fill="none" stroke="${col}" stroke-width="${focal?2.6:1.5}" opacity="${focal?1:0.62}" stroke-linejoin="round" stroke-linecap="round"/>`;
+  }
+  // 현재 세대 표시
+  const cx=gx(viewGen);
+  s+=`<line x1="${cx}" y1="${PADT}" x2="${cx}" y2="${H-PADB}" stroke="#ffffff" stroke-width="1" opacity=".22"/>`;
+  // 관찰 집단 현재 점 + 라벨
+  const fp=pops[0].hist[viewGen];
+  s+=`<circle cx="${cx}" cy="${gy(fp)}" r="4.5" fill="var(--focal)" stroke="#0b1a1d" stroke-width="1.5"/>`;
+  const lx = cx>W-90 ? cx-8 : cx+8, anch = cx>W-90 ? 'end' : 'start';
+  s+=`<text x="${lx}" y="${gy(fp)-8}" text-anchor="${anch}" font-size="11" font-weight="800" fill="var(--focal)">관찰 집단</text>`;
+  $('chart').innerHTML=s;
+}
+
+/* ===== 유전자 풀 ===== */
+let poolCount=-1;
+function tokenCount(){ return isFinite(N()) ? Math.min(2*N(),200) : 200; }
+function buildPool(){
+  const c=tokenCount();
+  if(c===poolCount) return; poolCount=c;
+  const el=$('pool'); el.innerHTML='';
+  for(let i=0;i<c;i++){ const t=document.createElement('span'); t.className='tok'; el.appendChild(t); }
+  $('poolNote').textContent = isFinite(N()) ? `${2*N()}개 대립유전자` : `무한 집단 · 200개 표본`;
+}
+function paintPool(p){
+  const toks=$('pool').children, c=toks.length, nA=Math.round(c*p);
+  const idx=[...Array(c).keys()];
+  for(let i=c-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
+  const isA=new Array(c).fill(false); for(let i=0;i<nA;i++) isA[idx[i]]=true;
+  for(let i=0;i<c;i++) toks[i].classList.toggle('A', isA[i]);
+}
+
+/* ===== 패널 ===== */
+function drawPanel(){
+  const fp=pops[0].hist[viewGen], q=1-fp;
+  $('pVal').textContent=fp.toFixed(2); $('qVal').textContent=q.toFixed(2);
+  $('barA').style.width=(fp*100)+'%'; $('barQ').style.width=(q*100)+'%';
+  $('barA').textContent = fp>0.12?'A':''; $('barQ').textContent = q>0.12?'a':'';
+  const st = fp>=1?'A 고정' : fp<=0?'A 소실' : '분리 유지';
+  $('stateVal').textContent=st;
+  $('stateVal').style.color = fp>=1?'var(--A)' : fp<=0?'var(--a)' : 'var(--ink-2)';
+  // 전체 집단 상태(현재 세대)
+  let fix=0,lost=0,seg=0;
+  for(const pop of pops){ const v=pop.hist[viewGen]; if(v>=1)fix++; else if(v<=0)lost++; else seg++; }
+  $('cFix').textContent=fix; $('cLost').textContent=lost; $('cSeg').textContent=seg;
+  // 하디·바인베르크 유전자형 빈도
+  const AA=(fp*fp), Aa=(2*fp*q), aa=(q*q);
+  $('hw').innerHTML=`하디·바인베르크 유전자형 빈도(관찰 집단): AA <b>${AA.toFixed(2)}</b> · Aa <b>${Aa.toFixed(2)}</b> · aa <b>${aa.toFixed(2)}</b>`;
+  $('genLabel').textContent='세대 '+viewGen;
+}
+
+function describe(){
+  const drift=isFinite(N()), mut=P.u>0, mig=P.m>0;
+  let out='';
+  if(!drift && !mut && !mig){
+    out=`<span class="m"><span class="tag" style="color:var(--accent)">하디·바인베르크 평형</span> — 진화 요인이 없고 집단이 충분히 크면, 대립유전자 빈도는 세대가 지나도 변하지 않습니다.</span>`;
+  } else {
+    if(drift) out+=`<span class="m"><span class="tag" style="color:var(--focal)">유전적 부동</span> — 표집 오차로 빈도가 무작위로 흔들립니다. 집단이 작을수록(N=${N()}) 변동이 크고, 결국 한 대립유전자가 고정/소실됩니다.</span>`;
+    if(mut) out+=`<span class="m"><span class="tag" style="color:var(--warn)">돌연변이</span> — A와 a가 서로 바뀌며 빈도를 천천히 0.5로 끌어당깁니다(약한 힘).</span>`;
+    if(mig) out+=`<span class="m"><span class="tag" style="color:var(--accent)">유전자 흐름</span> — 이주원(A 빈도 ${P.pm.toFixed(2)})에서 온 개체가 빈도를 그 값 쪽으로 끌어당깁니다.</span>`;
+    if(!drift) out+=`<span class="m" style="color:var(--ink-2)">집단이 무한(부동 없음)이라 빈도는 무작위 변동 없이 위 요인대로만 변합니다.</span>`;
+  }
+  $('explain').innerHTML=out;
+}
+
+function drawAll(){ buildPool(); drawChart(); paintPool(pops[0].hist[viewGen]); drawPanel(); describe(); }
+
+/* ===== 컨트롤 바인딩 ===== */
+function fmtU(u){ return u===0?'0':u.toFixed(3); }
+function syncLabels(){
+  $('lblN').textContent = isFinite(N())?N():'무한';
+  $('lblU').textContent = fmtU(P.u);
+  $('lblM').textContent = P.m.toFixed(2);
+  $('lblPm').textContent = P.pm.toFixed(2);
+  $('lblP0').textContent = P.p0.toFixed(2);
+  $('lblPops').textContent = P.nPops;
+  $('otherLeg').style.display = P.nPops>1 ? 'inline-flex' : 'none';
+}
+$('sN').addEventListener('input',e=>{ P.Nidx=+e.target.value; syncLabels(); buildPool(); paintPool(pops[0].hist[viewGen]); drawChart(); describe(); clearPreset(); });
+$('sU').addEventListener('input',e=>{ P.u=+e.target.value; syncLabels(); drawChart(); describe(); clearPreset(); });
+$('sM').addEventListener('input',e=>{ P.m=+e.target.value; syncLabels(); drawChart(); describe(); clearPreset(); });
+$('sPm').addEventListener('input',e=>{ P.pm=+e.target.value; syncLabels(); drawChart(); describe(); clearPreset(); });
+$('sP0').addEventListener('input',e=>{ P.p0=+e.target.value; syncLabels(); stop(); reset(); clearPreset(); });
+$('sPops').addEventListener('input',e=>{ P.nPops=+e.target.value; syncLabels(); stop(); reset(); clearPreset(); });
+
+$('stepBtn').addEventListener('click',()=>{ stop(); if(stepOnce()) drawAll(); });
+$('resetBtn').addEventListener('click',()=>{ stop(); reset(); });
+$('playBtn').addEventListener('click',()=>{ if(playing) stop(); else play(); });
+$('speed').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; gps=+b.dataset.s;
+  [...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b)); });
+$('scrub').addEventListener('input',e=>{ stop(); viewGen=+e.target.value; $('scrubLbl').textContent=viewGen;
+  drawChart(); paintPool(pops[0].hist[viewGen]); drawPanel(); });
+
+function play(){ if(gen>=MAXGEN) reset(); playing=true; $('playBtn').textContent='⏸ 멈춤'; $('playBtn').classList.remove('play'); lastT=0; acc=0; raf=requestAnimationFrame(loop); }
+function stop(){ playing=false; if(raf)cancelAnimationFrame(raf); raf=null; $('playBtn').textContent='▷ 재생'; $('playBtn').classList.add('play'); }
+function loop(ts){
+  if(!playing) return;
+  if(!lastT) lastT=ts; acc += (ts-lastT)/1000*gps; lastT=ts;
+  let did=false;
+  while(acc>=1){ acc-=1; if(!stepOnce()){ stop(); break; } did=true; }
+  if(did){ $('scrubLbl').textContent=viewGen; drawAll(); }
+  if(playing) raf=requestAnimationFrame(loop);
+}
+
+/* ===== 시나리오 ===== */
+const PRESETS={
+  hw:        {Nidx:6,u:0,   m:0,   pm:1,   p0:0.5, nPops:3},
+  'drift-small':{Nidx:1,u:0,m:0,   pm:1,   p0:0.5, nPops:6},
+  'drift-big':  {Nidx:5,u:0,m:0,   pm:1,   p0:0.5, nPops:6},
+  mutation:  {Nidx:5,u:0.03,m:0,   pm:1,   p0:0.05,nPops:3},
+  geneflow:  {Nidx:3,u:0,   m:0.12,pm:0.95,p0:0.1, nPops:4},
+};
+function applyPreset(name){
+  const q=PRESETS[name]; if(!q) return;
+  P={...q};
+  $('sN').value=P.Nidx; $('sU').value=P.u; $('sM').value=P.m; $('sPm').value=P.pm; $('sP0').value=P.p0; $('sPops').value=P.nPops;
+  syncLabels();
+  [...$('presets').children].forEach(b=>b.classList.toggle('on', b.dataset.preset===name));
+  stop(); reset();
+}
+function clearPreset(){ [...$('presets').children].forEach(b=>b.classList.remove('on')); }
+$('presets').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) applyPreset(b.dataset.preset); });
+
+/* ===== 시작 ===== */
+syncLabels(); reset();
+</script>
+</body>
+</html>

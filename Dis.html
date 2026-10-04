@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>생물 탐험대 · 분류 시뮬레이션</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Jua&family=Gothic+A1:wght@400;600;800&family=Baloo+2:wght@600;700&display=swap');
+
+  :root{
+    --bg1:#e7f5ec; --bg2:#e4eefb;
+    --card:#ffffff;
+    --ink:#33413f; --ink-soft:#6b7a77;
+    --leaf:#4fb787; --leaf-dk:#2f9c6c;
+    --sky:#5aa2e6; --sky-dk:#3b83c9;
+    --coral:#ff8f7a; --coral-dk:#f26a52;
+    --sun:#ffc94d; --sun-dk:#eaa62c;
+    --grape:#a78bfa;
+    --rose:#ef6f6f;
+    --soft:#eef4f0; --line:#dfece5;
+    --disp:'Jua',system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+    --body:'Gothic A1',system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+    --num:'Baloo 2',var(--disp);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--body);color:var(--ink);
+    background:linear-gradient(160deg,var(--bg1),var(--bg2));
+    min-height:100vh;line-height:1.6;-webkit-text-size-adjust:100%;overflow-x:hidden;
+  }
+  button,.spec,.slot,.pchip,.opt,a.reset{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  .wrap{max-width:900px;margin:0 auto;padding:20px 16px 80px}
+
+  /* 헤더 */
+  header.top{
+    background:var(--card);border-radius:24px;padding:16px 20px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    box-shadow:0 10px 30px -14px #2f9c6c40;border:2px solid #ffffff;
+  }
+  header .mascot{width:56px;height:56px;flex:0 0 56px}
+  header h1{font-family:var(--disp);font-size:clamp(21px,4vw,28px);margin:0;color:var(--ink);letter-spacing:.01em}
+  header .sub{font-size:12.5px;color:var(--ink-soft);margin-top:1px}
+  header .badge{margin-left:auto;font-family:var(--num);font-weight:700;font-size:12px;color:var(--leaf-dk);
+    background:var(--soft);border-radius:999px;padding:6px 13px}
+
+  /* 스텝 */
+  .steps{display:flex;gap:8px;margin:16px 0 20px;flex-wrap:wrap}
+  .step{flex:1 1 120px;min-width:120px;background:var(--card);border-radius:16px;padding:10px 12px;
+    display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-soft);
+    border:2px solid transparent;transition:.2s;box-shadow:0 6px 16px -12px #0003}
+  .step .n{font-family:var(--num);font-weight:700;font-size:12px;width:22px;height:22px;flex:0 0 22px;border-radius:50%;
+    background:var(--soft);color:var(--ink-soft);display:flex;align-items:center;justify-content:center}
+  .step.active{border-color:var(--leaf);color:var(--ink)}
+  .step.active .n{background:var(--leaf);color:#fff}
+  .step.done{color:var(--leaf-dk)}
+  .step.done .n{background:var(--leaf);color:#fff}
+  .step.done .n span{display:none}
+  .step.done .n::after{content:'✓';font-family:var(--body)}
+
+  .panel{background:var(--card);border-radius:24px;padding:24px 22px;margin-bottom:18px;
+    box-shadow:0 14px 40px -20px #2f9c6c50;border:2px solid #fff}
+  .panel.hidden{display:none}
+  .eyebrow{font-family:var(--disp);font-size:13px;color:var(--leaf-dk);margin:0 0 4px;letter-spacing:.02em}
+  .panel h2{font-family:var(--disp);font-size:24px;margin:0 0 6px;color:var(--ink);font-weight:400}
+  .lead{margin:0 0 18px;color:#4c5a57;font-size:14.5px;max-width:62ch}
+  .lead b{color:var(--leaf-dk)}
+  .rule{height:2px;background:var(--line);border-radius:2px;margin:18px 0}
+  .subhead{font-family:var(--disp);font-size:14px;color:var(--sky-dk);margin:0 0 10px}
+
+  .tag{font-family:var(--num);font-weight:600;font-size:10.5px;padding:2px 9px;border-radius:999px;letter-spacing:.02em}
+  .tag.real{background:#e2f3ea;color:var(--leaf-dk)}
+  .tag.fic{background:#ffe9dd;color:var(--coral-dk)}
+
+  /* 표본 카드 */
+  .specimens{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .spec{background:var(--soft);border-radius:20px;padding:12px 10px 14px;cursor:pointer;border:2px solid transparent;
+    transition:.18s;text-align:center;position:relative}
+  .spec:hover,.spec:focus-visible{transform:translateY(-3px) rotate(-1deg);border-color:var(--leaf);outline:none;
+    box-shadow:0 12px 22px -14px #2f9c6c80;background:#fff}
+  .spec svg{width:74px;height:74px;display:block;margin:0 auto 4px}
+  .spec .nm{font-family:var(--disp);font-size:15px;color:var(--ink)}
+  .spec .code{font-family:var(--num);font-weight:700;font-size:10.5px;color:var(--ink-soft)}
+  .spec .tag{position:absolute;top:9px;right:9px}
+
+  #specDetail{margin-top:14px;border-radius:20px;background:linear-gradient(150deg,#f3faf6,#eef5fb);border:2px dashed #cfe6dc;transition:.2s}
+  #specDetail.empty{padding:16px;text-align:center;color:var(--ink-soft);font-size:13.5px}
+  .detail-body{display:flex;gap:16px;padding:16px;flex-wrap:wrap;align-items:center}
+  .detail-body svg{width:104px;height:104px;flex:0 0 104px}
+  .detail-body .meta{flex:1 1 220px;min-width:200px}
+  .detail-body h3{font-family:var(--disp);font-size:20px;margin:0;color:var(--ink);font-weight:400;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .detail-body .desc{font-size:13.5px;color:#4c5a57;margin:6px 0 0}
+  .traitline{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+  .chip-t{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px;background:#eef1ef;color:#9aa6a2}
+  .chip-t.on{background:#e2f3ea;color:var(--leaf-dk)}
+  .chip-t.on::before{content:'●  ';font-size:8px;vertical-align:2px}
+
+  /* 행렬 */
+  .matrix-wrap{overflow-x:auto;border-radius:16px}
+  table.matrix{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px;min-width:520px;background:var(--soft);border-radius:16px;overflow:hidden}
+  table.matrix th,table.matrix td{padding:9px 6px;text-align:center}
+  table.matrix thead th{background:#dff0e7;font-family:var(--disp);font-weight:400;color:var(--ink);font-size:12px}
+  table.matrix tbody th{text-align:left;font-family:var(--disp);font-weight:400;white-space:nowrap;color:var(--ink);padding-left:12px}
+  table.matrix tbody tr:nth-child(even){background:#ffffff88}
+  table.matrix .yes{color:var(--leaf-dk);font-size:15px}
+  table.matrix .no{color:#c7d2cc;font-size:12px}
+  table.matrix .conv{color:var(--grape)} /* 수렴 후보 열 강조 안내용 */
+
+  /* 빌더 */
+  .builder{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .builder>div{min-width:0}
+  @media(max-width:680px){.builder{grid-template-columns:1fr}.steps .step{flex-basis:calc(50% - 4px)}}
+  .pool{display:flex;flex-wrap:wrap;gap:9px;min-height:56px;padding:12px;border-radius:18px;background:var(--soft)}
+  .pchip{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--line);border-radius:14px;
+    padding:7px 12px 7px 8px;cursor:pointer;font-family:var(--disp);font-size:14px;color:var(--ink);transition:.15s}
+  .pchip svg{width:30px;height:30px}
+  .pchip:hover,.pchip:focus-visible{border-color:var(--leaf);outline:none;transform:translateY(-2px)}
+  .pchip.sel{border-color:var(--sun);background:#fff8e6;box-shadow:0 0 0 3px #ffc94d40}
+  .ladder{background:var(--soft);border-radius:18px;padding:12px}
+  .ladder .axis{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-soft);margin-bottom:9px;font-family:var(--disp)}
+  .slot{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--line);border-radius:14px;
+    padding:8px 12px;margin-bottom:8px;min-height:54px;cursor:pointer;transition:.15s}
+  .slot .idx{font-family:var(--num);font-weight:700;font-size:13px;color:#b9c6c0;width:16px}
+  .slot svg{width:34px;height:34px}
+  .slot.filled{border-color:var(--leaf)}
+  .slot.target{border-color:var(--sun);box-shadow:0 0 0 3px #ffc94d33}
+  .slot .placed-nm{font-family:var(--disp);font-size:15px;color:var(--ink)}
+  .slot .hintdrop{font-size:12.5px;color:#b3c0ba}
+
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+  button.act{font-family:var(--disp);font-size:15px;padding:12px 22px;border-radius:16px;cursor:pointer;border:none;
+    background:var(--leaf);color:#fff;box-shadow:0 6px 0 0 var(--leaf-dk);transition:.08s;letter-spacing:.02em}
+  button.act:hover:not(:disabled){filter:brightness(1.04)}
+  button.act:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 0 var(--leaf-dk)}
+  button.act:disabled{opacity:.45;cursor:not-allowed;box-shadow:0 6px 0 0 #cfd8d4}
+  button.sky{background:var(--sky);box-shadow:0 6px 0 0 var(--sky-dk)}
+  button.coral{background:var(--coral);box-shadow:0 6px 0 0 var(--coral-dk)}
+  button.ghost{background:#fff;color:var(--leaf-dk);border:2px solid var(--line);box-shadow:0 4px 0 0 #e2ece5}
+  button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+  #treeResult.hidden{display:none}
+  .treecard{background:var(--soft);border-radius:18px;padding:14px;overflow-x:auto;margin-top:6px}
+  svg.clado{display:block;min-width:320px;width:100%;height:auto}
+  .verdict{border-radius:16px;padding:14px 16px;margin-top:14px;font-size:14px;line-height:1.6}
+  .verdict.good{background:#e3f5ec;color:#227a55}
+  .verdict.warn{background:#fff0e9;color:var(--coral-dk)}
+  .verdict b{font-family:var(--disp);font-weight:400}
+  .synlegend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .synlegend .s{font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:999px;background:#fff6df;color:var(--sun-dk)}
+  .synlegend .s.multi{background:#ffe4de;color:var(--coral-dk)}
+  .synlegend .s.auto{background:#efeafb;color:var(--grape)}
+
+  /* 분류 */
+  .rank-track{display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap}
+  .rank-pill{font-family:var(--disp);font-size:12.5px;padding:6px 13px;border-radius:999px;background:var(--soft);color:var(--ink-soft)}
+  .rank-pill.cur{background:var(--sun);color:#7a5600}
+  .rank-pill.set{background:var(--leaf);color:#fff}
+  .qcard h3{font-family:var(--disp);font-size:20px;margin:0 0 4px;color:var(--ink);font-weight:400}
+  .qcard .qsub{font-size:14px;color:#4c5a57;margin:0 0 14px}
+  .opts{display:grid;gap:10px}
+  .opt{text-align:left;border:2px solid var(--line);border-radius:16px;background:#fff;padding:14px 16px;cursor:pointer;
+    font-family:var(--disp);font-size:16px;color:var(--ink);transition:.14s}
+  .opt:hover:not(:disabled){border-color:var(--sky);transform:translateY(-2px)}
+  .opt.correct{border-color:var(--leaf);background:#eafaf1}
+  .opt.wrong{border-color:var(--rose);background:#fdeeee;opacity:.9}
+  .opt:disabled{cursor:default}
+  .feedback{margin-top:14px;border-radius:16px;padding:14px 16px;font-size:14px;display:none;line-height:1.6}
+  .feedback.show{display:block}
+  .feedback.right{background:#e3f5ec;color:#227a55}
+  .feedback.nope{background:#fdeeee;color:#c0392b}
+  .feedback b{font-family:var(--disp);font-weight:400}
+
+  .discuss{list-style:none;padding:0;margin:6px 0}
+  .discuss li{background:var(--soft);border-radius:14px;padding:12px 14px;margin:9px 0;font-size:14px;color:#4c5a57;
+    border-left:5px solid var(--grape)}
+  .discuss li b{color:var(--ink)}
+  .roles{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+  .role{flex:1 1 150px;background:var(--soft);border-radius:16px;padding:12px 14px}
+  .role .r{font-family:var(--disp);font-size:13px;color:var(--sky-dk)}
+  .role .d{font-size:13px;color:#4c5a57;margin-top:2px}
+
+  .foot{text-align:center;font-size:12px;color:#8fa39b;margin-top:24px;font-family:var(--num);font-weight:600}
+  a.reset{color:var(--leaf-dk);cursor:pointer;text-decoration:underline}
+  .copyright{text-align:center;margin-top:10px;font-family:var(--disp);font-size:13px;color:#8fa39b}
+  .copyright .mk{color:var(--leaf-dk)}
+
+  @media(max-width:520px){
+    .wrap{padding:14px 11px 60px}
+    .panel{padding:18px 15px;border-radius:20px}
+    .panel h2{font-size:21px}
+    .specimens{grid-template-columns:repeat(2,1fr);gap:9px}
+    .slot{min-height:58px}
+    .opt{padding:15px}
+    .btnrow button.act{flex:1 1 auto}
+  }
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <svg class="mascot" viewBox="0 0 120 120" id="mascotSlot"></svg>
+    <div>
+      <h1>생물 탐험대</h1>
+      <div class="sub">이끼늪에서 발견된 7마리를 계통으로 세워라!</div>
+    </div>
+    <div class="badge">표본 7마리</div>
+  </header>
+
+  <div class="steps" id="steps">
+    <div class="step active" data-s="0"><span class="n"><span>1</span></span> 관찰하기</div>
+    <div class="step" data-s="1"><span class="n"><span>2</span></span> 분기도 세우기</div>
+    <div class="step" data-s="2"><span class="n"><span>3</span></span> 계급 분류</div>
+    <div class="step" data-s="3"><span class="n"><span>4</span></span> 조별 정리</div>
+  </div>
+
+  <!-- 관찰 -->
+  <section class="panel" id="p0">
+    <p class="eyebrow">오늘의 미션</p>
+    <h2>귀여운 7마리, 누가 누구와 가까울까?</h2>
+    <p class="lead">이끼늪에서 실제 생물과 정체불명 생물이 섞여 발견됐어요. 조의 임무는 <b>①</b> 형질을 관찰하고 <b>②</b> 가장 단순한 분기도를 세우고 <b>③</b> 한 마리를 계·문·강·목까지 분류하는 것! 주의: <b>겉모습이 닮았다고 무조건 가까운 건 아니에요.</b> 근거로 말할 수 있으면 성공.</p>
+
+    <p class="subhead">표본 서랍 · 눌러서 관찰</p>
+    <div class="specimens" id="specGrid"></div>
+    <div id="specDetail" class="empty">표본을 누르면 자세히 볼 수 있어요.</div>
+
+    <div class="rule"></div>
+    <p class="subhead">형질 관찰표</p>
+    <div class="matrix-wrap"><table class="matrix" id="matrix"></table></div>
+    <p class="lead" style="margin-top:12px;font-size:13px">힌트: 많은 종이 <b>함께 가진 형질</b>일수록 더 먼저 갈라진(오래된) 형질일 가능성이 커요. 그런데 표를 잘 보면 <b>딱 두 마리만</b> 가진 형질도 있죠? 그게 진짜 가까운 사이라는 뜻일까요, 아니면 우연히 닮은 걸까요? 다음 단계에서 확인해요.</p>
+
+    <div class="btnrow"><button class="act" onclick="goStep(1)">분기도 세우러 가기 →</button></div>
+  </section>
+
+  <!-- 분기도 -->
+  <section class="panel hidden" id="p1">
+    <p class="eyebrow">STEP 2</p>
+    <h2>갈라진 순서대로 세우기</h2>
+    <p class="lead">공통 조상에 가장 가까운(먼저 갈라진) 표본을 <b>①</b>번, 가장 최근에 갈라진 표본을 아래에 놓아요. 표본을 누른 뒤 칸을 누르면 배치! 채운 칸을 다시 누르면 서랍으로 돌아가요.</p>
+
+    <div class="builder">
+      <div><p class="subhead">표본 서랍</p><div class="pool" id="pool"></div></div>
+      <div><p class="subhead">계통 사다리 (위 = 먼저 갈라짐)</p>
+        <div class="ladder"><div class="axis"><span>↑ 오래된 가지</span><span>최근 가지 ↓</span></div><div id="slots"></div></div>
+      </div>
+    </div>
+
+    <div class="btnrow">
+      <button class="act" id="drawBtn" onclick="drawTree()" disabled>분기도 그리기</button>
+      <button class="ghost act" onclick="resetLadder()">다시 배치</button>
+    </div>
+
+    <div id="treeResult" class="hidden">
+      <div class="rule"></div>
+      <p class="subhead">우리 조의 분기도</p>
+      <div class="treecard"><div id="svgHolder"></div></div>
+      <div class="synlegend" id="synLegend"></div>
+      <div id="verdict"></div>
+      <div class="btnrow"><button class="sky act" id="toClassifyBtn" onclick="goStep(2)" disabled>다음: 한 마리 분류하기 →</button></div>
+    </div>
+  </section>
+
+  <!-- 분류 -->
+  <section class="panel hidden" id="p2">
+    <p class="eyebrow">STEP 3</p>
+    <h2 id="clsTitle">‘달빛삵’을 분류하자</h2>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+      <svg id="clsArt" viewBox="0 0 120 120" style="width:88px;height:88px;flex:0 0 88px"></svg>
+      <p class="lead" style="margin:0">사다리의 가장 끝(가장 최근에 갈라진) 표본이에요. 계 → 문 → 강 → 목 순서로, 매번 <b>결정적 형질</b>을 근거로 골라 보세요.</p>
+    </div>
+
+    <div class="rank-track" id="rankTrack">
+      <span class="rank-pill cur">계</span><span class="rank-pill">문</span><span class="rank-pill">강</span><span class="rank-pill">목</span>
+    </div>
+    <div class="qcard" id="qcard"></div>
+    <div class="feedback" id="clsFeedback"></div>
+    <div class="btnrow"><button class="sky act hidden" id="nextRankBtn" onclick="nextRank()">다음 계급 →</button></div>
+  </section>
+
+  <!-- 정리 -->
+  <section class="panel hidden" id="p3">
+    <p class="eyebrow">STEP 4</p>
+    <h2>탐험 보고 & 토론</h2>
+    <p class="lead" id="finalLine">미션 완료! 조원끼리 근거를 맞춰 보며 아래 질문에 답해 보세요.</p>
+
+    <p class="subhead">역할 나누기 (추천)</p>
+    <div class="roles">
+      <div class="role"><div class="r">관찰자</div><div class="d">형질을 소리 내어 읽고 표를 채운다</div></div>
+      <div class="role"><div class="r">배치자</div><div class="d">사다리에 놓으며 근거를 말한다</div></div>
+      <div class="role"><div class="r">기록자</div><div class="d">왜 그 순서인지 한 줄로 적는다</div></div>
+      <div class="role"><div class="r">발표자</div><div class="d">다른 조 분기도와 비교한다</div></div>
+    </div>
+
+    <p class="subhead" style="margin-top:16px">토론 카드</p>
+    <ul class="discuss">
+      <li><b>가시비늘도마뱀</b>과 <b>별활공쥐</b>는 둘 다 활공막이 있어요. 하지만 하나는 파충류, 하나는 포유류죠. 겉모습이 닮았는데 왜 가까운 친척이 아닐까요? (<b>수렴진화</b>)</li>
+      <li><b>늪도롱뇽</b>과 <b>달빛삵</b>은 둘 다 얼룩무늬가 있어요. 무늬가 같으면 같은 무리로 묶어도 될까요?</li>
+      <li>‘활공막’ 두 마리를 이웃에 붙였더니 나무가 더 <b>복잡해졌다면</b>, 그건 무엇을 뜻할까요? 어떤 형질을 더 믿어야 할까요?</li>
+      <li>우리 조와 다른 조의 분기도가 다르다면, <b>“가지 변화가 더 적은(단순한) 나무가 낫다”</b>는 원칙으로 겨뤄 보세요.</li>
+    </ul>
+
+    <div class="btnrow"><button class="ghost act" onclick="goStep(0)">처음부터 다시 →</button></div>
+  </section>
+
+  <div class="foot">생물 탐험대 · 「생물의 분류」 실습 모듈 · <a class="reset" onclick="goStep(0)">전체 초기화</a></div>
+  <div class="copyright">© 2026 <span class="mk">광덕고 이재빈</span> · All rights reserved.</div>
+</div>
+
+<script>
+/* ================= 귀여운 일러스트 (형질 반영) ================= */
+const ART = {
+  // 뿅몰이: 무척추 물렁 블롭 (아무 형질도 없음 = 가장 단순)
+  BL:`<path d="M60 26C85 26 96 46 95 68 94 90 79 102 60 102 41 102 26 90 25 68 24 46 35 26 60 26Z" fill="#f6bcce"/>
+  <path d="M60 30C82 30 92 47 90 66 83 52 70 46 58 48 44 50 36 60 35 72 30 60 33 42 45 34 49 31 54 30 60 30Z" fill="#fbd3df" opacity=".8"/>
+  <ellipse cx="50" cy="66" rx="6" ry="7.2" fill="#fff"/><ellipse cx="72" cy="66" rx="6" ry="7.2" fill="#fff"/>
+  <circle cx="51.4" cy="68" r="3.2" fill="#41333a"/><circle cx="73.4" cy="68" r="3.2" fill="#41333a"/>
+  <circle cx="49.8" cy="66.2" r="1.1" fill="#fff"/><circle cx="71.8" cy="66.2" r="1.1" fill="#fff"/>
+  <path d="M55 80 Q61 85 67 80" stroke="#dd7c96" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <circle cx="40" cy="79" r="4" fill="#f49bb5" opacity=".6"/><circle cx="82" cy="79" r="4" fill="#f49bb5" opacity=".6"/>`,
+
+  // 은빛피라미: 척추만. 물고기(지느러미, 다리 없음)
+  PY:`<path d="M32 60 L15 43 Q22 60 15 77 Z" fill="#7fb0d1"/>
+  <path d="M32 60 C36 39 62 33 85 45 100 53 105 60 105 60 105 60 100 67 85 75 62 87 36 81 32 60Z" fill="#bcdcee"/>
+  <path d="M60 37 L71 31 72 46 Z" fill="#7fb0d1"/><path d="M62 81 L71 88 74 76 Z" fill="#7fb0d1"/>
+  <path d="M50 50 Q54 60 50 70" stroke="#8fc0dd" stroke-width="2" fill="none"/>
+  <ellipse cx="89" cy="57" rx="6" ry="6.6" fill="#fff"/><circle cx="90.6" cy="58" r="3" fill="#41333a"/><circle cx="89.3" cy="56.6" r="1" fill="#fff"/>
+  <path d="M97 63 Q93 67 97 70" stroke="#5c86a3" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="22" cy="33" r="2.4" fill="#d6ebf6"/><circle cx="14" cy="25" r="1.6" fill="#d6ebf6"/>`,
+
+  // 늪도롱뇽: 척추+사지. 얼룩무늬(수렴 함정)
+  SL:`<path d="M20 70 C10 74 12 62 22 60" fill="none" stroke="#7cc78d" stroke-width="9" stroke-linecap="round"/>
+  <path d="M96 62 C98 50 84 45 66 46 48 47 34 50 26 56 18 62 20 72 30 74 48 76 66 74 82 73 92 72 96 68 96 62Z" fill="#8ed49d"/>
+  <ellipse cx="42" cy="80" rx="5" ry="7.5" fill="#6cb47d"/><ellipse cx="68" cy="80" rx="5" ry="7.5" fill="#6cb47d"/>
+  <ellipse cx="36" cy="52" rx="4.6" ry="6.5" fill="#6cb47d"/>
+  <circle cx="52" cy="60" r="4" fill="#eaa24c"/><circle cx="70" cy="66" r="3.4" fill="#eaa24c"/><circle cx="40" cy="66" r="3" fill="#eaa24c"/>
+  <ellipse cx="86" cy="57" rx="6" ry="6.4" fill="#fff"/><circle cx="87.4" cy="58" r="3" fill="#41333a"/><circle cx="86.1" cy="56.7" r="1" fill="#fff"/>
+  <path d="M92 64 Q88 68 92 70" stroke="#4f9a63" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+
+  // 가시비늘도마뱀: 척추+사지+양막 + 활공막(수렴 함정) + 등가시, 털 없음
+  DR:`<path d="M60 60 C40 40 24 42 20 54 30 52 44 56 56 66 Z" fill="#f0a55c" opacity=".85"/>
+  <path d="M60 60 C80 40 96 42 100 54 90 52 76 56 64 66 Z" fill="#f0a55c" opacity=".85"/>
+  <path d="M60 60 C46 46 34 50 30 58" stroke="#d98a3e" stroke-width="1.6" fill="none"/>
+  <path d="M60 60 C74 46 86 50 90 58" stroke="#d98a3e" stroke-width="1.6" fill="none"/>
+  <path d="M26 78 C24 66 34 58 48 58 L74 58 C88 58 96 66 92 78 88 86 74 84 60 84 46 84 30 86 26 78Z" fill="#6fc3b0"/>
+  <path d="M40 58 l3 -7 4 7 3 -7 4 7 3 -7 4 7 3 -7 4 7" fill="none" stroke="#3f9c88" stroke-width="2.4" stroke-linejoin="round"/>
+  <ellipse cx="40" cy="90" rx="4.6" ry="6" fill="#4fa896"/><ellipse cx="80" cy="90" rx="4.6" ry="6" fill="#4fa896"/>
+  <ellipse cx="52" cy="70" rx="5.4" ry="6" fill="#fff"/><ellipse cx="68" cy="70" rx="5.4" ry="6" fill="#fff"/>
+  <circle cx="53" cy="71.4" r="2.8" fill="#41333a"/><circle cx="69" cy="71.4" r="2.8" fill="#41333a"/>
+  <circle cx="51.8" cy="70" r="1" fill="#fff"/><circle cx="67.8" cy="70" r="1" fill="#fff"/>`,
+
+  // 주머니여우: +털·젖. 배주머니에 아기, 태반 없음
+  MP:`<path d="M42 40 L34 22 50 33 Z" fill="#e0a978"/><path d="M78 40 L86 22 70 33 Z" fill="#e0a978"/>
+  <path d="M43 37 L38 26 49 34 Z" fill="#f6d7bc"/><path d="M77 37 L82 26 71 34 Z" fill="#f6d7bc"/>
+  <path d="M18 76 q7 5 11 -2" stroke="#dca773" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M60 40 C80 40 90 56 90 74 90 90 76 98 60 98 44 98 30 90 30 74 30 56 40 40 60 40Z" fill="#e6b184"/>
+  <ellipse cx="60" cy="83" rx="14" ry="11" fill="#f6ddc6"/>
+  <circle cx="60" cy="83" r="5.4" fill="#caa07a"/>
+  <path d="M56 79 l-2 -4 4 2Z" fill="#caa07a"/><path d="M64 79 l2 -4 -4 2Z" fill="#caa07a"/>
+  <circle cx="58.2" cy="82.6" r="1" fill="#5a442f"/><circle cx="61.8" cy="82.6" r="1" fill="#5a442f"/>
+  <ellipse cx="51" cy="64" rx="5.8" ry="6.6" fill="#fff"/><ellipse cx="69" cy="64" rx="5.8" ry="6.6" fill="#fff"/>
+  <circle cx="52" cy="65.4" r="3" fill="#41333a"/><circle cx="70" cy="65.4" r="3" fill="#41333a"/>
+  <circle cx="50.8" cy="64" r="1" fill="#fff"/><circle cx="68.8" cy="64" r="1" fill="#fff"/>
+  <path d="M60 70 l-3 3 h6 z" fill="#b98a63"/>`,
+
+  // 별활공쥐: +태반 + 활공막(수렴 함정!) + 큰 눈(야행성) + 별무늬
+  GL:`<path d="M30 62 C16 60 12 74 22 82 34 80 46 74 54 66 Z" fill="#c9c1ee" opacity=".9"/>
+  <path d="M90 62 C104 60 108 74 98 82 86 80 74 74 66 66 Z" fill="#c9c1ee" opacity=".9"/>
+  <path d="M44 40 L38 26 50 34 Z" fill="#b7ade4"/><path d="M76 40 L82 26 70 34 Z" fill="#b7ade4"/>
+  <path d="M60 40 C76 40 86 52 86 68 86 84 74 92 60 92 46 92 34 84 34 68 34 52 44 40 60 40Z" fill="#c3bbe8"/>
+  <ellipse cx="49" cy="64" rx="8" ry="9" fill="#fff"/><ellipse cx="71" cy="64" rx="8" ry="9" fill="#fff"/>
+  <circle cx="50" cy="66" r="4.6" fill="#41333a"/><circle cx="72" cy="66" r="4.6" fill="#41333a"/>
+  <circle cx="48.2" cy="64" r="1.5" fill="#fff"/><circle cx="70.2" cy="64" r="1.5" fill="#fff"/>
+  <path d="M60 74 l-3 3 h6 z" fill="#8f83c4"/>
+  <path d="M60 46 l1.6 3.4 3.7 .4 -2.8 2.5 .8 3.7 -3.3 -1.9 -3.3 1.9 .8 -3.7 -2.8 -2.5 3.7 -.4Z" fill="#ffd24d"/>`,
+
+  // 달빛삵: +태반 + 큰 송곳니 + 얼룩무늬(수렴 함정) + 초승달. 분류 대상
+  LF:`<path d="M40 38 L32 20 50 32 Z" fill="#8ba2c4"/><path d="M80 38 L88 20 70 32 Z" fill="#8ba2c4"/>
+  <path d="M40 38 L36 26 48 33 Z" fill="#d6c0d8"/><path d="M80 38 L84 26 72 33 Z" fill="#d6c0d8"/>
+  <path d="M60 40 C78 40 90 54 90 72 90 88 76 96 60 96 44 96 30 88 30 72 30 54 42 40 60 40Z" fill="#93a9ca"/>
+  <circle cx="46" cy="62" r="4" fill="#6f86a8"/><circle cx="74" cy="62" r="4" fill="#6f86a8"/><circle cx="60" cy="80" r="4" fill="#6f86a8"/><circle cx="40" cy="76" r="3" fill="#6f86a8"/><circle cx="80" cy="76" r="3" fill="#6f86a8"/>
+  <ellipse cx="50" cy="64" rx="6" ry="6.8" fill="#fff"/><ellipse cx="70" cy="64" rx="6" ry="6.8" fill="#fff"/>
+  <ellipse cx="51" cy="65" rx="2.4" ry="4" fill="#41333a"/><ellipse cx="71" cy="65" rx="2.4" ry="4" fill="#41333a"/>
+  <circle cx="49.8" cy="63.4" r="1" fill="#fff"/><circle cx="69.8" cy="63.4" r="1" fill="#fff"/>
+  <path d="M60 72 l-3 3 h6 z" fill="#5d7391"/>
+  <path d="M55 76 l-2 6 3 -2 Z" fill="#fff"/><path d="M65 76 l2 6 -3 -2 Z" fill="#fff"/>
+  <path d="M100 26 a9 9 0 1 0 2 12 7 7 0 1 1 -2 -12Z" fill="#ffd24d"/>`,
+};
+function creature(code){return `<svg viewBox="0 0 120 120">${ART[code]||''}</svg>`;}
+
+/* ================= 데이터 (표시 순서는 일부러 섞음) ================= */
+// 형질: [척추, 사지, 양막, 털·젖, 태반, 활공막, 얼룩무늬, 큰송곳니]
+const CHARS=[
+  {id:'c1',name:'척추(등뼈)',short:'척추'},
+  {id:'c2',name:'네 다리',short:'사지'},
+  {id:'c3',name:'양막알',short:'양막'},
+  {id:'c4',name:'털·젖',short:'털·젖'},
+  {id:'c5',name:'태반',short:'태반'},
+  {id:'c6',name:'활공막',short:'활공막',conv:true},
+  {id:'c7',name:'얼룩무늬',short:'얼룩',conv:true},
+  {id:'c8',name:'큰 송곳니',short:'송곳니'},
+];
+const CONV_GLIDE=5, CONV_SPOT=6; // 수렴 함정 형질 인덱스
+// 표시 순서를 섞어 제시 (정답 순서가 눈에 띄지 않도록)
+const SPECIES=[
+  {code:'MP',nm:'주머니여우',kind:'real',desc:'실제 유대류. 털과 젖이 있지만 태반이 없어 미숙한 새끼를 배주머니에서 길러요.',t:[1,1,1,1,0,0,0,0]},
+  {code:'DR',nm:'가시비늘도마뱀',kind:'fic',desc:'정체불명 생물. 비늘·네 다리·양막알을 갖고, 옆구리의 활공막으로 나무 사이를 미끄러져요. 털은 없어요.',t:[1,1,1,0,0,1,0,0]},
+  {code:'LF',nm:'달빛삵',kind:'fic',desc:'야행성 육식 생물. 털·젖·태반을 모두 갖췄고, 큰 송곳니와 얼룩무늬가 특징이에요.',t:[1,1,1,1,1,0,1,1]},
+  {code:'BL',nm:'뿅몰이',kind:'fic',desc:'이끼에 붙어 사는 물렁한 무척추 생물. 등뼈도 다리도 없이 몸을 물결쳐요.',t:[0,0,0,0,0,0,0,0]},
+  {code:'GL',nm:'별활공쥐',kind:'fic',desc:'큰 눈의 야행성 생물. 털·젖·태반이 있고, 앞뒤 다리 사이 활공막으로 미끄러져요.',t:[1,1,1,1,1,1,0,0]},
+  {code:'PY',nm:'은빛피라미',kind:'real',desc:'맑은 하천의 실제 어류. 등뼈는 있으나 다리가 없고 아가미로 호흡해요.',t:[1,0,0,0,0,0,0,0]},
+  {code:'SL',nm:'늪도롱뇽',kind:'real',desc:'물가의 실제 양서류. 네 다리와 얼룩무늬가 있지만 알에 양막이 없어요.',t:[1,1,0,0,0,0,1,0]},
+];
+const kindLabel=k=>k==='real'?'실제':'가상';
+const TARGET=SPECIES.findIndex(s=>s.code==='LF');
+document.getElementById('mascotSlot').innerHTML=ART.BL;
+
+/* ================= 카드 / 상세 ================= */
+const grid=document.getElementById('specGrid');
+SPECIES.forEach((s,i)=>{
+  const el=document.createElement('button');el.className='spec';el.type='button';
+  el.innerHTML=`<span class="tag ${s.kind==='real'?'real':'fic'}">${kindLabel(s.kind)}</span>${creature(s.code)}<div class="nm">${s.nm}</div><div class="code">${s.code}</div>`;
+  el.onclick=()=>showDetail(i);grid.appendChild(el);
+});
+function showDetail(i){
+  const s=SPECIES[i],d=document.getElementById('specDetail');d.className='';
+  const chips=CHARS.map((c,ci)=>`<span class="chip-t ${s.t[ci]?'on':''}">${c.short}</span>`).join('');
+  d.innerHTML=`<div class="detail-body">${creature(s.code)}<div class="meta">
+    <h3>${s.nm} <span class="tag ${s.kind==='real'?'real':'fic'}">${kindLabel(s.kind)}</span></h3>
+    <p class="desc">${s.desc}</p><div class="traitline">${chips}</div></div></div>`;
+}
+
+/* ================= 형질표 ================= */
+(function(){
+  const t=document.getElementById('matrix');
+  const head='<thead><tr><th>표본</th>'+CHARS.map(c=>`<th class="${c.conv?'conv':''}">${c.name}</th>`).join('')+'</tr></thead>';
+  const body='<tbody>'+SPECIES.map(s=>`<tr><th>${s.nm}</th>`+s.t.map(v=>v?'<td class="yes">●</td>':'<td class="no">○</td>').join('')+'</tr>').join('')+'</tbody>';
+  t.innerHTML=head+body;
+})();
+
+/* ================= 파시모니 (Fitch, caterpillar) ================= */
+function combine(a,b){const inter=a.filter(x=>b.includes(x));if(inter.length)return{set:inter,step:0};return{set:[...new Set([...a,...b])],step:1};}
+function fitch(order,ci){let acc=[SPECIES[order[order.length-1]].t[ci]];let steps=0;
+  for(let i=order.length-2;i>=0;i--){const r=combine([SPECIES[order[i]].t[ci]],acc);acc=r.set;steps+=r.step;}return steps;}
+function treeLen(order){let s=0;for(let ci=0;ci<CHARS.length;ci++)s+=fitch(order,ci);return s;}
+// 전역 최적(최소 트리길이) 사전 계산
+const OPT=(function(){
+  const idx=SPECIES.map((_,i)=>i);let min=1e9;
+  function* perms(a){if(a.length<=1){yield a;return;}for(let i=0;i<a.length;i++){const r=[...a.slice(0,i),...a.slice(i+1)];for(const p of perms(r))yield[a[i],...p];}}
+  for(const p of perms(idx)){const L=treeLen(p);if(L<min)min=L;}return min;
+})();
+
+/* ================= 스텝 ================= */
+function goStep(n){
+  ['p0','p1','p2','p3'].forEach((id,i)=>document.getElementById(id).classList.toggle('hidden',i!==n));
+  document.querySelectorAll('#steps .step').forEach((st,i)=>{st.classList.toggle('active',i===n);st.classList.toggle('done',i<n);});
+  if(n===0){buildLadder();resetClassify();}
+  if(n===1)buildLadder();
+  if(n===2){setupClassify();}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ================= 분기도 빌더 ================= */
+let slots=[],selected=null;
+function buildLadder(){
+  slots=new Array(SPECIES.length).fill(null);selected=null;
+  renderPool();renderSlots();
+  document.getElementById('treeResult').classList.add('hidden');
+  document.getElementById('drawBtn').disabled=true;
+  document.getElementById('toClassifyBtn').disabled=true;
+}
+function renderPool(){
+  const p=document.getElementById('pool');p.innerHTML='';
+  SPECIES.forEach((s,i)=>{if(slots.includes(i))return;
+    const b=document.createElement('button');b.className='pchip'+(selected===i?' sel':'');b.type='button';
+    b.innerHTML=`${creature(s.code)}${s.nm}`;
+    b.onclick=()=>{selected=(selected===i?null:i);renderPool();renderSlots();};p.appendChild(b);});
+  if(!p.children.length)p.innerHTML='<span style="font-size:12.5px;color:#b3c0ba;padding:8px">모두 배치했어요!</span>';
+}
+function renderSlots(){
+  const h=document.getElementById('slots');h.innerHTML='';
+  slots.forEach((sp,idx)=>{
+    const row=document.createElement('div');
+    row.className='slot'+(sp!==null?' filled':'')+(selected!==null&&sp===null?' target':'');
+    if(sp!==null){const s=SPECIES[sp];
+      row.innerHTML=`<span class="idx">${idx+1}</span>${creature(s.code)}<span class="placed-nm">${s.nm}</span>`;
+      row.onclick=()=>{slots[idx]=null;renderPool();renderSlots();upd();};
+    }else{row.innerHTML=`<span class="idx">${idx+1}</span><span class="hintdrop">${selected!==null?'여기에 놓기':'빈 칸'}</span>`;
+      row.onclick=()=>{if(selected!==null){slots[idx]=selected;selected=null;renderPool();renderSlots();upd();}};}
+    h.appendChild(row);});
+}
+function upd(){document.getElementById('drawBtn').disabled=slots.some(x=>x===null);}
+function resetLadder(){buildLadder();}
+
+/* 1의 위치가 한쪽 끝의 연속 블록인지 (synapomorphy 배치용) */
+function endBlock(order,ci){
+  const bits=order.map(si=>SPECIES[si].t[ci]);const n=bits.length;
+  const ones=[];bits.forEach((b,i)=>{if(b)ones.push(i);});
+  if(!ones.length)return null;
+  const contiguous=ones.every((v,k)=>k===0||v===ones[k-1]+1);
+  if(!contiguous)return null;
+  if(ones[ones.length-1]===n-1)return{end:'bottom',start:ones[0],size:ones.length};
+  if(ones[0]===0)return{end:'top',start:ones[0],size:ones.length};
+  return null;
+}
+
+function drawTree(){
+  const order=slots.slice();const n=order.length;
+  // 좌표 (직각 계통수, 왼쪽 뿌리)
+  const rowH=48,topPad=24,tipX=250,x0=26,dx=(tipX-64)/Math.max(1,n-1);
+  const H=topPad*2+(n-1)*rowH,W=430;
+  const yTip=i=>topPad+i*rowH;
+  const nodeY=new Array(n-1).fill(0);
+  if(n>=2){nodeY[n-2]=(yTip(n-2)+yTip(n-1))/2;for(let i=n-3;i>=0;i--)nodeY[i]=(yTip(i)+nodeY[i+1])/2;}
+  const nodeX=i=>x0+i*dx;
+  const stroke=`stroke="#4fb787" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"`;
+  let paths='',ticks='',labels='';
+  if(n>=2)paths+=`<path d="M ${x0-14} ${nodeY[0]} H ${nodeX(0)}" ${stroke}/>`;
+  for(let i=0;i<n-1;i++){
+    paths+=`<path d="M ${nodeX(i)} ${nodeY[i]} V ${yTip(i)} H ${tipX}" ${stroke}/>`;
+    if(i<n-2)paths+=`<path d="M ${nodeX(i)} ${nodeY[i]} V ${nodeY[i+1]} H ${nodeX(i+1)}" ${stroke}/>`;
+    else paths+=`<path d="M ${nodeX(i)} ${nodeY[i]} V ${yTip(n-1)} H ${tipX}" ${stroke}/>`;
+  }
+  // 팁 라벨 (색 동그라미 + 이름)
+  const col={BL:'#f19bb6',PY:'#7fb0d1',SL:'#7bc78d',DR:'#f0a55c',MP:'#e0a978',GL:'#b7ade4',LF:'#8ba2c4'};
+  for(let i=0;i<n;i++){const s=SPECIES[order[i]];
+    labels+=`<circle cx="${tipX+13}" cy="${yTip(i)}" r="11" fill="${col[s.code]}"/>
+      <text x="${tipX+13}" y="${yTip(i)+3.5}" font-family="Baloo 2,sans-serif" font-size="9.5" font-weight="700" fill="#fff" text-anchor="middle">${s.code}</text>
+      <text x="${tipX+30}" y="${yTip(i)+4.5}" font-family="Jua,sans-serif" font-size="13" fill="#33413f">${s.nm}</text>`;}
+  // 형질 표식: ✦공유(분기점) · ◆고유(그 종만) · ↯수렴(여러 번)
+  const legend=[]; const termCnt={}; let hasSyn=false,hasAuto=false,hasConv=false;
+  function putTerm(pos,label,fill,tcol,sym){
+    const k=termCnt[pos]||0; termCnt[pos]=k+1;
+    const cx=tipX-18-k*16, cy=yTip(pos);
+    ticks+=`<circle cx="${cx}" cy="${cy}" r="6" fill="${fill}"/><text x="${cx}" y="${cy+2.8}" font-family="Jua,sans-serif" font-size="8" fill="#fff" text-anchor="middle">${sym}</text>`+
+      `<text x="${cx}" y="${cy-9}" font-family="Gothic A1,sans-serif" font-weight="600" font-size="8.5" fill="${tcol}" text-anchor="middle">${label}</text>`;
+  }
+  CHARS.forEach((c,ci)=>{
+    const pos=[]; order.forEach((si,p)=>{if(SPECIES[si].t[ci])pos.push(p);});
+    if(pos.length===0||pos.length===n)return; // 없음 또는 조상형질(전부) → 표시 안 함
+    const steps=fitch(order,ci);
+    if(steps===1 && pos.length>=2){
+      const blk=endBlock(order,ci); let tx,ty,ok=true;
+      if(blk&&blk.end==='bottom'){const st=blk.start;
+        if(st===0){tx=x0-4;ty=nodeY[0]-8;}else{const ni=Math.min(st,n-2);tx=(nodeX(st-1)+nodeX(ni))/2;ty=nodeY[ni]-8;}}
+      else if(blk&&blk.end==='top'){const en=blk.size-1;const ni=Math.min(en,n-2);tx=(nodeX(0)+nodeX(ni))/2;ty=nodeY[0]-8;}
+      else ok=false;
+      if(ok){ticks+=`<circle cx="${tx}" cy="${ty}" r="6.5" fill="#ffc94d"/><text x="${tx}" y="${ty+3}" font-family="Jua,sans-serif" font-size="8" fill="#7a5600" text-anchor="middle">✦</text>`+
+        `<text x="${tx+10}" y="${ty+3}" font-family="Gothic A1,sans-serif" font-weight="600" font-size="9" fill="#eaa62c">${c.short}</text>`;
+        hasSyn=true;}
+      else {pos.forEach(p=>putTerm(p,c.short,'#ff8f7a','#d1583f','↯'));hasConv=true;}
+    } else if(steps===1 && pos.length===1){
+      putTerm(pos[0],c.short,'#a78bfa','#7c5fd0','◆'); hasAuto=true;
+    } else {
+      pos.forEach(p=>putTerm(p,c.short,'#ff8f7a','#d1583f','↯')); hasConv=true;
+    }
+  });
+  if(hasSyn)legend.push('<span class="s">✦ 공유 파생형질 · 무리를 정의</span>');
+  if(hasAuto)legend.push('<span class="s auto">◆ 고유 파생형질 · 그 종만의 특징</span>');
+  if(hasConv)legend.push('<span class="s multi">↯ 수렴형질 · 겉모습만 닮음(여러 번)</span>');
+  document.getElementById('svgHolder').innerHTML=`<svg class="clado" viewBox="0 0 ${W} ${H}" role="img" aria-label="분기도">${paths}${ticks}${labels}</svg>`;
+  document.getElementById('synLegend').innerHTML=legend.join('');
+
+  // 평가
+  const len=treeLen(order);const extra=len-OPT;
+  const v=document.getElementById('verdict');
+  const glideSteps=fitch(order,CONV_GLIDE),spotSteps=fitch(order,CONV_SPOT);
+  if(len===OPT){
+    v.className='verdict good';
+    v.innerHTML=`<b>가장 단순한 나무를 찾았어요! 🎉</b><br>남아 있는 <b>활공막</b>과 <b>얼룩무늬</b>는 어떤 나무를 세워도 각각 <b>두 번씩 따로</b> 진화한 걸로 나와요. 가시비늘도마뱀과 별활공쥐(활공막), 늪도롱뇽과 달빛삵(얼룩무늬)은 겉모습만 닮은 <b>남남</b> — 이게 바로 <b>수렴진화</b>예요. (참고: 사다리의 위·아래를 뒤집거나, 형질이 똑같은 두 마리의 앞뒤 순서는 바뀌어도 똑같이 정답이에요.)`;
+    document.getElementById('toClassifyBtn').disabled=false;
+  }else{
+    v.className='verdict warn';
+    let hint='';
+    if(glideSteps<=1)hint+=' 혹시 <b>활공막</b>을 가진 도마뱀과 활공쥐를 이웃에 붙였나요?';
+    if(spotSteps<=1)hint+=' 혹시 <b>얼룩무늬</b>를 가진 도롱뇽과 삵을 붙였나요?';
+    if(!hint)hint=' 많은 종이 공유하는 형질(척추·양막 등)을 사다리 위쪽에 오도록 다시 배치해 보세요.';
+    v.innerHTML=`<b>가지 변화가 ${extra}번 더 많아요.</b> (지금 ${len} · 최소 ${OPT})${hint} 겉모습만 닮은 형질로 묶으면, 더 강한 형질들이 어긋나서 나무가 복잡해져요. 다시 배치해 볼까요?<br><span style="font-size:12.5px">그대로 진행할 수도 있지만, 조원과 더 단순한 배치를 먼저 찾아보길 권해요.</span>`;
+    document.getElementById('toClassifyBtn').disabled=false;
+  }
+  document.getElementById('treeResult').classList.remove('hidden');
+  document.getElementById('treeResult').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ================= 분류 ================= */
+const RANKS=[
+  {r:'계 Kingdom',q:'세포에 세포벽이 없고, 다른 생물을 먹어 양분을 얻으며, 여러 세포로 이루어졌어요. 어느 계일까요?',
+   o:[{t:'동물계',ok:1,w:'세포벽 없음 + 종속영양 + 다세포 — 동물계의 결정적 특징이에요.'},
+      {t:'식물계',ok:0,w:'식물계는 세포벽과 엽록체로 스스로 양분을 만들어요(독립영양). 달빛삵은 다른 생물을 먹으니 아니에요.'},
+      {t:'균계',ok:0,w:'균계는 세포벽(키틴)이 있고 몸 밖으로 소화효소를 내보내 흡수해요. 먹이를 삼키는 달빛삵과 달라요.'}]},
+  {r:'문 Phylum',q:'몸 등쪽을 따라 신경관이 지나고, 속에 단단한 등뼈(척추)를 가졌어요. 어느 문일까요?',
+   o:[{t:'척삭동물문',ok:1,w:'등쪽 신경관과 척추(속뼈)는 척삭동물문의 핵심! 표에서 7마리 중 6마리가 함께 가졌던 그 형질이죠.'},
+      {t:'절지동물문',ok:0,w:'절지동물은 겉뼈대와 마디 다리를 가져요. 속에 등뼈가 있는 달빛삵과 달라요.'},
+      {t:'연체동물문',ok:0,w:'연체동물은 등뼈 없이 부드러운 몸에 껍데기를 흔히 가져요. 척추를 가진 달빛삵과 안 맞아요.'}]},
+  {r:'강 Class',q:'온몸에 털이 있고 젖(유선)으로 새끼를 기르며, 태반을 통해 새끼를 낳아요. 어느 강일까요?',
+   o:[{t:'포유강',ok:1,w:'털 + 젖 + 태반은 포유강의 결정적 형질! 사다리에서 달빛삵을 가장 끝에 놓게 만든 형질들이에요.'},
+      {t:'파충강',ok:0,w:'파충강은 비늘·양막알을 갖지만 젖이 없어요. 가시비늘도마뱀이 이쪽 무리죠.'},
+      {t:'조강',ok:0,w:'조강(새)은 깃털·부리로 알을 낳아요. 털·젖과 달라요.'}]},
+  {r:'목 Order',q:'큰 송곳니와 고기를 자르는 이빨(열육치)을 가진 육식성이에요. 어느 목에 가까울까요?',
+   o:[{t:'식육목',ok:1,w:'큰 송곳니와 열육치는 식육목(육식 포유류)의 특징! 표의 “큰 송곳니”가 달빛삵만 가진 형질이었죠.'},
+      {t:'설치목',ok:0,w:'설치목(쥐 무리)은 끊임없이 자라는 앞니로 갉아먹어요. 별활공쥐가 이쪽에 가깝죠.'},
+      {t:'영장목',ok:0,w:'영장목은 마주보는 엄지와 큰 뇌, 잡식이 특징이에요. 열육치를 가진 육식형과 달라요.'}]},
+];
+let curRank=0;
+function resetClassify(){curRank=0;}
+function setupClassify(){
+  resetClassify();
+  const s=SPECIES[TARGET];
+  document.getElementById('clsTitle').textContent=`‘${s.nm}’을 분류하자`;
+  document.getElementById('clsArt').innerHTML=ART[s.code];
+  renderRank();
+}
+function renderRank(){
+  const R=RANKS[curRank];
+  document.querySelectorAll('#rankTrack .rank-pill').forEach((p,i)=>{p.classList.toggle('cur',i===curRank);p.classList.toggle('set',i<curRank);});
+  document.getElementById('qcard').innerHTML=`<h3>${R.r}</h3><p class="qsub">${R.q}</p><div class="opts">${R.o.map((o,i)=>`<button class="opt" data-i="${i}" type="button">${o.t}</button>`).join('')}</div>`;
+  document.querySelectorAll('#qcard .opt').forEach(b=>b.onclick=()=>choose(parseInt(b.dataset.i)));
+  const fb=document.getElementById('clsFeedback');fb.className='feedback';fb.innerHTML='';
+  document.getElementById('nextRankBtn').classList.add('hidden');
+}
+function choose(i){
+  const R=RANKS[curRank],c=R.o[i],btns=document.querySelectorAll('#qcard .opt'),fb=document.getElementById('clsFeedback');
+  if(c.ok){btns.forEach((b,bi)=>{b.disabled=true;if(bi===i)b.classList.add('correct');});
+    fb.className='feedback right show';fb.innerHTML=`<b>정답 — ${c.t}!</b> ${c.w}`;
+    document.querySelectorAll('#rankTrack .rank-pill')[curRank].classList.add('set');
+    const nb=document.getElementById('nextRankBtn');nb.classList.remove('hidden');
+    nb.textContent=curRank<RANKS.length-1?'다음 계급 →':'분류 완료 · 정리로 →';
+  }else{btns[i].classList.add('wrong');btns[i].disabled=true;
+    fb.className='feedback nope show';fb.innerHTML=`<b>다시 생각해 봐요.</b> ${c.w} <span style="font-size:12.5px">다른 근거를 골라 볼까요?</span>`;}
+}
+function nextRank(){
+  if(curRank<RANKS.length-1){curRank++;renderRank();window.scrollTo({top:0,behavior:'smooth'});}
+  else{document.getElementById('finalLine').innerHTML='분류 완료! <b>달빛삵</b> → 동물계 · 척삭동물문 · 포유강 · 식육목. 계급이 내려갈수록 함께 가진 형질이 늘고 무리가 좁아졌죠. 이제 조원끼리 근거를 맞춰 아래 질문에 답해 보세요.';goStep(3);}
+}
+
+/* 초기화 */
+buildLadder();
+</script>
+</body>
+</html>

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>세포와 물질대사 시뮬레이션</title>
+<style>
+  :root {
+    --bg: #f4f7f6; --surface: #ffffff; --ink: #2c3e50; --ink-2: #7f8c8d; --line: #ecf0f1;
+    --primary: #27ae60; --primary-d: #229954;
+    --carbo: #f39c12; --lipid: #e67e22; --protein: #3498db; --nucleic: #9b59b6;
+    --warn: #e74c3c;
+  }
+  * { box-sizing: border-box; }
+  body { 
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Pretendard", -apple-system, "Malgun Gothic", sans-serif;
+    line-height: 1.6; 
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 30px 20px 50px; }
+  .eyebrow { font-size: 13px; color: var(--primary); font-weight: 800; margin-bottom: 5px; }
+  h1 { font-size: 28px; margin: 0 0 20px; letter-spacing: -0.5px; }
+  
+  /* Tabs */
+  .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn {
+    flex: 1; min-width: 120px; text-align: center; font-size: 16px; font-weight: 700;
+    padding: 14px 20px; background: var(--surface); border: 2px solid var(--line);
+    border-radius: 12px; cursor: pointer; transition: 0.2s; color: var(--ink-2);
+  }
+  .tab-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .tab-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .tab-btn[data-target="carbo"].active { background: var(--carbo); border-color: var(--carbo); }
+  .tab-btn[data-target="lipid"].active { background: var(--lipid); border-color: var(--lipid); }
+  .tab-btn[data-target="protein"].active { background: var(--protein); border-color: var(--protein); }
+  .tab-btn[data-target="nucleic"].active { background: var(--nucleic); border-color: var(--nucleic); }
+
+  /* Content */
+  .tab-content { display: none; animation: fadeIn 0.4s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
+  
+  .card { background: var(--surface); border-radius: 16px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid var(--line); }
+  .card.full { grid-column: 1 / -1; }
+  .card h2 { margin: 0 0 15px; font-size: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--line); padding-bottom: 10px; }
+  .card h3 { font-size: 16px; color: var(--ink); margin: 20px 0 10px; }
+  .desc-list { list-style: none; padding: 0; margin: 0; }
+  .desc-list li { margin-bottom: 12px; font-size: 14.5px; position: relative; padding-left: 18px; }
+  .desc-list li::before { content: '•'; position: absolute; left: 0; color: var(--primary); font-weight: bold; }
+  
+  .img-box { text-align: center; margin: 15px 0; background: #fafcfd; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 10px; overflow-x: auto; }
+  .img-box svg { width: 100%; height: auto; max-width: 600px; min-width: 400px; }
+  .img-cap { font-size: 12px; color: var(--ink-2); margin-top: 8px; }
+
+  /* Interactive Elements */
+  .sim-area { background: #f8f9fa; border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+  button.action-btn { background: #fff; border: 2px solid var(--ink); color: var(--ink); font-weight: 700; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.2s; margin: 5px; font-size:14px; }
+  button.action-btn:hover { background: var(--ink); color: #fff; }
+  
+  /* Quizzes */
+  .quiz-container { display: flex; flex-direction: column; gap: 15px; }
+  .q-item { background: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid var(--line); text-align: left; }
+  .q-item p { margin: 0 0 10px; font-weight: 700; font-size: 15px; }
+  .q-opts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .q-opt { padding: 8px 16px; border: 1px solid #bdc3c7; background: #fff; border-radius: 20px; cursor: pointer; font-size: 14px; transition: 0.2s; font-family: inherit; }
+  .q-opt:hover { border-color: var(--primary); color: var(--primary); }
+  .q-opt.correct { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .q-opt.wrong { background: var(--warn); color: #fff; border-color: var(--warn); }
+  .q-msg { font-size: 13.5px; margin-top: 10px; padding: 10px; border-radius: 8px; display: none; line-height: 1.5; font-weight: 500; }
+  .q-msg.show { display: block; animation: fadeIn 0.3s ease; }
+  .q-msg.correct-msg { background: #eafaf1; color: #1d8348; border-left: 4px solid var(--primary); }
+  .q-msg.wrong-msg { background: #fdedec; color: #c0392b; border-left: 4px solid var(--warn); }
+
+  /* Carbo Sim */
+  .glucose-chain { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px; margin-top: 20px; min-height: 50px;}
+  .hex { width: 40px; height: 46px; background: var(--carbo); clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); display: flex; justify-content: center; align-items: center; color: white; font-size: 10px; font-weight: bold; animation: pop 0.3s ease; }
+  .link { width: 15px; height: 4px; background: #bdc3c7; animation: pop 0.3s ease; }
+  
+  /* Lipid Sim */
+  .membrane-box { width: 100%; height: 180px; background: #e0f7fa; position: relative; border-radius: 8px; margin-top: 15px; border: 2px dashed #b2ebf2; display: flex; flex-direction: column; justify-content: center; }
+  .lipid-layer { display: flex; justify-content: center; gap: 5px; height: 60px;}
+  .lipid-layer.bottom { transform: scaleY(-1); }
+  .phos { display: flex; flex-direction: column; align-items: center; animation: slideDown 0.4s ease; }
+  .head { width: 20px; height: 20px; background: #3498db; border-radius: 50%; z-index: 2; }
+  .tails { display: flex; gap: 4px; margin-top: -2px; }
+  .tail { width: 4px; height: 30px; background: #f1c40f; border-radius: 2px; }
+
+  /* Protein Sim */
+  .prot-svg { width: 100%; max-width: 250px; height: 180px; overflow: visible; margin-top: 10px; }
+  .prot-path { fill: none; stroke: var(--protein); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; transition: d 0.5s ease, stroke 0.5s ease, opacity 0.5s ease; }
+  .prot-arrow { fill: var(--protein); transition: fill 0.5s ease, opacity 0.5s ease; }
+  .controls { margin-top: 15px; width: 100%; max-width: 350px; }
+  .controls label { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+  input[type=range] { width: 100%; margin-bottom: 10px; accent-color: var(--protein); }
+  
+  /* Graphs */
+  .graph-wrapper { display: flex; gap: 15px; justify-content: center; width: 100%; margin-top: 10px; flex-wrap: wrap; }
+  .graph-box { flex: 1; min-width: 140px; background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 10px; text-align: center; }
+  .graph-box h4 { margin: 0 0 5px; font-size: 12px; color: var(--ink-2); }
+  .graph-svg { width: 100%; height: 60px; overflow: visible; }
+  .g-line { fill: none; stroke: #bdc3c7; stroke-width: 2; }
+  .g-dot { fill: var(--warn); transition: cx 0.2s, cy 0.2s; }
+
+  /* Nucleic Sim */
+  .dna-sim { display: flex; gap: 20px; margin-top: 20px; align-items: center; }
+  .strand { display: flex; flex-direction: column; gap: 8px; }
+  .base { padding: 8px 15px; border-radius: 4px; color: white; font-weight: bold; width: 50px; text-align: center; }
+  .base.A { background: #e74c3c; } .base.T { background: #2ecc71; }
+  .base.G { background: #f1c40f; color: #333; } .base.C { background: #9b59b6; }
+  .base.empty { background: #ecf0f1; color: #7f8c8d; border: 1px dashed #bdc3c7; cursor: pointer; }
+  .base-picker { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+  .base-picker button { border: none; padding: 10px 15px; font-weight: bold; border-radius: 6px; cursor: pointer; color: white; }
+  
+  @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+  @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 14px; color: var(--ink-2); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="eyebrow">2022 개정 교육과정 · 세포와 물질대사</div>
+  <h1>생물체의 구성 물질 시뮬레이션</h1>
+
+  <div class="tabs">
+    <div class="tab-btn active" data-target="carbo">탄수화물</div>
+    <div class="tab-btn" data-target="lipid">지질</div>
+    <div class="tab-btn" data-target="protein">단백질</div>
+    <div class="tab-btn" data-target="nucleic">핵산</div>
+  </div>
+
+  <!-- 1. 탄수화물 -->
+  <div class="tab-content active" id="carbo">
+    <div class="grid">
+      <div class="card">
+        <h2 style="color: var(--carbo);">🌾 탄수화물 (Carbohydrates)</h2>
+        <ul class="desc-list">
+          <li><b>구성 원소:</b> 탄소(C), 수소(H), 산소(O)</li>
+          <li><b>기능:</b> 생물의 주요 에너지원(1g당 약 4kcal)으로 사용되며, 몸을 구성합니다.</li>
+          <li><b>종류 및 구분 (탄소 수/결합 수에 따라):</b>
+            <ul style="margin-top:5px; padding-left:15px;">
+              <li><b>단당류:</b> 포도당(6탄당), 갈락토스, 과당. 가장 단순한 형태.</li>
+              <li><b>이당류:</b> 단당류 2개가 결합 (엿당, 설탕, 젖당).</li>
+              <li><b>다당류:</b> 수많은 단당류가 결합 (녹말, 글리코젠, 셀룰로스).</li>
+            </ul>
+          </li>
+          <li><b>실생활 예시:</b> 식물은 에너지를 '녹말'(감자)로, 동물은 '글리코젠'(간, 근육)으로 저장합니다. 식물의 세포벽은 '셀룰로스'로 구성됩니다.</li>
+        </ul>
+        <div class="img-box">
+          <svg viewBox="0 0 600 120" style="background:#fff; border-radius:8px;">
+            <polygon points="100,40 120,30 140,40 140,60 120,70 100,60" fill="#f39c12"/>
+            <text x="120" y="95" text-anchor="middle" font-size="13" font-weight="bold">단당류(포도당)</text>
+            <polygon points="260,40 280,30 300,40 300,60 280,70 260,60" fill="#f39c12"/>
+            <polygon points="305,40 325,30 345,40 345,60 325,70 305,60" fill="#f39c12"/>
+            <line x1="300" y1="50" x2="305" y2="50" stroke="#7f8c8d" stroke-width="2"/>
+            <text x="302" y="95" text-anchor="middle" font-size="13" font-weight="bold">이당류(설탕)</text>
+            <circle cx="450" cy="50" r="12" fill="#f39c12"/>
+            <circle cx="470" cy="50" r="12" fill="#f39c12"/>
+            <circle cx="490" cy="50" r="12" fill="#f39c12"/>
+            <circle cx="510" cy="50" r="12" fill="#f39c12"/>
+            <circle cx="530" cy="50" r="12" fill="#f39c12"/>
+            <text x="490" y="95" text-anchor="middle" font-size="13" font-weight="bold">다당류(녹말)</text>
+          </svg>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🔬 다당류 합성 시뮬레이션</h3>
+        <p style="font-size: 14px; color: var(--ink-2);">포도당(단당류) 분자를 결합시켜 다당류 사슬을 만들어보세요.</p>
+        <div class="sim-area">
+          <div class="glucose-chain" id="glucoseChain"></div>
+          <div style="margin-top: 20px;">
+            <button class="action-btn" id="addGlucose" style="border-color:var(--carbo);">+ 포도당 추가</button>
+            <button class="action-btn" id="resetGlucose">초기화</button>
+          </div>
+          <p id="carboStatus" style="font-size:13px; font-weight:bold; margin-top:15px; color:var(--carbo);">현재 상태: 단당류 (0개)</p>
+        </div>
+      </div>
+      <div class="card full">
+        <h3>🧠 탄수화물 개념 확인 퀴즈</h3>
+        <div class="quiz-container">
+          <div class="q-item">
+            <p>1. 포도당은 구성하는 탄소 수에 따라 몇 탄당으로 구분되는가?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 5탄당은 핵산의 구성 성분인 리보스와 디옥시리보스입니다. 포도당의 분자식(C₆H₁₂O₆)을 떠올려보세요!">5탄당</button>
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! 포도당, 과당, 갈락토스는 모두 탄소가 6개인 6탄당(Hexose)입니다.">6탄당</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+          <div class="q-item">
+            <p>2. 식물의 세포벽을 구성하는 다당류의 이름은 무엇인가?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! 셀룰로스는 식물 세포벽의 주성분이며, 녹말과 달리 곧은 사슬 구조를 가져 매우 단단합니다.">셀룰로스</button>
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 글리코젠은 동물의 간과 근육에 에너지를 저장하는 형태입니다. 식물을 지탱하는 단단한 벽을 만드는 물질이 무엇인지 다시 확인해보세요.">글리코젠</button>
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 녹말은 식물이 에너지를 저장하는 형태입니다. 식물을 지탱하는 물질을 찾아보세요.">녹말</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+          <div class="q-item">
+            <p>3. 탄수화물은 1g당 약 몇 kcal의 에너지를 발생하는가?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! 탄수화물과 단백질은 1g당 약 4kcal, 지질(지방)은 1g당 약 9kcal의 에너지를 냅니다.">4 kcal</button>
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 9kcal는 단위 질량당 가장 많은 에너지를 내는 지질(중성지방)의 에너지양입니다. 탄수화물과 단백질의 발생량을 교과서에서 확인해보세요.">9 kcal</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 지질 -->
+  <div class="tab-content" id="lipid">
+    <div class="grid">
+      <div class="card">
+        <h2 style="color: var(--lipid);">💧 지질 (Lipids)</h2>
+        <ul class="desc-list">
+          <li><b>특성:</b> 물에 녹지 않고 유기용매에 잘 녹습니다.</li>
+          <li><b>중성지방:</b> 에너지 저장소(1g당 9kcal), 체온 유지. (글리세롤 1분자 + 지방산 3분자)</li>
+          <li><b>인지질:</b> 세포막 구성 성분. 친수성 머리와 소수성 꼬리로 이중층 형성.</li>
+          <li><b>스테로이드:</b> 성호르몬/부신겉질호르몬 주성분(콜레스테롤 등). 4개의 탄소 고리 화합물.</li>
+        </ul>
+        <div class="img-box">
+          <svg viewBox="0 0 600 160" style="background:#fff; border-radius:8px;">
+            <rect x="70" y="30" width="60" height="20" rx="10" fill="#a2d149"/> 
+            <rect x="80" y="50" width="8" height="60" rx="4" fill="#f1c40f"/>
+            <rect x="96" y="50" width="8" height="60" rx="4" fill="#f1c40f"/>
+            <rect x="112" y="50" width="8" height="60" rx="4" fill="#f1c40f"/>
+            <text x="100" y="140" text-anchor="middle" font-size="13" font-weight="bold">중성지방</text>
+            <circle cx="300" cy="40" r="18" fill="#3498db"/> 
+            <rect x="290" y="60" width="6" height="50" rx="3" fill="#f1c40f"/>
+            <rect x="304" y="60" width="6" height="50" rx="3" fill="#f1c40f" transform="rotate(-15 307 60)"/>
+            <text x="300" y="140" text-anchor="middle" font-size="13" font-weight="bold">인지질</text>
+            <path d="M 470,70 L 485,55 L 500,70 L 500,90 L 485,105 L 470,90 Z" fill="#9b59b6" opacity="0.7"/>
+            <path d="M 500,70 L 515,55 L 530,70 L 530,90 L 515,105 L 500,90 Z" fill="#9b59b6" opacity="0.7"/>
+            <path d="M 485,40 L 500,25 L 515,40 L 515,55 L 500,70 L 485,55 Z" fill="#9b59b6" opacity="0.7"/>
+            <path d="M 530,70 L 545,65 L 560,80 L 545,95 L 530,90 Z" fill="#9b59b6" opacity="0.7"/>
+            <text x="510" y="140" text-anchor="middle" font-size="13" font-weight="bold">스테로이드</text>
+          </svg>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🔬 인지질 이중층 (세포막) 조립</h3>
+        <p style="font-size: 14px; color: var(--ink-2);">물(세포 안팎)이 있는 환경에서 인지질 분자들이 어떻게 배열되는지 확인하세요.</p>
+        <div class="sim-area">
+          <div class="membrane-box">
+            <div style="position:absolute; top:5px; left:10px; color:#0097a7; font-size:12px; font-weight:bold;">물 (세포 외부)</div>
+            <div class="lipid-layer top" id="lipidTop"></div>
+            <div class="lipid-layer bottom" id="lipidBot"></div>
+            <div style="position:absolute; bottom:5px; left:10px; color:#0097a7; font-size:12px; font-weight:bold;">물 (세포 내부)</div>
+          </div>
+          <div style="margin-top: 20px;">
+            <button class="action-btn" id="addLipid" style="border-color:var(--lipid);">+ 인지질 추가</button>
+            <button class="action-btn" id="resetLipid">초기화</button>
+          </div>
+        </div>
+      </div>
+      <div class="card full">
+        <h3>🧠 지질 개념 확인 퀴즈</h3>
+        <div class="quiz-container">
+          <div class="q-item">
+            <p>1. 인지질 이중층에서 물과 닿는 부분은 어느 쪽인가?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 지방산으로 이루어진 꼬리 부분은 물을 싫어하는 '소수성'을 띱니다. 세포 안팎은 물로 가득 차 있으므로 어떤 부분이 밖을 향할지 생각해보세요.">소수성 꼬리</button>
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! 인산과 글리세롤로 이루어진 머리 부분은 물과 친한 '친수성'을 띠어 세포 안팎의 물과 맞닿아 있습니다.">친수성 머리</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+          <div class="q-item">
+            <p>2. 글리세롤 1분자와 지방산 3분자로 구성된 지질은?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! 중성지방은 에너지를 저장하고 체온을 유지하는 역할을 하며, 우리가 흔히 말하는 '지방'입니다.">중성지방</button>
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 스테로이드는 4개의 탄소 고리 구조를 갖습니다.">스테로이드</button>
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 인지질은 글리세롤 1분자에 지방산 2분자와 인산이 결합되어 있습니다.">인지질</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+          <div class="q-item">
+            <p>3. 성호르몬의 주성분인 콜레스테롤이 속하는 지질의 종류는?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! 스테로이드는 4개의 탄소 고리를 가진 지질로, 콜레스테롤, 성호르몬, 부신 겉질 호르몬 등이 여기에 속합니다.">스테로이드</button>
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 중성지방은 에너지 저장의 역할을 합니다. 호르몬이나 세포막의 안정성을 돕는 탄소 고리 화합물을 다시 찾아보세요.">중성지방</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 단백질 -->
+  <div class="tab-content" id="protein">
+    <div class="grid">
+      <div class="card">
+        <h2 style="color: var(--protein);">🥩 단백질 (Proteins)</h2>
+        <ul class="desc-list">
+          <li><b>단위체:</b> 20여 종의 <b>아미노산</b></li>
+          <li><b>펩타이드 결합:</b> 아미노산들이 결합할 때 <b>물(H₂O)이 빠져나오며</b> 연결됩니다.</li>
+          <li><b>입체 구조:</b> 
+            <ul style="margin-top:5px; padding-left:15px;">
+              <li><b>1차:</b> 아미노산의 서열</li>
+              <li><b>2차:</b> 수소 결합에 의한 <b>α 나선 구조</b>, <b>β 병풍 구조</b></li>
+              <li><b>3차/4차:</b> 접히고 꼬여 고유한 입체 구조 형성. 이 <b>입체 구조가 단백질의 기능을 결정</b>합니다. (예: 헤모글로빈, 효소 카탈레이스)</li>
+            </ul>
+          </li>
+          <li><b>단백질 변성:</b> 고열이나 부적절한 pH 환경에서는 입체 구조가 변하여 기능을 잃습니다.</li>
+        </ul>
+        <div class="img-box">
+          <!-- 펩타이드 결합 모식도 -->
+          <svg viewBox="0 0 600 120" style="background:#fff; border-radius:8px; margin-bottom:15px;">
+            <rect x="50" y="30" width="140" height="50" rx="5" fill="#f8d7da" opacity="0.8"/>
+            <text x="120" y="60" text-anchor="middle" font-size="14" font-weight="bold" fill="#2c3e50">아미노산 1</text>
+            <circle cx="170" cy="55" r="16" fill="#3498db" opacity="0.2"/>
+            <text x="170" y="60" text-anchor="middle" font-size="12" font-weight="bold" fill="#2980b9">-OH</text>
+            <text x="210" y="60" text-anchor="middle" font-size="20">+</text>
+            <rect x="230" y="30" width="140" height="50" rx="5" fill="#d1ecf1" opacity="0.8"/>
+            <text x="300" y="60" text-anchor="middle" font-size="14" font-weight="bold" fill="#2c3e50">아미노산 2</text>
+            <circle cx="250" cy="55" r="16" fill="#3498db" opacity="0.2"/>
+            <text x="250" y="60" text-anchor="middle" font-size="12" font-weight="bold" fill="#2980b9">-H</text>
+            <text x="390" y="60" text-anchor="middle" font-size="20">→</text>
+            <rect x="420" y="30" width="160" height="50" rx="5" fill="#fcf3cf" opacity="0.8"/>
+            <text x="500" y="60" text-anchor="middle" font-size="14" font-weight="bold" fill="#2c3e50">펩타이드 결합</text>
+            <path d="M 390,70 Q 390,100 410,110" fill="none" stroke="#3498db" stroke-width="2"/>
+            <polygon points="410,110 400,105 405,115" fill="#3498db"/>
+            <text x="450" y="115" text-anchor="middle" font-size="13" fill="#2980b9" font-weight="bold">+ H₂O (물 분자 생성)</text>
+          </svg>
+
+          <!-- 1~4차 구조 모식도 -->
+          <svg viewBox="0 0 600 170" style="background:#fff; border-radius:8px;">
+            <!-- 1차 구조 -->
+            <g transform="translate(30, 0)">
+                <line x1="20" y1="20" x2="20" y2="130" stroke="#333" stroke-width="2"/>
+                <circle cx="20" cy="20" r="8" fill="#e74c3c"/>
+                <circle cx="20" cy="40" r="8" fill="#3498db"/>
+                <circle cx="20" cy="60" r="8" fill="#f1c40f"/>
+                <circle cx="20" cy="80" r="8" fill="#2ecc71"/>
+                <circle cx="20" cy="100" r="8" fill="#9b59b6"/>
+                <circle cx="20" cy="120" r="8" fill="#e67e22"/>
+                <text x="20" y="160" text-anchor="middle" font-size="12" font-weight="bold">1차 구조 (서열)</text>
+            </g>
+            <text x="80" y="75" text-anchor="middle" font-size="20" fill="#e74c3c">→</text>
+            <!-- 2차 구조 -->
+            <g transform="translate(100, 0)">
+                <!-- Alpha -->
+                <path d="M 30,20 Q 55,30 30,45 T 30,70 T 30,95 T 30,120" fill="none" stroke="#9b59b6" stroke-width="8" stroke-linecap="round"/>
+                <!-- Beta -->
+                <path d="M 70,30 L 110,30 M 70,65 L 110,65 M 70,100 L 110,100" stroke="#3498db" stroke-width="6"/>
+                <polygon points="110,22 125,30 110,38" fill="#3498db"/>
+                <polygon points="110,57 125,65 110,73" fill="#3498db"/>
+                <polygon points="110,92 125,100 110,108" fill="#3498db"/>
+                <line x1="80" y1="30" x2="80" y2="65" stroke="#bdc3c7" stroke-width="2" stroke-dasharray="2"/>
+                <line x1="100" y1="65" x2="100" y2="100" stroke="#bdc3c7" stroke-width="2" stroke-dasharray="2"/>
+                <text x="75" y="160" text-anchor="middle" font-size="12" font-weight="bold">2차 구조 (α, β)</text>
+            </g>
+            <text x="255" y="75" text-anchor="middle" font-size="20" fill="#e74c3c">→</text>
+            <!-- 3차 구조 -->
+            <g transform="translate(270, 0)">
+                <path d="M 40,75 C 10,20 80,10 100,55 C 130,30 180,40 160,85 C 190,125 110,125 90,85 C 70,125 10,115 40,75 Z" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="3"/>
+                <path d="M 50,55 Q 70,65 50,75 T 50,95" fill="none" stroke="#9b59b6" stroke-width="5" stroke-linecap="round"/>
+                <path d="M 120,40 L 150,55" stroke="#3498db" stroke-width="5"/>
+                <polygon points="148,47 158,59 144,61" fill="#3498db"/>
+                <circle cx="100" cy="80" r="8" fill="#f1c40f"/>
+                <text x="100" y="160" text-anchor="middle" font-size="12" font-weight="bold">3차 구조 (입체)</text>
+            </g>
+            <text x="475" y="75" text-anchor="middle" font-size="20" fill="#e74c3c">→</text>
+            <!-- 4차 구조 -->
+            <g transform="translate(485, 10)">
+                <path d="M 10,40 C -10,0 40,-10 50,30 C 70,0 100,10 90,50 C 110,80 50,80 40,50 C 20,80 -20,70 10,40 Z" fill="#e74c3c" opacity="0.6"/>
+                <path d="M 30,60 C 10,20 60,10 70,50 C 90,20 120,30 110,70 C 130,100 70,100 60,70 C 40,100 0,90 30,60 Z" fill="#3498db" opacity="0.6"/>
+                <path d="M 40,30 C 20,0 70,-10 80,30 C 100,0 130,10 120,50 C 140,80 80,80 70,50 C 50,80 10,70 40,30 Z" fill="#f1c40f" opacity="0.6" transform="translate(10, -20)"/>
+                <text x="60" y="150" text-anchor="middle" font-size="12" font-weight="bold">4차 구조 (복합체)</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🔬 단백질(효소) 변성 및 활성 시뮬레이션</h3>
+        <p style="font-size: 13px; color: var(--ink-2);">온도와 pH를 조절하여 카탈레이스(효소)의 입체 구조 변화와 그에 따른 효소 활성도(반응 속도) 그래프를 관찰하세요.</p>
+        
+        <div class="sim-area" style="padding-top:10px;">
+          <!-- Protein SVG -->
+          <svg class="prot-svg" viewBox="0 0 200 120" id="catSvg">
+            <path id="catPath" class="prot-path" d="M 20,60 C 20,10 90,0 100,50 C 110,0 180,10 180,60 C 180,110 110,120 100,70 C 90,120 20,110 20,60 Z" />
+            <path id="catAlpha" class="prot-path" stroke="#9b59b6" stroke-width="4" d="M 40,40 Q 60,50 40,60 T 40,80" />
+            <path id="catBeta" class="prot-path" stroke="#f1c40f" stroke-width="4" d="M 130,40 L 150,60 L 130,80" />
+          </svg>
+          <p id="protStatus" style="font-size:13px; font-weight:bold; color:var(--primary); margin:0;">[활성] 최적의 입체 구조 유지</p>
+          
+          <div class="controls">
+            <label><span>온도 (Temperature)</span> <span id="tempVal">37 °C</span></label>
+            <input type="range" id="tempSlider" min="0" max="80" value="37">
+            
+            <label><span>pH 농도</span> <span id="phVal">7</span></label>
+            <input type="range" id="phSlider" min="1" max="14" value="7" step="0.5">
+          </div>
+
+          <!-- Graphs -->
+          <div class="graph-wrapper">
+            <div class="graph-box">
+              <h4>온도 - 효소 활성도</h4>
+              <svg viewBox="0 0 100 60" class="graph-svg">
+                <!-- Activity Curve Temp: Opt 37, Dies at ~60 -->
+                <path d="M 0,60 Q 30,60 37,5 Q 45,60 80,60" class="g-line"/>
+                <circle id="gTempDot" cx="37" cy="5" r="4" class="g-dot"/>
+              </svg>
+            </div>
+            <div class="graph-box">
+              <h4>pH - 효소 활성도</h4>
+              <svg viewBox="0 0 100 60" class="graph-svg">
+                <!-- Activity Curve pH: Opt 7, Dies at 4 and 10. Max width 14 => x*7.14 -->
+                <path d="M 28,60 Q 38,5 50,5 Q 62,5 71,60" class="g-line"/>
+                <circle id="gPhDot" cx="50" cy="5" r="4" class="g-dot"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card full">
+        <h3>🧠 단백질 개념 확인 퀴즈</h3>
+        <div class="quiz-container">
+          <div class="q-item">
+            <p>1. 단백질을 구성하는 기본 단위체의 이름은?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 뉴클레오타이드는 핵산(DNA, RNA)의 단위체이고, 포도당은 탄수화물(다당류)의 단위체입니다. 단백질을 이루는 블록을 다시 생각해보세요.">뉴클레오타이드</button>
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! 20여 종의 아미노산이 어떤 순서로 결합하느냐에 따라 단백질의 종류와 기능이 결정됩니다.">아미노산</button>
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 포도당은 탄수화물의 단위체입니다. 단백질을 구성하는 물질을 생각해보세요.">포도당</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+          <div class="q-item">
+            <p>2. 아미노산들이 결합할 때 물 분자가 빠져나오는 결합을 무엇이라 하는가?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 수소 결합은 물 분자 사이나 단백질/DNA의 2차 구조를 형성할 때 주로 나타나는 약한 인력입니다. 아미노산 사이의 튼튼한 공유 결합 명칭을 확인하세요.">수소 결합</button>
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! 한 아미노산의 카복실기와 다른 아미노산의 아미노기 사이에서 물(H₂O)이 빠져나오며 형성되는 결합을 펩타이드 결합이라 합니다.">펩타이드 결합</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+          <div class="q-item">
+            <p>3. 단백질의 입체 구조가 파괴되어 기능을 상실하는 '변성'의 주된 요인은?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! 고열이나 강산/강염기(pH 변화) 환경에서는 단백질의 입체 구조를 유지하는 결합들이 끊어져 효소 활성 등의 고유 기능을 잃게 됩니다.">온도와 pH</button>
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 산소 농도와 압력보다는 열(온도)과 산성도(pH)가 단백질의 섬세한 3차 구조를 파괴하는 가장 직접적이고 강력한 요인입니다.">산소 농도와 압력</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 핵산 -->
+  <div class="tab-content" id="nucleic">
+    <div class="grid">
+      <div class="card">
+        <h2 style="color: var(--nucleic);">🧬 핵산 (Nucleic Acids)</h2>
+        <ul class="desc-list">
+          <li><b>단위체:</b> 뉴클레오타이드 (인산 : 당 : 염기 = 1 : 1 : 1 로 구성)</li>
+          <li><b>DNA:</b> 유전정보 저장. <b>이중나선</b> 구조. 당(디옥시리보스), 염기(<b>A, G, C, T</b>)</li>
+          <li><b>RNA:</b> 정보 전달 및 단백질 합성 관여. <b>단일 가닥</b> 구조. 당(리보스), 염기(<b>A, G, C, U</b>)</li>
+          <li><b>상보적 결합:</b> DNA에서 <b>아데닌(A)은 항상 타이민(T)</b>과, <b>구아닌(G)은 항상 사이토신(C)</b>과 수소 결합하여 짝을 이룹니다.</li>
+        </ul>
+        <div class="img-box">
+          <!-- 뉴클레오타이드 구조 추가 -->
+          <svg viewBox="0 0 600 120" style="background:#fff; border-radius:8px; margin-bottom:15px;">
+             <!-- 인산 -->
+             <circle cx="220" cy="60" r="22" fill="#f1c40f" />
+             <text x="220" y="65" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">인산</text>
+             <line x1="242" y1="60" x2="270" y2="60" stroke="#333" stroke-width="3"/>
+             <!-- 당 -->
+             <polygon points="300,35 330,55 320,85 280,85 270,55" fill="#3498db" />
+             <text x="300" y="65" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">당</text>
+             <line x1="330" y1="55" x2="360" y2="50" stroke="#333" stroke-width="3"/>
+             <!-- 염기 -->
+             <rect x="360" y="35" width="60" height="30" rx="4" fill="#e74c3c" />
+             <text x="390" y="55" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">염기</text>
+             <text x="300" y="110" text-anchor="middle" font-size="13" font-weight="bold" fill="#7f8c8d">▲ 뉴클레오타이드 구조 (인산:당:염기 = 1:1:1)</text>
+          </svg>
+
+          <!-- DNA vs RNA -->
+          <svg viewBox="0 0 600 150" style="background:#fff; border-radius:8px;">
+            <path d="M 150,20 Q 190,85 150,140" fill="none" stroke="#3498db" stroke-width="6"/>
+            <path d="M 190,20 Q 150,85 190,140" fill="none" stroke="#e74c3c" stroke-width="6"/>
+            <line x1="158" y1="35" x2="182" y2="35" stroke="#ccc" stroke-width="3"/>
+            <line x1="165" y1="60" x2="175" y2="60" stroke="#ccc" stroke-width="3"/>
+            <line x1="168" y1="100" x2="172" y2="100" stroke="#ccc" stroke-width="3"/>
+            <line x1="158" y1="125" x2="182" y2="125" stroke="#ccc" stroke-width="3"/>
+            <text x="170" y="150" text-anchor="middle" font-size="14" font-weight="bold">DNA (이중나선 구조)</text>
+            <text x="170" y="15" text-anchor="middle" font-size="12" fill="#7f8c8d">A, T, G, C</text>
+
+            <path d="M 450,20 Q 410,85 450,140" fill="none" stroke="#9b59b6" stroke-width="6"/>
+            <line x1="443" y1="35" x2="425" y2="35" stroke="#ccc" stroke-width="3"/>
+            <line x1="435" y1="60" x2="420" y2="60" stroke="#ccc" stroke-width="3"/>
+            <line x1="433" y1="85" x2="418" y2="85" stroke="#ccc" stroke-width="3"/>
+            <line x1="443" y1="125" x2="425" y2="125" stroke="#ccc" stroke-width="3"/>
+            <text x="430" y="150" text-anchor="middle" font-size="14" font-weight="bold">RNA (단일 가닥 구조)</text>
+            <text x="430" y="15" text-anchor="middle" font-size="12" fill="#7f8c8d">A, U, G, C</text>
+          </svg>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🔬 DNA 상보적 염기쌍 맞추기</h3>
+        <p style="font-size: 14px; color: var(--ink-2);">왼쪽 DNA 가닥의 서열에 맞는 상보적 염기를 선택해 우측 가닥을 완성하세요.</p>
+        <div class="sim-area">
+          <div class="dna-sim">
+            <div class="strand" id="strandLeft">
+              <div class="base A">A</div><div class="base C">C</div>
+              <div class="base T">T</div><div class="base G">G</div>
+            </div>
+            <div style="font-weight:bold; color:#bdc3c7; letter-spacing:2px; writing-mode:vertical-lr; text-orientation:upright;">||||</div>
+            <div class="strand" id="strandRight">
+              <div class="base empty" data-target="T">?</div><div class="base empty" data-target="G">?</div>
+              <div class="base empty" data-target="A">?</div><div class="base empty" data-target="C">?</div>
+            </div>
+          </div>
+          
+          <div class="base-picker">
+            <button style="background:#e74c3c;" onclick="matchBase('A')">A</button>
+            <button style="background:#2ecc71;" onclick="matchBase('T')">T</button>
+            <button style="background:#f1c40f; color:#333;" onclick="matchBase('G')">G</button>
+            <button style="background:#9b59b6;" onclick="matchBase('C')">C</button>
+          </div>
+          <p id="dnaStatus" style="font-size:13px; font-weight:bold; margin-top:15px;"></p>
+          <button class="action-btn" id="resetDNA" style="display:none; font-size:12px; padding:6px 12px;">다시 하기</button>
+        </div>
+      </div>
+      <div class="card full">
+        <h3>🧠 핵산 개념 확인 퀴즈</h3>
+        <div class="quiz-container">
+          <div class="q-item">
+            <p>1. 핵산을 구성하는 기본 단위체의 이름은?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 아미노산은 단백질의 단위체입니다. 인산-당-염기로 이루어진 핵산의 기본 단위를 다시 확인해보세요.">아미노산</button>
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! 뉴클레오타이드는 인산, 당, 염기가 1:1:1의 비율로 결합된 핵산의 복합 단위체입니다.">뉴클레오타이드</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+          <div class="q-item">
+            <p>2. DNA 이중나선에서 아데닌(A)과 상보적으로 결합하는 염기는?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 구아닌(G)은 사이토신(C)과 상보적으로 결합합니다.">구아닌(G)</button>
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. 유라실(U)은 RNA에 존재하는 염기로, DNA에는 없습니다. DNA에서 A의 짝을 찾아보세요.">유라실(U)</button>
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! DNA에서는 항상 A는 T와(2중 수소결합), G는 C와(3중 수소결합) 상보적인 짝을 이룹니다.">타이민(T)</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+          <div class="q-item">
+            <p>3. 주로 단일 가닥 구조이며, 타이민(T) 대신 유라실(U)을 염기로 가지는 핵산은?</p>
+            <div class="q-opts">
+              <button class="q-opt" data-correct="false" data-msg="오답입니다. DNA는 디옥시리보스를 당으로 가지며, A, T, G, C를 염기로 사용하는 이중나선 구조입니다.">DNA</button>
+              <button class="q-opt" data-correct="true" data-msg="정답입니다! RNA는 리보스를 당으로 가지며, 주로 단일 가닥으로 존재하여 유전 정보 전달이나 단백질 합성에 관여합니다.">RNA</button>
+            </div>
+            <div class="q-msg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 광덕고 이재빈 &middot; 세포와 물질대사 시뮬레이션
+  </footer>
+</div>
+
+<script>
+  // Tab Navigation
+  const tabs = document.querySelectorAll('.tab-btn');
+  const contents = document.querySelectorAll('.tab-content');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.target).classList.add('active');
+    });
+  });
+
+  // Quiz Logic with Scaffolding
+  document.querySelectorAll('.q-item').forEach(item => {
+    const opts = item.querySelectorAll('.q-opt');
+    const msg = item.querySelector('.q-msg');
+    
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        // Reset button styles
+        opts.forEach(o => { o.classList.remove('correct', 'wrong'); });
+        
+        const isCorrect = opt.getAttribute('data-correct') === 'true';
+        const feedbackMsg = opt.getAttribute('data-msg');
+        
+        msg.textContent = feedbackMsg;
+        msg.classList.add('show');
+        
+        if(isCorrect) {
+          opt.classList.add('correct');
+          msg.classList.remove('wrong-msg');
+          msg.classList.add('correct-msg');
+        } else {
+          opt.classList.add('wrong');
+          msg.classList.remove('correct-msg');
+          msg.classList.add('wrong-msg');
+        }
+      });
+    });
+  });
+
+  // 1. Carbo Simulation
+  let glucoseCount = 0;
+  const chain = document.getElementById('glucoseChain');
+  const carboStatus = document.getElementById('carboStatus');
+  document.getElementById('addGlucose').addEventListener('click', () => {
+    if(glucoseCount > 7) return; 
+    if(glucoseCount > 0) {
+      const link = document.createElement('div');
+      link.className = 'link';
+      chain.appendChild(link);
+    }
+    const hex = document.createElement('div');
+    hex.className = 'hex';
+    hex.textContent = '포도당';
+    chain.appendChild(hex);
+    glucoseCount++;
+    if(glucoseCount === 1) carboStatus.textContent = '단당류 (포도당)';
+    else if(glucoseCount === 2) carboStatus.textContent = '이당류 (엿당)';
+    else carboStatus.textContent = `다당류 (사슬 길이: ${glucoseCount})`;
+  });
+  document.getElementById('resetGlucose').addEventListener('click', () => {
+    chain.innerHTML = ''; glucoseCount = 0; carboStatus.textContent = '단당류 (0개)';
+  });
+
+  // 2. Lipid Simulation
+  let lipidCount = 0;
+  const lTop = document.getElementById('lipidTop');
+  const lBot = document.getElementById('lipidBot');
+  document.getElementById('addLipid').addEventListener('click', () => {
+    if(lipidCount > 6) return;
+    const makeLipid = () => {
+      const p = document.createElement('div'); p.className = 'phos';
+      p.innerHTML = `<div class="head"></div><div class="tails"><div class="tail"></div><div class="tail"></div></div>`;
+      return p;
+    }
+    lTop.appendChild(makeLipid()); lBot.appendChild(makeLipid()); lipidCount++;
+  });
+  document.getElementById('resetLipid').addEventListener('click', () => {
+    lTop.innerHTML = ''; lBot.innerHTML = ''; lipidCount = 0;
+  });
+
+  // 3. Protein/Enzyme Simulation
+  const tSlider = document.getElementById('tempSlider');
+  const pSlider = document.getElementById('phSlider');
+  const tVal = document.getElementById('tempVal');
+  const pVal = document.getElementById('phVal');
+  const protStatus = document.getElementById('protStatus');
+  
+  const pBase = document.getElementById('catPath');
+  const pAlpha = document.getElementById('catAlpha');
+  const pBeta = document.getElementById('catBeta');
+  const dotT = document.getElementById('gTempDot');
+  const dotP = document.getElementById('gPhDot');
+
+  function updateEnzyme() {
+    let t = parseFloat(tSlider.value);
+    let p = parseFloat(pSlider.value);
+    tVal.textContent = t + ' °C';
+    pVal.textContent = p;
+
+    let actT = Math.max(0, 1 - Math.pow(t - 37, 2) * 0.0018); 
+    let actP = Math.max(0, 1 - Math.pow(p - 7, 2) * 0.11);
+    
+    let totalAct = actT * actP;
+
+    let dotTx = t * 1.25;
+    let dotTy = 60 - (actT * 55); 
+    dotT.setAttribute('cx', dotTx);
+    dotT.setAttribute('cy', dotTy);
+
+    let dotPx = (p / 14) * 100;
+    let dotPy = 60 - (actP * 55);
+    dotP.setAttribute('cx', dotPx);
+    dotP.setAttribute('cy', dotPy);
+
+    if (totalAct > 0.7) {
+      pBase.setAttribute('d', 'M 20,60 C 20,10 90,0 100,50 C 110,0 180,10 180,60 C 180,110 110,120 100,70 C 90,120 20,110 20,60 Z');
+      pBase.style.stroke = 'var(--protein)';
+      pAlpha.style.opacity = '1'; pBeta.style.opacity = '1';
+      protStatus.textContent = '[활성] 최적의 입체 구조 유지 (반응 속도 빠름)';
+      protStatus.style.color = 'var(--primary)';
+    } else if (totalAct > 0.2) {
+      pBase.setAttribute('d', 'M 20,60 C 20,30 60,30 100,60 C 140,30 180,30 180,60 C 180,90 140,90 100,60 C 60,90 20,90 20,60 Z');
+      pBase.style.stroke = '#e67e22';
+      pAlpha.style.opacity = '0.4'; pBeta.style.opacity = '0.4';
+      protStatus.textContent = '[효능 감소] 결합력 약화, 입체 구조 일부 변형';
+      protStatus.style.color = '#e67e22';
+    } else {
+      pBase.setAttribute('d', 'M 10,60 Q 50,40 100,60 T 190,60 L 190,62 L 10,62 Z');
+      pBase.style.stroke = 'var(--warn)';
+      pAlpha.style.opacity = '0'; pBeta.style.opacity = '0';
+      protStatus.textContent = '[변성/실활] 입체 구조 완전 파괴 (기능 상실)';
+      protStatus.style.color = 'var(--warn)';
+    }
+  }
+
+  tSlider.addEventListener('input', updateEnzyme);
+  pSlider.addEventListener('input', updateEnzyme);
+  updateEnzyme(); 
+
+  // 4. Nucleic Acid Simulation
+  const empties = document.querySelectorAll('.base.empty');
+  const dnaStat = document.getElementById('dnaStatus');
+  let currentTargetIndex = 0;
+  
+  window.matchBase = function(base) {
+    if (currentTargetIndex >= empties.length) return;
+    const targetNode = empties[currentTargetIndex];
+    const correctBase = targetNode.dataset.target;
+    if (base === correctBase) {
+      targetNode.textContent = base; targetNode.classList.remove('empty'); targetNode.classList.add(base);
+      currentTargetIndex++;
+      dnaStat.textContent = '정확합니다! 상보적 결합입니다.'; dnaStat.style.color = 'var(--primary)';
+      if (currentTargetIndex === empties.length) {
+        dnaStat.textContent = '완벽합니다! 이중나선 구조가 완성되었습니다.';
+        document.getElementById('resetDNA').style.display = 'inline-block';
+      }
+    } else {
+      dnaStat.textContent = `틀렸습니다. ${correctBase}와 짝을 이뤄야 합니다.`; dnaStat.style.color = 'var(--warn)';
+    }
+  }
+  document.getElementById('resetDNA').addEventListener('click', () => {
+    empties.forEach(el => { el.className = 'base empty'; el.textContent = '?'; });
+    currentTargetIndex = 0; dnaStat.textContent = ''; document.getElementById('resetDNA').style.display = 'none';
+  });
+</script>
+</body>
+</html>
