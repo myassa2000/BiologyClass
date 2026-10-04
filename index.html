@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>생명과학 시뮬레이션</title>
+<meta name="description" content="세포, 물질대사, 유전, 진화를 직접 조작하며 탐구하는 생명과학 인터랙티브 시뮬레이션 모음">
+<style>
+:root{
+  --paper:#FAF7F0;
+  --card:#FFFFFF;
+  --ink:#25231E;
+  --ink2:#5E584D;
+  --ink3:#918977;
+  --rule:#E0D8C7;
+  --rule2:#CFC5AE;
+  --orange:#DE7A2C;
+  --sans:"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR","Nanum Gothic",sans-serif;
+
+  /* 주제별 색 */
+  --c1:#3AA294; --c1s:#D2ECE7;
+  --c2:#DE7A2C; --c2s:#F9DCC0;
+  --c3:#3A7BC0; --c3s:#D3E3F4;
+  --c4:#9A7BC4; --c4s:#E6DCF4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+
+header{border-bottom:1px solid var(--rule2);padding:40px 0 28px}
+header h1{font-size:28px;font-weight:800;letter-spacing:-.04em}
+header p{margin-top:6px;color:var(--ink2);font-size:15px}
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.jump a{
+  font-size:13px;font-weight:700;text-decoration:none;color:var(--ink2);
+  border:1px solid var(--rule2);background:var(--card);border-radius:20px;padding:6px 14px;
+}
+.jump a:hover{border-color:var(--ink3);color:var(--ink)}
+
+section{padding:30px 0 6px}
+section h2{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:800;letter-spacing:.08em;color:var(--ink3);margin-bottom:14px;
+}
+section h2::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--c)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+
+a.card{
+  display:flex;flex-direction:column;gap:8px;
+  background:var(--card);border:1px solid var(--rule);border-radius:12px;
+  border-top:4px solid var(--c);
+  padding:18px 18px 16px;text-decoration:none;color:inherit;min-height:168px;
+  transition:transform .15s,box-shadow .15s,border-color .15s;
+}
+a.card:hover,a.card:focus-visible{
+  transform:translateY(-2px);box-shadow:0 6px 18px rgba(60,50,30,.10);border-color:var(--rule2);
+  outline:none;
+}
+.card h3{font-size:17px;font-weight:800;letter-spacing:-.03em;line-height:1.35}
+.card p{font-size:13.5px;color:var(--ink2);line-height:1.6;flex:1}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tags span{
+  font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;
+  background:var(--cs);color:var(--ink2);
+}
+.go{font-size:12.5px;font-weight:800;color:var(--c);margin-top:2px}
+
+.t1{--c:var(--c1);--cs:var(--c1s)}
+.t2{--c:var(--c2);--cs:var(--c2s)}
+.t3{--c:var(--c3);--cs:var(--c3s)}
+.t4{--c:var(--c4);--cs:var(--c4s)}
+
+footer{margin-top:34px;border-top:1px solid var(--rule);padding:16px 0 30px;font-size:12px;color:var(--ink3)}
+.foot{display:flex;justify-content:space-between;gap:6px 12px;flex-wrap:wrap}
+
+@media (prefers-reduced-motion:reduce){ a.card{transition:none} a.card:hover{transform:none} }
+@media (max-width:640px){
+  .wrap{padding:0 16px}
+  header{padding:26px 0 20px}
+  header h1{font-size:23px}
+  .grid{grid-template-columns:1fr}
+  a.card{min-height:0}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>생명과학 시뮬레이션</h1>
+    <p>직접 누르고 바꿔 보며 생명 현상을 탐구해 보세요. 카드를 누르면 시뮬레이션이 열립니다.</p>
+    <nav class="jump" aria-label="주제 바로가기">
+      <a href="#cell">세포와 구성 물질</a>
+      <a href="#meta">효소와 물질대사</a>
+      <a href="#gene">유전 정보와 세포 분열</a>
+      <a href="#evo">진화와 분류</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="cell" class="t1">
+    <h2>세포와 구성 물질</h2>
+    <div class="grid">
+      <a class="card" href="Microscope.html">
+        <h3>현미경과 마이크로미터</h3>
+        <p>현미경 사용법을 익히고, 접안마이크로미터와 대물마이크로미터로 세포의 크기를 측정한다.</p>
+        <div class="tags"><span>현미경 사용법</span><span>크기 측정</span></div>
+        <span class="go">열기 →</span>
+      </a>
+      <a class="card" href="CellStructure.html">
+        <h3>세포의 구조와 세포소기관</h3>
+        <p>원핵세포와 진핵세포를 비교하고, 세포소기관을 눌러 각각의 구조와 기능을 확인한다.</p>
+        <div class="tags"><span>원핵세포·진핵세포</span><span>세포소기관</span></div>
+        <span class="go">열기 →</span>
+      </a>
+      <a class="card" href="metabolism_simulation_scaffold.html">
+        <h3>생물체의 구성 물질</h3>
+        <p>탄수화물, 지질, 단백질, 핵산을 다룬다. 다당류 합성, 인지질 이중층 조립, 효소 변성을 직접 해 보고 개념 퀴즈로 정리한다.</p>
+        <div class="tags"><span>탄수화물</span><span>지질</span><span>단백질</span><span>핵산</span></div>
+        <span class="go">열기 →</span>
+      </a>
+    </div>
+  </section>
+
+  <section id="meta" class="t2">
+    <h2>효소와 물질대사</h2>
+    <div class="grid">
+      <a class="card" href="EnzymeInhibitor.html">
+        <h3>효소 반응 속도와 억제제</h3>
+        <p>억제제의 종류에 따라 기질 농도–반응 속도 그래프와 효소의 결합 상태가 어떻게 달라지는지 비교한다.</p>
+        <div class="tags"><span>효소 억제제</span><span>반응 속도 그래프</span></div>
+        <span class="go">열기 →</span>
+      </a>
+      <a class="card" href="Photosynthesis.html">
+        <h3>광합성과 세포호흡</h3>
+        <p>명반응과 탄소고정반응, 해당 과정부터 산화적 인산화까지의 세포호흡, 그리고 발효를 도식으로 따라가며 확인 문제를 푼다.</p>
+        <div class="tags"><span>명반응</span><span>캘빈회로</span><span>세포호흡</span><span>발효</span></div>
+        <span class="go">열기 →</span>
+      </a>
+    </div>
+  </section>
+
+  <section id="gene" class="t3">
+    <h2>유전 정보와 세포 분열</h2>
+    <div class="grid">
+      <a class="card" href="DNARep.html">
+        <h3>DNA 복제</h3>
+        <p>헬리케이스가 이중나선을 풀고, 선도가닥은 연속으로, 지연가닥은 끊어지며 합성되는 과정을 재생해 본다.</p>
+        <div class="tags"><span>반보존적 복제</span><span>선도가닥·지연가닥</span></div>
+        <span class="go">열기 →</span>
+      </a>
+      <a class="card" href="RNATrans.html">
+        <h3>RNA 번역</h3>
+        <p>mRNA 염기서열을 직접 입력하면 리보솜이 코돈을 읽고 tRNA가 아미노산을 가져와 폴리펩타이드를 만든다.</p>
+        <div class="tags"><span>코돈</span><span>tRNA</span><span>리보솜</span></div>
+        <span class="go">열기 →</span>
+      </a>
+      <a class="card" href="CellDivision.html">
+        <h3>세포 분열</h3>
+        <p>체세포 분열과 감수 분열을 한 화면에서 비교하고, 유전자형과 세포 종류를 바꿔 가며 염색체의 변화를 관찰한다.</p>
+        <div class="tags"><span>체세포 분열</span><span>감수 분열</span></div>
+        <span class="go">열기 →</span>
+      </a>
+    </div>
+  </section>
+
+  <section id="evo" class="t4">
+    <h2>진화와 분류</h2>
+    <div class="grid">
+      <a class="card" href="RevSim.html">
+        <h3>대립유전자 빈도의 변화</h3>
+        <p>한 집단의 대립유전자 빈도가 세대를 거치며 어떻게 변하는지 시뮬레이션으로 관찰한다.</p>
+        <div class="tags"><span>유전자풀</span><span>대립유전자 빈도</span></div>
+        <span class="go">열기 →</span>
+      </a>
+      <a class="card" href="Dis.html">
+        <h3>생물 탐험대: 분류</h3>
+        <p>이끼늪에서 발견된 가상의 생물 7마리를 비교해 갈라진 순서대로 계통을 세우고, 새로운 생물을 분류해 본다.</p>
+        <div class="tags"><span>계통수</span><span>분류</span><span>탐구 토론</span></div>
+        <span class="go">열기 →</span>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>ⓒ 이재빈, 광덕고등학교 · 도움: 용용</span>
+    <span>시뮬레이션은 PC와 태블릿 화면에 맞춰 제작되었습니다.</span>
+  </div>
+</footer>
+
+</body>
+</html>
