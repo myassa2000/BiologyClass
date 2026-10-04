@@ -277,7 +277,19 @@ body.adv .adv-inline{display:inline-flex}
   .pulse,.dash{animation:none}
   *{transition-duration:.01ms !important}
 }
+/* 태블릿: 머리말을 줄이고 세부 탭은 한 줄로 두어 옆으로 밀어 넘긴다 */
 @media (max-width:1180px){
+  .brand span{display:none}
+  .subtabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .subtabs::-webkit-scrollbar{display:none}
+  .subtabs button{white-space:nowrap;flex:none}
+}
+/* 가로 태블릿: 설명 패널을 도식 옆에 두어 누르자마자 보이게 한다 */
+@media (min-width:900px) and (max-width:1180px){
+  main{grid-template-columns:minmax(0,1fr) 300px;gap:16px}
+  aside{top:110px}
+}
+@media (max-width:899px){
   main{grid-template-columns:1fr}
   aside{position:static;flex-direction:row;flex-wrap:wrap}
   aside > .panel{flex:1 1 300px}
