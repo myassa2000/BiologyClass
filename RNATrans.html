@@ -90,7 +90,7 @@
 <div class="wrap">
   <div class="eyebrow">분자생물학 · 단백질 합성</div>
   <h1>RNA 번역 시뮬레이션</h1>
-  <p class="sub">mRNA 염기서열을 직접 입력하면, 리보솜이 조립되어 코돈을 읽고 tRNA가 아미노산을 가져와 폴리펩타이드를 만드는 과정을 단계별로 볼 수 있어요.</p>
+  <p class="sub">mRNA 염기서열을 직접 입력하면, 라이보솜이 조립되어 코돈을 읽고 tRNA가 아미노산을 가져와 폴리펩타이드를 만드는 과정을 단계별로 볼 수 있어요.</p>
 
   <div class="inputbar">
     <div class="field">
@@ -123,10 +123,10 @@
     </section>
 
     <section class="card">
-      <h3>리보솜의 세 자리와 용어</h3>
+      <h3>라이보솜의 세 자리와 용어</h3>
       <div class="term" style="border-color:var(--site-a)"><div class="t">A 자리 (aminoacyl)</div><div class="d">아미노산을 실은 새 tRNA가 들어와 코돈과 결합하는 자리.</div></div>
       <div class="term" style="border-color:var(--site-p)"><div class="t">P 자리 (peptidyl)</div><div class="d">자라는 폴리펩타이드를 들고 있는 tRNA가 위치하는 자리.</div></div>
-      <div class="term" style="border-color:var(--site-e)"><div class="t">E 자리 (exit)</div><div class="d">아미노산을 넘겨준 빈 tRNA가 리보솜을 빠져나가는 자리.</div></div>
+      <div class="term" style="border-color:var(--site-e)"><div class="t">E 자리 (exit)</div><div class="d">아미노산을 넘겨준 빈 tRNA가 라이보솜을 빠져나가는 자리.</div></div>
       <div class="term"><div class="t">코돈 ↔ 안티코돈</div><div class="d">mRNA의 코돈(3염기)과 tRNA의 안티코돈(3염기)이 상보결합(A–U, G–C)하여, 코돈에 맞는 아미노산이 정확히 운반된다.</div></div>
       <div class="term"><div class="t">개시 · 신장 · 종결</div><div class="d">개시 코돈 <b style="color:var(--ink)">AUG</b>(Met)에서 시작, 코돈마다 아미노산을 이어 붙이며(신장), 종결 코돈 <b style="color:var(--ink)">UAA·UAG·UGA</b>에서 끝난다.</div></div>
       <div class="clsleg">
@@ -293,7 +293,7 @@ function render(){
   }
   const f=frames[fi], st=state(f);
   ensureMRNA();
-  // mRNA 슬라이드: P 자리 코돈을 리보솜 중앙(RIBO)에 정렬
+  // mRNA 슬라이드: P 자리 코돈을 라이보솜 중앙(RIBO)에 정렬
   const centerBase=start+3*st.ribP+1;
   mr.style.transform=`translateX(${RIBO-centerBase*baseW}px)`;
 
@@ -347,13 +347,13 @@ function render(){
 
 function panel(f,st){
   const txt={
-    small:'리보솜 소단위체가 mRNA의 5\u2032쪽에 결합합니다.',
+    small:'라이보솜 소단위체가 mRNA의 5\u2032쪽에 결합합니다.',
     scan:'소단위체가 mRNA를 훑어 개시 코돈(AUG)을 찾습니다.',
     initP:'개시 tRNA가 메싸이오닌(Met)을 싣고 P 자리에서 AUG와 안티코돈으로 결합합니다.',
-    large:'대단위체가 결합해 리보솜이 완성됩니다. 개시 단계 완료!',
+    large:'대단위체가 결합해 라이보솜이 완성됩니다. 개시 단계 완료!',
     Aenter:'A 자리에 새 aminoacyl-tRNA가 들어와, 안티코돈이 코돈과 상보결합(A–U, G–C)합니다.',
     bond:'대단위체의 작용으로 펩타이드 결합이 형성되어, 폴리펩타이드가 A 자리 tRNA로 옮겨집니다.',
-    translocate:'리보솜이 코돈 하나만큼 이동합니다(자리 이동). A→P, P→E로 옮겨지고 E 자리의 빈 tRNA가 빠져나갑니다.',
+    translocate:'라이보솜이 코돈 하나만큼 이동합니다(자리 이동). A→P, P→E로 옮겨지고 E 자리의 빈 tRNA가 빠져나갑니다.',
     term:'A 자리에 종결 코돈이 들어오면 방출 인자가 결합해, 완성된 폴리펩타이드가 방출되고 번역이 끝납니다.',
     noStop:'서열 끝에 도달했습니다(종결 코돈 없음). 지금까지의 폴리펩타이드를 방출합니다.'
   };
@@ -373,7 +373,7 @@ function panel(f,st){
           <div class="lab" style="color:var(--ink-2)">아미노산</div>
           <div class="big" style="color:${isStop?'#ff9b9b':aaColor(aa)}">${isStop?'종결':aa+' ('+(AANAME[aa]||'')+')'}</div></div>`;
   } else {
-    mb=`<div class="lab" style="color:var(--ink-2)">리보솜을 조립하는 중입니다…</div>`;
+    mb=`<div class="lab" style="color:var(--ink-2)">라이보솜을 조립하는 중입니다…</div>`;
   }
   document.getElementById('matchbox').innerHTML=mb;
 
