@@ -7,21 +7,21 @@
 <meta name="description" content="DNA 구조·복제부터 전사, RNA 가공, 번역, 돌연변이, 유전자발현 조절까지 하나의 유전자로 따라가는 생물의 유전 통합 시뮬레이션">
 <style>
   :root{
-    --bg:#0f1520; --surface:#161f2d; --surface2:#1e2a3b; --surface3:#253449;
-    --ink:#eaf0f7; --ink-2:#a3b3c6; --ink-3:#7d8ea3; --line:#2a3a4f;
-    --accent:#7cc4ff; --accent-ink:#06121e; --good:#5fd39a; --bad:#ff8f8f; --warn:#ffcf6b;
+    --bg:#F2ECE0; --surface:#FFFFFF; --surface2:#F7F3EA; --surface3:#ECE4D4;
+    --ink:#25231E; --ink-2:#5E584D; --ink-3:#8C8473; --line:#E0D8C7;
+    --accent:#2F7BC4; --accent-ink:#FFFFFF; --good:#2E9D62; --bad:#D04545; --warn:#B7791F;
     --A:#3fae6f; --T:#e0703f; --G:#4f86d6; --C:#c069b0; --U:#e3b13a;
     --par:#3a7fd0; --newdna:#e7eef8; --primer:#e0476a;
-    --lead:#46c08a; --lag:#e0904f; --helic:#57c8c0; --enz:#f0c08a; --enz-d:#c98a4e;
+    --lead:#2E9D62; --lag:#D9782E; --helic:#57c8c0; --enz:#f0c08a; --enz-d:#c98a4e;
     --pol:#8fd17a; --ribo:#d8b36a; --ribo-d:#a9843d; --trna:#9b8ce0;
     --np:#d9a93a; --polar:#45a98a; --acid:#e0603f; --basic:#5f86d6;
-    --exon:#5aa0e6; --intron:#6b7688; --cap:#ffd166; --polya:#f4a261;
+    --exon:#5aa0e6; --intron:#9AA3AF; --cap:#ffd166; --polya:#f4a261;
     --nuc:#6b4f9e; --cyto:#3b3324;
     --font:"Pretendard","Pretendard Variable",-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
   }
   *{box-sizing:border-box;}
   html{-webkit-text-size-adjust:100%;}
-  body{margin:0; background:radial-gradient(1000px 520px at 80% -12%, #1d2e4455, transparent), var(--bg); color:var(--ink);
+  body{margin:0; background:var(--bg); color:var(--ink);
     font-family:var(--font); line-height:1.6; -webkit-font-smoothing:antialiased;}
   .wrap{max-width:1120px; margin:0 auto; padding:22px 18px 44px;}
   .eyebrow{font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); font-weight:700;}
@@ -48,7 +48,7 @@
 
   /* 상단 도구 막대 */
   .toolbar{position:sticky; top:0; z-index:30; display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center;
-           background:#0f1520ee; backdrop-filter:blur(6px); border:1px solid var(--line); border-radius:14px; padding:10px 13px; margin-bottom:12px;}
+           background:#FFFFFFee; backdrop-filter:blur(6px); border:1px solid var(--line); border-radius:14px; padding:10px 13px; margin-bottom:12px;}
   .toolbar .sp{flex:1;}
   .toolbar .lbl{font-size:12px; color:var(--ink-3); font-weight:700;}
 
@@ -67,7 +67,7 @@
   .editor.open{display:block;}
   .editor .row{display:flex; flex-wrap:wrap; gap:8px 10px; align-items:center; margin-bottom:8px;}
   .editor textarea{width:100%; min-height:58px; font-family:ui-monospace,Consolas,monospace; font-size:15px; letter-spacing:.12em; font-weight:700;
-     padding:9px 11px; border:1px solid var(--line); border-radius:9px; background:#0b111b; color:var(--ink); resize:vertical;}
+     padding:9px 11px; border:1px solid var(--line); border-radius:9px; background:#FFFDF8; color:var(--ink); resize:vertical;}
   .editor .hint{font-size:12.5px; color:var(--ink-2);}
   .msg{font-size:13px; font-weight:700; min-height:1.2em;}
   .msg.err{color:var(--bad);} .msg.ok{color:var(--good);}
@@ -78,25 +78,45 @@
      padding:9px 13px; border-radius:11px; cursor:pointer;}
   .tabs button .n{display:inline-block; min-width:19px; height:19px; line-height:19px; border-radius:6px; background:var(--surface3); color:var(--ink-2); font-size:11.5px; margin-right:6px; text-align:center;}
   .tabs button.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
-  .tabs button.on .n{background:#06121e33; color:var(--accent-ink);}
+  .tabs button.on .n{background:#ffffff33; color:var(--accent-ink);}
   .tabs .tabsep{flex:none; width:2px; margin:4px 6px; background:var(--line); border-radius:1px;}
-  .tabs button.tab-ind{border-style:dashed; border-color:#8f86d6; color:#c9c1f2;}
-  .tabs button.tab-ind.on{background:#8f86d6; border-color:#8f86d6; border-style:solid; color:#120f1c;}
+  .tabs button.tab-ind{border-style:dashed; border-color:#7A6CC4; color:#5B4BA8;}
+  .tabs button.tab-ind.on{background:#7A6CC4; border-color:#7A6CC4; border-style:solid; color:#fff;}
   .intro3{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:10px 0 14px;}
   @media (max-width:860px){ .intro3{grid-template-columns:1fr;} }
   .intro3 .card h3{font-size:14px;}
-  .intro3 .card p{margin:0; font-size:13px; color:#c8d4e2;}
-  .quest{border:1px dashed var(--warn); background:#2b2414; color:#f3dfae; border-radius:10px; padding:9px 12px; margin-top:10px; font-size:13px;}
-  .quest b{color:#ffe08a;}
+  .intro3 .card p{margin:0; font-size:13.5px; color:var(--ink-2);}
+  .quest{border:1px dashed var(--warn); background:#FFF8E6; color:#6B5214; border-radius:10px; padding:9px 12px; margin-top:10px; font-size:13.5px;}
+  .quest b{color:#8A5A00;}
   .quest ol{margin:4px 0 0; padding-left:20px;}
+  body:not(.adv) .adv-only{display:none !important;}
+  .mission{background:var(--surface); border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:12px; padding:10px 14px; margin:0 0 12px;}
+  .ms-goal{font-size:15px; margin-bottom:6px;}
+  .ms-goal b{color:var(--accent); margin-right:4px;}
+  .ms-list{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:13.5px; color:var(--ink-2);}
+  .ms-item.ok{color:var(--good); font-weight:700;}
+  .ms-prog{font-size:12.5px; color:var(--ink-3); margin-top:5px; font-weight:700;}
+  .summary{margin-top:14px; background:#FFF8E6; border:1px solid #E7C77A; border-radius:12px; padding:12px 15px; font-size:15px; line-height:1.7;}
+  .summary b{color:#8A5A00; margin-right:4px;}
+  .summary.done{box-shadow:0 0 0 3px #E7C77A88;}
+  .analogy{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-top:12px;}
+  @media (max-width:860px){ .analogy{grid-template-columns:repeat(2,1fr);} }
+  .an{position:relative; min-height:118px; border-radius:12px; border:1px solid var(--line); background:var(--surface); cursor:pointer; padding:10px 12px; text-align:center; transition:transform .15s;}
+  .an:hover{transform:translateY(-2px);}
+  .an .ic{font-size:30px; line-height:1.2;}
+  .an .nm{font-weight:900; font-size:15px; margin-top:2px;}
+  .an .bk{display:none; font-size:13.5px; color:var(--ink-2); text-align:left;}
+  .an .bk b{color:var(--ink); display:block; font-size:14.5px; margin-bottom:3px;}
+  .an.flip{background:#F7F3EA;}
+  .an.flip .fr{display:none;} .an.flip .bk{display:block;}
   .tab-panel{display:none;}
   .tab-panel.on{display:block;}
   .ptitle{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 12px; margin:2px 0 8px;}
   .ptitle h2{font-size:19px; margin:0;}
   .ptitle .ref{font-size:12px; color:var(--ink-3); font-weight:700;}
-  .lead{font-size:14px; color:var(--ink-2); margin:0 0 10px;}
+  .lead{font-size:15px; color:var(--ink-2); margin:0 0 10px;}
 
-  .stage{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:6px; box-shadow:0 14px 40px #0006; position:relative;}
+  .stage{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:6px; box-shadow:0 6px 18px rgba(60,50,30,.08); position:relative;}
   svg.scene{width:100%; height:auto; display:block; user-select:none; -webkit-user-select:none;}
   .stage-cap{position:absolute; left:14px; top:10px; font-size:11.5px; font-weight:800; letter-spacing:.08em; color:var(--ink-3); pointer-events:none;}
   .controls{display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; margin-top:10px;
@@ -106,7 +126,7 @@
   .tnow{font-variant-numeric:tabular-nums; font-weight:800; color:var(--accent); min-width:44px; text-align:right; font-size:13.5px;}
   .fstep{font-size:12.5px; color:var(--ink-2); font-weight:700;}
 
-  .view3d{position:relative; height:clamp(260px,42vw,420px); border-radius:14px; overflow:hidden; background:radial-gradient(circle at 50% 40%, #1b2a40, #0b111a 75%); border:1px solid var(--line); margin-top:10px; touch-action:none;}
+  .view3d{position:relative; height:clamp(260px,42vw,420px); border-radius:14px; overflow:hidden; background:radial-gradient(circle at 50% 40%, #FFFDF8, #E9E1D0 80%); border:1px solid var(--line); margin-top:10px; touch-action:none;}
   .view3d canvas{display:block; width:100%; height:100%;}
   .view3d .ov{position:absolute; left:10px; top:8px; font-size:11.5px; font-weight:800; color:var(--ink-3); letter-spacing:.06em; pointer-events:none;}
   .view3d .ovr{position:absolute; right:8px; top:8px; display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;}
@@ -124,13 +144,13 @@
   .card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px 16px;}
   .card h3{margin:0 0 8px; font-size:15px;}
   .card h4{margin:10px 0 6px; font-size:13.5px; color:var(--ink-2);}
-  .phase{font-size:14px; color:#dbe6f2; margin:0 0 8px; min-height:48px;}
+  .phase{font-size:15px; color:var(--ink); margin:0 0 8px; min-height:48px;}
   .stepname{display:inline-block; font-size:12px; font-weight:800; padding:2px 9px; border-radius:7px; background:var(--surface3); color:var(--accent); margin-bottom:6px;}
   .count{font-size:12.5px; color:var(--ink-2); border-top:1px dashed var(--line); padding-top:8px;}
   .count b{color:var(--ink);}
   .term{border-left:3px solid var(--accent); padding-left:11px; margin-bottom:9px;}
   .term .t{font-weight:800; font-size:13.5px;}
-  .term .d{font-size:12.8px; color:#bccadb;}
+  .term .d{font-size:13.5px; color:var(--ink-2);}
   table.cmp{width:100%; border-collapse:collapse; font-size:12.8px;}
   table.cmp th, table.cmp td{border-bottom:1px solid var(--line); padding:6px 7px; text-align:left; vertical-align:top;}
   table.cmp th{color:var(--ink-2); font-weight:800; background:var(--surface2);}
@@ -140,12 +160,12 @@
   .legend .c{display:inline-flex; align-items:center; gap:6px;}
   .legend .sw{width:12px; height:12px; border-radius:3px; display:inline-block;}
   .note{font-size:12.5px; color:var(--ink-2); background:var(--surface2); border:1px solid var(--line); border-radius:10px; padding:8px 11px; margin-top:8px;}
-  .note.warn{border-color:#6b5520; background:#2b2414; color:#f3dfae;}
+  .note.warn{border-color:#E7C77A; background:#FFF8E6; color:#6B5214;}
   .mono{font-family:ui-monospace,Consolas,monospace; letter-spacing:.06em;}
   .chips{display:flex; flex-wrap:wrap; gap:6px;}
 
   /* 예측 모드 질문 */
-  .ask{position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; background:#04080dcc; padding:16px;}
+  .ask{position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; background:#25231E99; padding:16px;}
   .ask.open{display:flex;}
   .ask .box{width:min(560px,100%); max-height:92vh; overflow:auto; background:var(--surface); border:1px solid var(--accent); border-radius:16px; padding:18px 18px 16px; box-shadow:0 20px 60px #000a;}
   .ask .tag{font-size:11.5px; font-weight:800; letter-spacing:.12em; color:var(--warn);}
@@ -160,13 +180,13 @@
   .ask .opts.aa{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));}
   .ask .opts button{text-align:left; border:1px solid var(--line); background:var(--surface2); border-radius:10px; padding:8px 10px; cursor:pointer; font-size:13.5px; font-weight:700;}
   .ask .opts button:hover{border-color:var(--accent);}
-  .ask .opts button.sel{border-color:var(--accent); background:#21405f;}
+  .ask .opts button.sel{border-color:var(--accent); background:#DCEBFA;}
   .ask .fb{min-height:1.4em; font-weight:800; font-size:14px; margin:4px 0 10px;}
   .ask .fb.ok{color:var(--good);} .ask .fb.no{color:var(--bad);}
   .ask .acts{display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;}
 
   /* 모달 */
-  .modal{position:fixed; inset:0; z-index:70; display:none; align-items:flex-start; justify-content:center; background:#04080dcc; padding:24px 12px; overflow:auto;}
+  .modal{position:fixed; inset:0; z-index:70; display:none; align-items:flex-start; justify-content:center; background:#25231E99; padding:24px 12px; overflow:auto;}
   .modal.open{display:flex;}
   .modal .box{width:min(980px,100%); background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px 18px; position:relative;}
   .modal .x{position:absolute; right:12px; top:10px;}
@@ -175,7 +195,7 @@
   table.codon th{background:var(--surface3); color:var(--ink-2); padding:4px; border-radius:6px; font-size:13px;}
   table.codon td{background:var(--surface2); border-radius:7px; padding:3px 5px; vertical-align:top;}
   table.codon .cd{display:flex; align-items:center; gap:6px; padding:1px 3px; border-radius:5px; cursor:pointer;}
-  table.codon .cd:hover{background:#2b3d55;}
+  table.codon .cd:hover{background:#E3EEF9;}
   table.codon .cd.hl{background:var(--accent); color:var(--accent-ink);}
   table.codon .cd .c{font-family:ui-monospace,Consolas,monospace; font-weight:800; letter-spacing:.04em;}
   table.codon .cd .a{font-size:11.5px;}
@@ -194,12 +214,12 @@
   .cdn{display:flex; flex-direction:column; align-items:center; gap:2px; padding:3px 4px; border-radius:8px; background:var(--surface2); border:1px solid var(--line); min-width:46px;}
   .cdn .s{font-family:ui-monospace,Consolas,monospace; font-weight:800; font-size:13px; letter-spacing:.05em;}
   .cdn .a{font-size:11px; font-weight:800; border-radius:5px; padding:0 5px; color:#141018;}
-  .cdn.diff{border-color:var(--warn); background:#3a2f12;}
+  .cdn.diff{border-color:var(--warn); background:#FFF1CC;}
   .cdn.stop .a{background:var(--bad) !important;}
   .cdn.utr{opacity:.45;}
   .badge{display:inline-block; font-weight:900; font-size:14px; border-radius:9px; padding:5px 11px; background:var(--surface3);}
-  .badge.silent{background:#1f4a35; color:#9ff0c4;} .badge.mis{background:#4a3a14; color:#ffe08a;} .badge.non{background:#4e1f26; color:#ffb3bd;}
-  .badge.fs{background:#3d2452; color:#e1b8ff;} .badge.other{background:#21405f; color:#bfe2ff;}
+  .badge.silent{background:#DDF3E6; color:#1E6B43;} .badge.mis{background:#FFF1CC; color:#7A5300;} .badge.non{background:#FBE0E0; color:#9B2C2C;}
+  .badge.fs{background:#EEE3FA; color:#5B3A92;} .badge.other{background:#E3EEF9; color:#1F5A94;}
 
   #tlMrna{transition:transform .62s cubic-bezier(.4,.05,.2,1);}
   @keyframes tlIn{from{opacity:0; transform:translate(70px,-50px);} to{opacity:1; transform:none;}}
@@ -223,6 +243,7 @@
   <p class="sub">하나의 유전자가 <b class="k">DNA → (전사) → RNA → (번역) → 폴리펩타이드</b>로 발현되는 과정을 처음부터 끝까지 따라가 봅니다. 위의 서열을 바꾸면 모든 단계가 같은 서열로 바뀝니다.</p>
 
   <div class="toolbar">
+    <label class="switch" title="끄면(기본 모드) 핵심 내용만, 켜면 효소·가공 과정·비교표·3D까지 자세히 보여 줍니다."><input type="checkbox" id="advToggle"><span class="tr"></span>심화 모드</label>
     <label class="switch" title="켜면 중요한 단계마다 결과를 먼저 예측해야 다음으로 넘어갑니다."><input type="checkbox" id="predictToggle"><span class="tr"></span>예측 모드</label>
     <span class="sp"></span>
     <button class="btn sm" id="openCodon">🧬 유전부호 표</button>
@@ -278,6 +299,16 @@
       <label class="switch"><input type="checkbox" id="ovCompare"><span class="tr"></span>원핵·진핵 나란히 비교</label>
       <span class="fstep">번호를 누르면 해당 단계 시뮬레이션으로 이동합니다.</span>
     </div>
+    <section class="card" style="margin-top:14px">
+      <h3>비유로 이해하기 <span class="ref" style="font-size:12px;color:var(--ink-3);font-weight:600">카드를 누르면 뒤집혀요</span></h3>
+      <div class="analogy" id="analogy">
+        <div class="an" data-an="dna"><div class="fr"><div class="ic">📕</div><div class="nm">DNA</div><div class="fstep">핵 속</div></div><div class="bk"><b>도서관의 원본 요리책</b>모든 요리법(유전정보)이 적혀 있지만, 귀중해서 도서관(핵) 밖으로 가지고 나갈 수 없다.</div></div>
+        <div class="an" data-an="mrna"><div class="fr"><div class="ic">📄</div><div class="nm">mRNA</div><div class="fstep">전사로 만들어짐</div></div><div class="bk"><b>필요한 쪽만 베낀 복사본</b>요리책에서 한 가지 요리법만 복사(전사)해 주방으로 가지고 간다.</div></div>
+        <div class="an" data-an="ribo"><div class="fr"><div class="ic">🍳</div><div class="nm">라이보솜</div><div class="fstep">세포질</div></div><div class="bk"><b>주방(요리사)</b>복사본을 세 글자(코돈)씩 읽으며 재료를 차례대로 이어 붙인다(번역).</div></div>
+        <div class="an" data-an="trna"><div class="fr"><div class="ic">🛵</div><div class="nm">tRNA</div><div class="fstep">아미노산 운반</div></div><div class="bk"><b>재료 배달원</b>주문서(코돈)에 맞는 재료(아미노산)만 골라 주방으로 배달한다. 안티코돈이 주문 번호표다.</div></div>
+        <div class="an" data-an="prot"><div class="fr"><div class="ic">🍲</div><div class="nm">폴리펩타이드</div><div class="fstep">단백질</div></div><div class="bk"><b>완성된 요리</b>재료(아미노산)가 순서대로 이어져 완성된 요리. 순서가 바뀌면 다른 요리가 된다(돌연변이).</div></div>
+      </div>
+    </section>
     <div class="grid2">
       <section class="card">
         <h3>현재 유전자의 유전정보 흐름</h3>
@@ -382,7 +413,7 @@
       </section>
       <section class="card">
         <h3>DNA 복제와 전사 비교</h3>
-        <table class="cmp">
+        <table class="cmp adv-only">
           <tr><th>구분</th><th>DNA 복제</th><th>전사</th></tr>
           <tr><td>효소</td><td>헬리케이스, DNA 중합효소 등</td><td><b class="k">RNA 중합효소</b> (스스로 이중나선을 풂)</td></tr>
           <tr><td>주형</td><td>두 가닥 모두</td><td>두 가닥 중 <b class="k">한 가닥(주형가닥)</b>만</td></tr>
@@ -391,6 +422,8 @@
           <tr><td>합성 방향</td><td colspan="2" style="text-align:center">새 가닥은 모두 <b class="k">5′→3′ 방향</b>으로 합성 (주형과 역평행)</td></tr>
           <tr><td>결과</td><td>DNA 2분자 (반보존적)</td><td>단일 가닥 RNA (mRNA, tRNA, rRNA)</td></tr>
         </table>
+        <div class="term"><div class="t">복제와 같은 점</div><div class="d">새 가닥은 주형과 상보적이며 <b class="k">5′→3′ 방향</b>으로 합성된다.</div></div>
+        <div class="term" style="border-color:var(--U)"><div class="t">복제와 다른 점</div><div class="d">한 가닥(주형가닥)만 주형으로 쓰고, 프라이머 없이 RNA 중합효소가 시작하며, A의 짝으로 <b class="k">U</b>가 들어간다.</div></div>
         <div class="note">mRNA의 염기서열은 <b class="k">주형가닥과 상보적</b>이고, <b class="k">비주형가닥과 같다</b>(T 대신 U).</div>
       </section>
     </div>
@@ -405,8 +438,9 @@
     <div class="controls">
       <button class="btn primary" id="prPlay">▷ 재생</button>
       <div class="grow"><span class="fstep">진행</span><input type="range" id="prTime" min="0" max="1000" value="0"><span class="tnow" id="prNow">0%</span></div>
-      <label class="switch" id="prAltWrap" title="엑손 2도 함께 잘라내는 선택적 RNA 가공"><input type="checkbox" id="prAlt"><span class="tr"></span>선택적 RNA 가공 (엑손 2 제외)</label>
-      <button class="btn sm" id="prAddIntron">＋ 인트론 넣어 보기</button>
+      <label class="switch adv-only" id="prAltWrap" title="엑손 2도 함께 잘라내는 선택적 RNA 가공"><input type="checkbox" id="prAlt"><span class="tr"></span>선택적 RNA 가공 (엑손 2 제외)</label>
+      <button class="btn sm" id="prLoadEx">📚 엑손·인트론 예시 유전자 불러오기</button>
+      <button class="btn sm adv-only" id="prAddIntron">＋ 현재 유전자에 인트론 넣기</button>
     </div>
     <div class="grid2">
       <section class="card">
@@ -419,9 +453,9 @@
         <h3>엑손과 인트론</h3>
         <div class="term" style="border-color:var(--exon)"><div class="t">엑손</div><div class="d">처음 만들어진 RNA에서 단백질을 암호화하는 부위. 가공 후 이어 붙어 mRNA에 남는다.</div></div>
         <div class="term" style="border-color:var(--intron)"><div class="t">인트론</div><div class="d">엑손 사이의 부위로, 가공 과정에서 잘려 나간다.</div></div>
-        <div class="term" style="border-color:var(--cap)"><div class="t">양 끝 변형</div><div class="d">5′ 끝에는 변형된 뉴클레오타이드(5′ 캡)가, 3′ 끝에는 A가 길게 이어진 꼬리(폴리 A 꼬리)가 붙어 mRNA가 분해되지 않게 보호하고 번역을 돕는다.</div></div>
-        <div class="term" style="border-color:var(--warn)"><div class="t">유전자 하나 → 여러 폴리펩타이드</div><div class="d">어떤 엑손을 남기느냐에 따라 한 유전자에서 서로 다른 mRNA와 폴리펩타이드가 만들어질 수 있다(선택적 RNA 가공).</div></div>
-        <div id="prAltOut"></div>
+        <div class="term adv-only" style="border-color:var(--cap)"><div class="t">양 끝 변형</div><div class="d">5′ 끝에는 변형된 뉴클레오타이드(5′ 캡)가, 3′ 끝에는 A가 길게 이어진 꼬리(폴리 A 꼬리)가 붙어 mRNA가 분해되지 않게 보호하고 번역을 돕는다.</div></div>
+        <div class="term adv-only" style="border-color:var(--warn)"><div class="t">유전자 하나 → 여러 폴리펩타이드</div><div class="d">어떤 엑손을 남기느냐에 따라 한 유전자에서 서로 다른 mRNA와 폴리펩타이드가 만들어질 수 있다(선택적 RNA 가공).</div></div>
+        <div id="prAltOut" class="adv-only"></div>
       </section>
     </div>
   </section>
@@ -456,7 +490,7 @@
         <div class="term" style="border-color:#9b8ce0"><div class="t">P 자리</div><div class="d">길어지는 폴리펩타이드가 붙은 tRNA가 있는 자리. 개시 tRNA도 P 자리에 온다.</div></div>
         <div class="term" style="border-color:#7fa9c9"><div class="t">E 자리</div><div class="d">아미노산을 넘겨준 tRNA가 빠져나가기 전에 잠시 머무는 자리.</div></div>
         <div class="term"><div class="t">코돈 ↔ 안티코돈</div><div class="d">mRNA의 코돈(염기 3개)과 tRNA의 안티코돈이 상보적으로 결합해, 코돈에 맞는 아미노산이 운반된다.</div></div>
-        <div class="term" style="border-color:var(--bad)"><div class="t">종결</div><div class="d">A 자리에 종결코돈(UAA, UAG, UGA)이 오면 결합할 수 있는 tRNA가 없어 번역이 끝난다. <span style="color:var(--ink-3)">(심화: 실제로는 방출 인자라는 단백질이 종결코돈에 결합한다.)</span></div></div>
+        <div class="term" style="border-color:var(--bad)"><div class="t">종결</div><div class="d">A 자리에 종결코돈(UAA, UAG, UGA)이 오면 결합할 수 있는 tRNA가 없어 번역이 끝난다. <span class="adv-only" style="color:var(--ink-3)">(심화: 실제로는 방출 인자라는 단백질이 종결코돈에 결합한다.)</span></div></div>
         <div class="legend"><span class="c"><span class="sw" style="background:var(--np);border-radius:50%"></span>비극성</span><span class="c"><span class="sw" style="background:var(--polar);border-radius:50%"></span>극성</span><span class="c"><span class="sw" style="background:var(--acid);border-radius:50%"></span>산성</span><span class="c"><span class="sw" style="background:var(--basic);border-radius:50%"></span>염기성</span></div>
       </section>
     </div>
@@ -519,7 +553,7 @@
       </div>
       <div class="grid2">
         <section class="card"><h3>시간에 따른 변화 <span class="ref" style="font-size:12px;color:var(--ink-3)">(81쪽 과학 글쓰기 2번)</span></h3><svg class="scene" id="lacGraph" viewBox="0 0 460 250"></svg>
-          <div class="legend"><span class="c"><span class="sw" style="background:#9fd3ff"></span>젖당 농도</span><span class="c"><span class="sw" style="background:#ff7b7b"></span>구조유전자 mRNA</span><span class="c"><span class="sw" style="background:#c9a7ff"></span>젖당분해효소</span></div></section>
+          <div class="legend"><span class="c"><span class="sw" style="background:#2a6cb0"></span>젖당 농도</span><span class="c"><span class="sw" style="background:#ff7b7b"></span>구조유전자 mRNA</span><span class="c"><span class="sw" style="background:#c9a7ff"></span>젖당분해효소</span></div></section>
         <section class="card"><h3>젖당오페론의 구성</h3>
           <div class="term" style="border-color:#5cbf6a"><div class="t">조절유전자</div><div class="d">억제단백질의 정보가 있으며 <b class="k">항상(지속적으로)</b> 발현된다. 오페론에는 포함되지 않는다.</div></div>
           <div class="term" style="border-color:#f08a5d"><div class="t">프로모터</div><div class="d">RNA 중합효소가 결합하는 부위.</div></div>
@@ -622,8 +656,8 @@
       <section class="card">
         <h3>학생에게 서열 공유하기</h3>
         <p class="lead" style="margin-bottom:8px">현재 서열·생물 종류·탭·예측 모드 설정이 담긴 링크를 만듭니다. 학생이 링크로 열면 같은 화면에서 시작합니다.</p>
-        <div class="chips"><button class="btn sm primary" id="tCopy">🔗 현재 설정 링크 복사</button></div>
-        <input id="tLink" class="mono" style="width:100%; margin-top:8px; padding:7px 9px; border-radius:8px; border:1px solid var(--line); background:#0b111b; color:var(--ink); font-size:12px" readonly>
+        <div class="chips"><button class="btn sm primary" id="tCopy">🔗 현재 설정 링크 복사</button><button class="btn sm" id="tResetM">↺ 미션 기록 초기화</button></div>
+        <input id="tLink" class="mono" style="width:100%; margin-top:8px; padding:7px 9px; border-radius:8px; border:1px solid var(--line); background:#FFFDF8; color:var(--ink); font-size:12px" readonly>
         <div class="msg ok" id="tMsg"></div>
         <h3 style="margin-top:12px">차시별 활용 예시</h3>
         <table class="cmp">
@@ -723,7 +757,7 @@ const PRESETS = [
 
 /* ---------- 전역 상태 ---------- */
 const S = {
-  org: 'euk', predict: false, tab: 'overview', alt: false,
+  org: 'euk', predict: false, tab: 'overview', alt: false, adv: false,
   gene: null,          // {name, segs:[{t:'E'|'I', s}], fragment, note, id}
   ver: 0,
 };
@@ -818,8 +852,8 @@ function renderSeqBar(){
   $('gTag').textContent = tags.join(' · ');
   const rows = [];
   rows.push(['DNA 주형가닥', `3${PRIME}-${ntSpan(d.tmpl, d.mask)}-5${PRIME}`]);
-  rows.push(['DNA 비주형가닥', `5${PRIME}-${ntSpan(d.dna, d.mask)}-3${PRIME}`]);
-  if (S.org === 'euk' && d.hasIntron) rows.push(['처음 만들어진 RNA', `5${PRIME}-${ntSpan(d.pre, d.mask)}-3${PRIME}`]);
+  if (S.adv) rows.push(['DNA 비주형가닥', `5${PRIME}-${ntSpan(d.dna, d.mask)}-3${PRIME}`]);
+  if (S.adv && S.org === 'euk' && d.hasIntron) rows.push(['처음 만들어진 RNA', `5${PRIME}-${ntSpan(d.pre, d.mask)}-3${PRIME}`]);
   rows.push([S.org === 'euk' && d.hasIntron ? 'mRNA (가공 후)' : 'mRNA', `5${PRIME}-${ntSpan(d.mature)}-3${PRIME}`]);
   let pp;
   if (d.start < 0) pp = '<span style="color:var(--bad)">개시코돈(AUG)이 없어 번역되지 않음</span>';
@@ -1027,6 +1061,7 @@ function shareURL(){
   if (S.org !== 'euk') p.set('org', S.org);
   if (S.tab !== 'overview') p.set('tab', S.tab);
   if (S.predict) p.set('p', '1');
+  if (S.adv) p.set('adv', '1');
   return location.href.split('#')[0] + '#' + p.toString();
 }
 function readURL(){
@@ -1034,6 +1069,7 @@ function readURL(){
   const p = new URLSearchParams(h);
   if (p.get('org') === 'pro') S.org = 'pro';
   if (p.get('p') === '1') S.predict = true;
+  if (p.get('adv') === '1') S.adv = true;
   const s = p.get('s');
   if (s){
     const code = normalizeInput(s, 'code');
@@ -1045,6 +1081,65 @@ function readURL(){
   return p.get('tab') || false;
 }
 
+/* ---------- 탭별 목표 · 미션 · 핵심 정리 ---------- */
+const MISSIONS = {
+  overview:{goal:'DNA의 유전정보가 단백질이 되기까지의 전체 흐름(중심원리)을 살펴보자.',
+    items:[['call','그림의 번호(①~⑥) 하나를 눌러 해당 단계로 이동해 보기'], ['pro','‘원핵생물’로 바꾸고 진핵생물과 다른 점 찾기'], ['analogy','비유 카드 5장을 모두 눌러 뒤집어 보기']],
+    sum:'중심원리: DNA →(전사)→ mRNA →(번역)→ 폴리펩타이드. 진핵생물은 핵에서 전사하고 세포질에서 번역하며, 원핵생물은 세포질에서 전사와 번역이 동시에 일어난다.'},
+  structure:{goal:'DNA 이중나선의 구조적 특징을 관찰하자.',
+    items:[['pick','염기쌍 하나를 눌러 수소 결합 수 확인하기'], ['ladder','슬라이더를 왼쪽 끝으로 옮겨 사다리 모양 만들기'], ['arrows','‘5′→3′ 방향’을 켜서 두 가닥의 방향 비교하기']],
+    sum:'DNA는 두 가닥이 서로 반대 방향(역평행)으로 꼬인 이중나선이며, A–T(수소 결합 2개), G–C(수소 결합 3개)가 상보적으로 결합한다.'},
+  replication:{goal:'새 가닥이 5′→3′ 방향으로만 자라서 선도가닥과 지연가닥이 생기는 까닭을 알아보자.',
+    items:[['play','재생 버튼을 눌러 복제 시작하기'], ['lig','DNA 연결효소가 절편을 잇는 장면 보기'], ['end','복제를 끝까지 진행해 딸 DNA 두 개 확인하기']],
+    sum:'DNA 중합효소는 5′→3′ 방향으로만 합성하므로, 분기점 방향과 같은 선도가닥은 연속으로, 반대 방향인 지연가닥은 오카자키 절편으로 불연속 합성된다. 복제 결과 딸 DNA는 원래 가닥 하나를 보존한다(반보존적 복제).'},
+  transcription:{goal:'RNA 중합효소가 RNA를 합성하는 방향과 규칙을 알아보자.',
+    items:[['play','재생 버튼을 눌러 전사 시작하기'], ['elong','RNA 중합효소가 RNA를 길게 만드는 신장 단계 보기'], ['end','전사가 끝나 RNA가 떨어져 나오는 것 확인하기']],
+    sum:'전사: RNA 중합효소가 프로모터에 결합한 뒤, 주형가닥에 상보적인 RNA를 5′→3′ 방향으로 합성한다(A의 짝은 U). 만들어진 RNA는 비주형가닥과 같은 서열이다(T 대신 U).'},
+  processing:{goal:'처음 만들어진 RNA가 mRNA가 되기까지 어떤 변화가 일어나는지 알아보자.',
+    items:[['play','재생 버튼을 눌러 가공 시작하기'], ['splice','인트론이 잘려 나가고 엑손이 이어지는 장면 보기'], ['export','mRNA가 핵공을 통해 세포질로 나가는 장면 보기']],
+    sum:'진핵생물에서 처음 만들어진 RNA는 핵 속에서 인트론이 제거되고 엑손끼리 연결되며 양 끝이 변형되어 mRNA가 된 뒤, 핵공을 통해 세포질로 이동한다.'},
+  translation:{goal:'라이보솜에서 개시·신장·종결 단계를 거쳐 폴리펩타이드가 만들어지는 과정을 알아보자.',
+    items:[['init','개시 단계를 끝까지 넘겨 완전한 라이보솜 만들기'], ['codon','‘표에서 찾기’로 코돈이 지정하는 아미노산 확인하기'], ['term','종결 단계까지 진행하기']],
+    sum:'번역: 개시(개시코돈 AUG에 개시 tRNA 결합 → 대단위체 결합, P 자리) → 신장(A 자리에 tRNA 진입 → 펩타이드결합 → 라이보솜이 코돈 하나만큼 이동) → 종결(종결코돈에 결합하는 tRNA가 없어 끝남).'},
+  mutation:{goal:'DNA 염기서열이 바뀌면 단백질이 어떻게 달라지는지 비교하자.',
+    items:[['p80','교과서 80쪽 ㄱ~ㄹ 중 하나를 적용해 보기'], ['sickle','‘낫모양적혈구빈혈증’ 사례에서 돌연변이 적용하기'], ['manual','염기를 직접 골라 치환·삽입·결실 일으키기']],
+    sum:'염기 하나의 치환은 아미노산을 바꾸지 않거나(침묵) 하나만 바꾸거나(낫모양적혈구빈혈증) 종결코돈을 만든다. 3의 배수가 아닌 삽입·결실은 읽기틀을 바꿔 뒤쪽 아미노산이 모두 달라질 수 있다.'},
+  regulation:{goal:'생물이 상황에 따라 유전자 발현을 켜고 끄는 방법을 알아보자.',
+    items:[['lac','‘젖당 넣기’를 누르고 억제단백질의 변화 관찰하기'], ['tf','전사인자를 직접 골라 발현되는 유전자 바꿔 보기'], ['dev','마이오디유전자에 돌연변이를 일으켜 보기']],
+    sum:'원핵생물은 주로 전사 단계에서 오페론 단위로, 진핵생물은 전사인자의 조합을 비롯해 여러 단계에서 유전자발현을 조절한다. 핵심조절유전자는 다른 유전자의 발현을 연쇄적으로 조절해 세포분화를 이끈다.'},
+};
+const MDONE = {};
+try{ Object.assign(MDONE, JSON.parse(localStorage.getItem('cd-missions') || '{}')); }catch(e){}
+function mission(tab, id){
+  const k = tab + ':' + id;
+  if (MDONE[k]) return;
+  MDONE[k] = 1;
+  try{ localStorage.setItem('cd-missions', JSON.stringify(MDONE)); }catch(e){}
+  renderMission(tab, true);
+}
+function renderMission(tab, flash){
+  const M = MISSIONS[tab], box = document.getElementById('ms-' + tab); if (!M || !box) return;
+  const done = M.items.filter(([id]) => MDONE[tab + ':' + id]).length, all = done === M.items.length;
+  box.innerHTML = `<div class="ms-goal">🎯 <b>이번 탭의 목표</b> ${M.goal}</div>
+    <div class="ms-list">${M.items.map(([id, t], i) => { const ok = MDONE[tab + ':' + id]; return `<span class="ms-item${ok ? ' ok' : ''}">${ok ? '✅' : '⬜'} 미션 ${i + 1}. ${t}</span>`; }).join('')}</div>
+    <div class="ms-prog">${all ? '🎉 미션 완료! 아래의 핵심 정리를 읽어 보세요.' : `미션 ${done} / ${M.items.length}`}</div>`;
+  const sm = document.getElementById('sm-' + tab);
+  if (sm){ sm.classList.toggle('done', all); if (flash && all) sm.scrollIntoView && 0; }
+}
+function initMissions(){
+  Object.keys(MISSIONS).forEach(tab => {
+    const panel = document.getElementById('tab-' + tab); if (!panel) return;
+    const box = document.createElement('div'); box.className = 'mission'; box.id = 'ms-' + tab;
+    const anchor = panel.querySelector('.intro3') || panel.querySelector(':scope > .lead') || panel.querySelector('.ptitle');
+    anchor.after(box);
+    const sm = document.createElement('div'); sm.className = 'summary'; sm.id = 'sm-' + tab;
+    sm.innerHTML = `<b>📌 핵심 정리</b> ${MISSIONS[tab].sum}`;
+    panel.appendChild(sm);
+    renderMission(tab);
+  });
+}
+function resetMissions(){ Object.keys(MDONE).forEach(k => delete MDONE[k]); try{ localStorage.removeItem('cd-missions'); }catch(e){} Object.keys(MISSIONS).forEach(t => renderMission(t)); }
+
 /* ---------- 공통 SVG 도우미 ---------- */
 function ntTile(x, y, b, style, w = 22, h = 20){
   // style: 'tem'(주형, 채움) | 'new'(새 가닥, 흰 바탕) | 'prim'(프라이머) | 'rna' | 'dim'
@@ -1052,7 +1147,7 @@ function ntTile(x, y, b, style, w = 22, h = 20){
   if (style === 'new') return `<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="5" fill="#e7eef8" stroke="${BASE_HEX[b]}" stroke-width="2"/><text x="${x}" y="${y+4.2}" text-anchor="middle" fill="${BASE_HEX[b]}" font-size="${fs}" font-weight="800">${b}</text>`;
   if (style === 'prim') return `<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="5" fill="#e0476a"/><text x="${x}" y="${y+4.2}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="800">${b}</text>`;
   if (style === 'rna') return `<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="9" fill="${BASE_HEX[b]}" stroke="#ffe7a8" stroke-width="1.5"/><text x="${x}" y="${y+4.2}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="800">${b}</text>`;
-  if (style === 'dim') return `<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="5" fill="#33445c"/><text x="${x}" y="${y+4.2}" text-anchor="middle" fill="#9fb2c6" font-size="${fs}" font-weight="800">${b}</text>`;
+  if (style === 'dim') return `<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="5" fill="#DDE2E8"/><text x="${x}" y="${y+4.2}" text-anchor="middle" fill="#5E584D" font-size="${fs}" font-weight="800">${b}</text>`;
   return `<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="5" fill="${BASE_HEX[b]}"/><text x="${x}" y="${y+4.2}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="800">${b}</text>`;
 }
 function svgText(x, y, t, o = {}){
@@ -1094,7 +1189,7 @@ function makeTimeline(o){
     [...$(o.speedSeg).children].forEach(x => x.classList.toggle('on', x === b)); });
   T.tick = (dt) => {
     if (!T.playing || T.busy) return;
-    let nt = T.t + dt * T.speed;
+    let nt = T.t + dt * T.speed * 0.75;
     if (S.predict && o.checkpoints){
       const cp = o.checkpoints().find(c => !T.asked.has(c.key) && T.t < c.t + 1e-6 && nt >= c.t);
       if (cp){
@@ -1245,14 +1340,14 @@ const V3 = (() => {
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 2;
     const res = {tex:t, aspect: w / h}; texCache.set(key, res); return res;
   }
-  function makeLabel(text, color = '#eaf0f7', bg = 'rgba(10,16,26,.72)', height = 0.5){
+  function makeLabel(text, color = '#25231E', bg = 'rgba(255,253,248,.92)', height = 0.5){
     const {tex, aspect} = textTexture(text, color, bg);
     const m = new THREE.SpriteMaterial({map:tex, depthTest:false, transparent:true});
     const sp = new THREE.Sprite(m); sp.scale.set(height * aspect, height, 1); sp.renderOrder = 10;
     sp.userData.h = height;
     return sp;
   }
-  function setLabel(sp, text, color = '#eaf0f7', bg = 'rgba(10,16,26,.72)'){
+  function setLabel(sp, text, color = '#25231E', bg = 'rgba(255,253,248,.92)'){
     const {tex, aspect} = textTexture(text, color, bg);
     if (sp.material.map !== tex){ sp.material.map = tex; sp.material.needsUpdate = true; }
     sp.scale.set(sp.userData.h * aspect, sp.userData.h, 1);
@@ -1352,7 +1447,7 @@ const V3 = (() => {
   const view = V3.create('v3-structure', {dist:10.5, phi:1.38, theta:0.25, spin:0.22, minDist:3, maxDist:40});
   const dx = new V3.Duplex(view.scene, 64);
   const dims = new THREE.Group(); view.scene.add(dims);
-  const ends = [0, 1, 2, 3].map(() => { const s = V3.makeLabel('5′', '#cfe3ff', 'rgba(10,16,26,.75)', 0.42); view.scene.add(s); return s; });
+  const ends = [0, 1, 2, 3].map(() => { const s = V3.makeLabel('5′', '#cfe3ff', 'rgba(255,253,248,.92)', 0.42); view.scene.add(s); return s; });
   let seq = '', nodes = [], sel = -1, dirty = true, twist = 1;
 
   function geom(){
@@ -1375,10 +1470,10 @@ const V3 = (() => {
     if (n){
       const L0 = nodes[0], L1 = nodes[1], R0 = nodes[2 * n - 2], R1 = nodes[2 * n - 1];
       const off = new THREE.Vector3(-0.55, 0, 0);
-      ends[0].position.copy(L0.p).add(off).multiplyScalar(1).add(new THREE.Vector3(0, 0.15, 0)); V3.setLabel(ends[0], '5′', '#9fd0ff');
-      ends[1].position.copy(L1.p).add(off); V3.setLabel(ends[1], '3′', '#9fd0ff');
-      ends[2].position.copy(R0.p).sub(off); V3.setLabel(ends[2], '3′', '#9fd0ff');
-      ends[3].position.copy(R1.p).sub(off); V3.setLabel(ends[3], '5′', '#9fd0ff');
+      ends[0].position.copy(L0.p).add(off).multiplyScalar(1).add(new THREE.Vector3(0, 0.15, 0)); V3.setLabel(ends[0], '5′', '#2a6cb0');
+      ends[1].position.copy(L1.p).add(off); V3.setLabel(ends[1], '3′', '#2a6cb0');
+      ends[2].position.copy(R0.p).sub(off); V3.setLabel(ends[2], '3′', '#2a6cb0');
+      ends[3].position.copy(R1.p).sub(off); V3.setLabel(ends[3], '5′', '#2a6cb0');
     }
     buildDims(n, spacing, delta);
     dirty = false;
@@ -1396,25 +1491,26 @@ const V3 = (() => {
       const xd = x0 - 1.0;
       dims.add(line([new V(xd, -1, 0), new V(xd, 1, 0)]));
       dims.add(line([new V(xd - .15, -1, 0), new V(xd + .15, -1, 0)])); dims.add(line([new V(xd - .15, 1, 0), new V(xd + .15, 1, 0)]));
-      const l1 = V3.makeLabel('지름 약 2 nm', '#ffd166', 'rgba(10,16,26,.8)', 0.36); l1.position.set(xd - 0.2, -1.45, 0); dims.add(l1);
+      const l1 = V3.makeLabel('지름 약 2 nm', '#a8740a', 'rgba(255,253,248,.92)', 0.36); l1.position.set(xd - 0.2, -1.45, 0); dims.add(l1);
       const xa = x0, xb = x0 + 10 * spacing, yb = 1.75;
       dims.add(line([new V(xa, yb, 0), new V(xb, yb, 0)]));
       dims.add(line([new V(xa, yb - .2, 0), new V(xa, yb + .2, 0)])); dims.add(line([new V(xb, yb - .2, 0), new V(xb, yb + .2, 0)]));
-      const l2 = V3.makeLabel('한 바퀴 3.4 nm (염기쌍 10개)', '#ffd166', 'rgba(10,16,26,.8)', 0.36); l2.position.set((xa + xb) / 2, yb + 0.42, 0); dims.add(l2);
+      const l2 = V3.makeLabel('한 바퀴 3.4 nm (염기쌍 10개)', '#a8740a', 'rgba(255,253,248,.92)', 0.36); l2.position.set((xa + xb) / 2, yb + 0.42, 0); dims.add(l2);
       const xc = x0 + 11 * spacing;
       dims.add(line([new V(xc, -1.6, 0), new V(xc + spacing, -1.6, 0)], 0x9fe0c0));
-      const l3 = V3.makeLabel('0.34 nm', '#9fe0c0', 'rgba(10,16,26,.8)', 0.32); l3.position.set(xc + spacing / 2, -1.95, 0); dims.add(l3);
+      const l3 = V3.makeLabel('0.34 nm', '#2e8a5f', 'rgba(255,253,248,.92)', 0.32); l3.position.set(xc + spacing / 2, -1.95, 0); dims.add(l3);
       // 큰 홈 · 작은 홈
       const im = Math.min(n - 1, 14), a = im * V3.TWIST, xm = (im - (n - 1) / 2) * spacing;
       const minorA = a + delta / 2, majorA = minorA + Math.PI;
-      const m1 = V3.makeLabel('작은 홈', '#ff9fb2', 'rgba(10,16,26,.8)', 0.36); m1.position.copy(V3.onHelix(xm, 0, 0, minorA, 1.55)); dims.add(m1);
-      const m2 = V3.makeLabel('큰 홈', '#ff9fb2', 'rgba(10,16,26,.8)', 0.36); m2.position.copy(V3.onHelix(xm + 5 * spacing, 0, 0, majorA + 5 * V3.TWIST, 1.55)); dims.add(m2);
+      const m1 = V3.makeLabel('작은 홈', '#c0392b', 'rgba(255,253,248,.92)', 0.36); m1.position.copy(V3.onHelix(xm, 0, 0, minorA, 1.55)); dims.add(m1);
+      const m2 = V3.makeLabel('큰 홈', '#c0392b', 'rgba(255,253,248,.92)', 0.36); m2.position.copy(V3.onHelix(xm + 5 * spacing, 0, 0, majorA + 5 * V3.TWIST, 1.55)); dims.add(m2);
     }
   }
 
   view.update = () => { if (dirty) geom(); };
   view.pickables = [dx.base];
   view.onPick = hit => {
+    if (hit && hit.object === dx.base) mission('structure', 'pick');
     if (!hit || hit.object !== dx.base){ sel = -1; dirty = true; pickInfo(); return; }
     const nd = nodes.find(x => x._bi === hit.instanceId);
     sel = nd ? nd.pair : -1; dirty = true; pickInfo();
@@ -1433,8 +1529,8 @@ const V3 = (() => {
   }
   function reload(){ seq = D().dna.slice(0, 30); sel = -1; dirty = true; pickInfo(); stats(); }
   onGene(reload);
-  $('stTwist').addEventListener('input', e => { twist = +e.target.value / 100; dirty = true; });
-  [['stBackbone', v => dx.showBB = v], ['stHbond', v => dx.showHB = v], ['stLetters', v => dx.lettersOn = v], ['stArrows', v => dx.showArrows = v], ['stDims', () => {}], ['stSpin', v => view.spin = v ? 0.22 : 0]]
+  $('stTwist').addEventListener('input', e => { twist = +e.target.value / 100; dirty = true; if (twist < 0.12) mission('structure', 'ladder'); });
+  [['stBackbone', v => dx.showBB = v], ['stHbond', v => dx.showHB = v], ['stLetters', v => dx.lettersOn = v], ['stArrows', v => { dx.showArrows = v; if (v) mission('structure', 'arrows'); }], ['stDims', () => {}], ['stSpin', v => view.spin = v ? 0.22 : 0]]
     .forEach(([id, f]) => $(id).addEventListener('change', e => { f(e.target.checked); dirty = true; }));
   TABS.structure = {show(){ reload(); V3.activate(view); }, hide(){ V3.deactivate(view); }};
 })();
@@ -1570,25 +1666,25 @@ const V3 = (() => {
       if (!st[iL] || !st[iR] || t < j.t0 - REP || t >= j.t1) return;
       if (st[iL].s !== 'dna' || st[iR].s !== 'dna') return;
       const x = X(j.at), y = j.strand === 'T' ? yT[iL] + GAP : yB[iL] - GAP;
-      marks += `<line x1="${x}" y1="${y - 12}" x2="${x}" y2="${y + 12}" stroke="#ffcf6b" stroke-width="2.4" stroke-dasharray="3 2"/>`;
+      marks += `<line x1="${x}" y1="${y - 12}" x2="${x}" y2="${y + 12}" stroke="#a8740a" stroke-width="2.4" stroke-dasharray="3 2"/>`;
     });
     // 원점 표시
-    if (t < 1.2) marks += `<line x1="${X(O - 0.5)}" y1="190" x2="${X(O - 0.5)}" y2="318" stroke="#ffcf6b" stroke-width="1.5" stroke-dasharray="4 3" opacity="${1 - t / 1.2}"/>`+
-      svgText(X(O - 0.5), 184, '복제 원점', {fill:'#ffcf6b', size:12.5});
+    if (t < 1.2) marks += `<line x1="${X(O - 0.5)}" y1="190" x2="${X(O - 0.5)}" y2="318" stroke="#a8740a" stroke-width="1.5" stroke-dasharray="4 3" opacity="${1 - t / 1.2}"/>`+
+      svgText(X(O - 0.5), 184, '복제 원점', {fill:'#a8740a', size:12.5});
 
     // ---- 효소 ----
     const labels = [];
     const {xl, xr} = forks(t);
     const blob = (x, y, col, rx = 13, ry = 15) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${col}" opacity=".9" stroke="#0006"/>`;
     const helic = (fx, yt, yb) => `<g><ellipse cx="${fx}" cy="${(yt + yb) / 2 - 10}" rx="15" ry="13" fill="var(--helic)" opacity=".92"/><ellipse cx="${fx}" cy="${(yt + yb) / 2 + 10}" rx="15" ry="13" fill="var(--helic)" opacity=".92"/></g>`;
-    if (t > 0.05 && t < O){ const x = X(xl - 0.5); enz += helic(x, PT, PB); labels.push({x, ty:PT - 6, row:'top', t1:'헬리케이스', t2:'◄ 이중나선을 풂', col:'var(--helic)'}); }
-    if (t > 0.05 && t < L - O){ const x = X(xr - 0.5); enz += helic(x, PT, PB); labels.push({x, ty:PT - 6, row:'top', t1:'헬리케이스', t2:'이중나선을 풂 ►', col:'var(--helic)'}); }
+    if (t > 0.05 && t < O){ const x = X(xl - 0.5); enz += helic(x, PT, PB); labels.push({x, ty:PT - 6, row:'top', t1:'헬리케이스', t2:'◄ 이중나선을 풂', col:'#1f8a7e'}); }
+    if (t > 0.05 && t < L - O){ const x = X(xr - 0.5); enz += helic(x, PT, PB); labels.push({x, ty:PT - 6, row:'top', t1:'헬리케이스', t2:'이중나선을 풂 ►', col:'#1f8a7e'}); }
     const doPieces = (pieces, strand) => pieces.forEach((p, pi) => {
       const yy = i => strand === 'T' ? yT[clamp(Math.round(i), 0, L - 1)] + GAP : yB[clamp(Math.round(i), 0, L - 1)] - GAP;
       const row = strand === 'T' ? 'top' : 'bot', ty = i => strand === 'T' ? yy(i) - 14 : yy(i) + 14;
       // 프라이메이스
-      if (t >= p.ts - 0.45 && t < p.ts + 0.2){ const i = p.pside === 'R' ? p.b - 0.5 : p.a + 0.5; enz += blob(X(i), yy(i), '#ff8fb0', 11, 11);
-        labels.push({x:X(i), ty:ty(i), row, t1:'프라이메이스', t2:'RNA 프라이머 합성', col:'#ff8fb0'}); }
+      if (S.adv && t >= p.ts - 0.45 && t < p.ts + 0.2){ const i = p.pside === 'R' ? p.b - 0.5 : p.a + 0.5; enz += blob(X(i), yy(i), '#ff8fb0', 11, 11);
+        labels.push({x:X(i), ty:ty(i), row, t1:'프라이메이스', t2:'RNA 프라이머 합성', col:'#c0476a'}); }
       // DNA 중합효소(합성)
       if (t >= p.ts + 0.1 && t < p.tc){
         let fi;
@@ -1598,12 +1694,12 @@ const V3 = (() => {
         labels.push({x:X(fi), ty:ty(fi), row, t1:'DNA 중합효소', t2:(p.kind === 'lead' ? '선도가닥 · 연속 ' : '지연가닥 · 절편 ') + (strand === 'T' ? '◄' : '►'), col:'var(--enz-d)'});
       }
       // 프라이머 교체
-      if (p.rep && t >= p.rep.t0 && t < p.rep.t1){ const i = p.pside === 'R' ? p.b - p.pl / 2 + 0.5 : p.a + p.pl / 2 - 0.5;
+      if (S.adv && p.rep && t >= p.rep.t0 && t < p.rep.t1){ const i = p.pside === 'R' ? p.b - p.pl / 2 + 0.5 : p.a + p.pl / 2 - 0.5;
         enz += blob(X(i), yy(i), '#f7d9a8', 12, 13);
-        labels.push({x:X(i), ty:ty(i), row, t1:'DNA 중합효소', t2:'프라이머 → DNA로 교체', col:'#f7d9a8'}); }
+        labels.push({x:X(i), ty:ty(i), row, t1:'DNA 중합효소', t2:'프라이머 → DNA로 교체', col:'#a8740a'}); }
     });
     doPieces(M.top, 'T'); doPieces(M.bot, 'B');
-    M.junc.forEach(j => { if (t >= j.t0 && t < j.t1){ const i = j.at, y = j.strand === 'T' ? yT[Math.floor(i)] + GAP : yB[Math.floor(i)] - GAP;
+    M.junc.forEach(j => { if (t >= j.t0 && t < j.t1){ mission('replication', 'lig'); const i = j.at, y = j.strand === 'T' ? yT[Math.floor(i)] + GAP : yB[Math.floor(i)] - GAP;
       enz += blob(X(i), y, 'var(--accent)', 12, 12); labels.push({x:X(i), ty: j.strand === 'T' ? y + 14 : y - 14, row: j.strand === 'T' ? 'top' : 'bot', t1:'DNA 연결효소', t2:'틈을 연결', col:'var(--accent)'}); } });
 
     // 가닥 이름표
@@ -1623,6 +1719,7 @@ const V3 = (() => {
     // 끝 방향 표시
     const endL = (x, y, s) => svgText(x, y + 4, s, {size:12, fill:'var(--ink-3)'});
     marks += endL(X(0) - 24, yT[0], `5${PRIME}`) + endL(X(L - 1) + 24, yT[L - 1], `3${PRIME}`) + endL(X(0) - 24, yB[0], `3${PRIME}`) + endL(X(L - 1) + 24, yB[L - 1], `5${PRIME}`);
+    if (t >= M.T - 0.05) mission('replication', 'end');
     const lbl = layoutLabels(labels, {top:[40, 74], bot:[448, 480]});
     svg.innerHTML = back + rungs + tiles + marks + enz + lab.join('') + lbl;
     panel(t, tS, bS);
@@ -1754,9 +1851,9 @@ const V3 = (() => {
     const yT = i => lerp(TP, TOPO, openAt(i, t)), yC = i => lerp(CD, CDO, openAt(i, t));
     // 프로모터·종결 부위 상자
     back += `<rect x="${X(-P) - 14}" y="${TP - 22}" width="${P * STEP + 2}" height="${CD - TP + 44}" rx="10" fill="#f08a5d22" stroke="#f08a5d" stroke-dasharray="4 3"/>`;
-    back += svgText(X(-P / 2 - 0.5), TP - 30, '프로모터', {fill:'#f6a37f', size:12.5});
+    back += svgText(X(-P / 2 - 0.5), TP - 30, '프로모터', {fill:'#c25a2a', size:12.5});
     back += `<rect x="${X(L) - 14}" y="${TP - 22}" width="${R * STEP + 2}" height="${CD - TP + 44}" rx="10" fill="#9aa7b922" stroke="#9aa7b9" stroke-dasharray="4 3"/>`;
-    back += svgText(X(L + R / 2 - 0.5), TP - 30, '전사 종결 부위', {fill:'#b9c4d3', size:12});
+    back += svgText(X(L + R / 2 - 0.5), TP - 30, '전사 종결 부위', {fill:'#5E584D', size:12});
     // 엑손/인트론 표시 (진핵)
     if (S.org === 'euk' && d.hasIntron){
       let i = 0; d.segs.forEach((sg, k) => {
@@ -1764,7 +1861,7 @@ const V3 = (() => {
         const col = sg.t === 'E' ? 'var(--exon)' : 'var(--intron)';
         back += `<rect x="${X(a) - 11}" y="${LANE + 26}" width="${(b - a) * STEP + 22}" height="7" rx="3" fill="${col}"/>`;
         const no = sg.t === 'E' ? d.segs.slice(0, k + 1).filter(x => x.t === 'E').length : d.segs.slice(0, k + 1).filter(x => x.t === 'I').length;
-        back += svgText(X((a + b) / 2), LANE + 50, (sg.t === 'E' ? '엑손 ' : '인트론 ') + no, {fill: sg.t === 'E' ? '#9ccaf5' : '#9aa5b5', size:11});
+        back += svgText(X((a + b) / 2), LANE + 50, (sg.t === 'E' ? '엑손 ' : '인트론 ') + no, {fill: sg.t === 'E' ? '#2a6cb0' : '#9aa5b5', size:11});
       });
     }
     // 골격
@@ -1803,8 +1900,8 @@ const V3 = (() => {
     }
     if (lanePts.length > 1) back += `<polyline points="${lanePts.join(' ')}" fill="none" stroke="#e3b13a" stroke-width="3" opacity=".55"/>`;
     if (n > 0){
-      const [x0, y0] = rnaPos(0); if (x0 > 20) fr += svgText(x0 - 22, y0 + 4, `5${PRIME}`, {fill:'#f3d27a', size:12});
-      if (released){ const [x1, y1] = rnaPos(L - 1); fr += svgText(x1 + 22, y1 + 4, `3${PRIME}`, {fill:'#f3d27a', size:12}); }
+      const [x0, y0] = rnaPos(0); if (x0 > 20) fr += svgText(x0 - 22, y0 + 4, `5${PRIME}`, {fill:'#a8740a', size:12});
+      if (released){ const [x1, y1] = rnaPos(L - 1); fr += svgText(x1 + 22, y1 + 4, `3${PRIME}`, {fill:'#a8740a', size:12}); }
     }
     // 원핵: 전사와 동시에 번역
     if (S.org === 'pro') M.ribos.forEach((rb, k) => {
@@ -1833,7 +1930,7 @@ const V3 = (() => {
       const exitOff = t >= M.tEnd ? -70 * (1 - polOp) : 0;
       polSvg += `<g opacity="${Math.max(.15, polOp)}"><ellipse cx="${polAt}" cy="${polY + yOff + exitOff}" rx="${HYB / 2 * STEP + 34}" ry="78" fill="#8fd17a33" stroke="#8fd17a" stroke-width="2"/>`
          + (t >= M.tEl && t < M.tEnd ? `<path d="M ${polAt + 40} ${polY + 70} l 40 0 m -8 -5 l 8 5 l -8 5" stroke="#ff7b7b" stroke-width="2.4" fill="none"/>` : '') + '</g>';
-      labels.push({x:polAt, ty:polY - 78, row:'top', t1:'RNA 중합효소', t2: t >= M.tEl && t < M.tEnd ? 'RNA를 5′→3′ 방향으로 합성 ►' : t < M.tEl ? '프로모터에 결합' : 'DNA에서 분리', col:'#a8e090'});
+      labels.push({x:polAt, ty:polY - 78, row:'top', t1:'RNA 중합효소', t2: t >= M.tEl && t < M.tEnd ? 'RNA를 5′→3′ 방향으로 합성 ►' : t < M.tEl ? '프로모터에 결합' : 'DNA에서 분리', col:'#3f8a2a'});
     }
     // 전사인자 (진핵)
     if (S.org === 'euk' && t < M.tEnd + 1.2){
@@ -1845,14 +1942,16 @@ const V3 = (() => {
         if (op <= 0.02) return;
         fr += `<g opacity="${op}">` + (sh === 'circle' ? `<circle cx="${x}" cy="${y}" r="10" fill="${col}"/>` : sh === 'rect' ? `<rect x="${x - 9}" y="${y - 9}" width="18" height="18" rx="3" fill="${col}"/>` : `<path d="M ${x} ${y - 11} l 11 11 l -11 11 l -11 -11 z" fill="${col}"/>`) + '</g>';
       });
-      if (t < M.tEl + 0.5) labels.push({x:X(-P + 3), ty:TP - 40, row:'top', t1:'전사인자', t2: t < 1.3 ? '프로모터에 결합' : '전사개시복합체 형성', col:'#e9a9c0'});
+      if (t < M.tEl + 0.5) labels.push({x:X(-P + 3), ty:TP - 40, row:'top', t1:'전사인자', t2: t < 1.3 ? '프로모터에 결합' : '전사개시복합체 형성', col:'#b0476a'});
     }
     // 가닥 이름
     const strandLab = `<g>${svgText(X(vs) - 28, TP + 4, `3${PRIME}`, {size:12, fill:'var(--ink-3)'})}${svgText(X(vs) - 28, CD + 4, `5${PRIME}`, {size:12, fill:'var(--ink-3)'})}</g>`;
-    const lbl2 = `<text x="960" y="${TP - 50}" text-anchor="end" font-size="12" font-weight="800" fill="#7fb3ff">위: 주형가닥 (3′→5′)</text><text x="960" y="${TP - 34}" text-anchor="end" font-size="12" font-weight="800" fill="#9fb4cf">아래: 비주형가닥 (5′→3′)</text>`;
-    const laneLab = n > HYB + 2 || released ? svgText(960, LANE + (S.org === 'euk' && d.hasIntron ? 74 : 30), released ? (S.org === 'euk' ? (d.hasIntron ? '처음 만들어진 RNA (가공 전)' : '처음 만들어진 RNA') : 'mRNA') + ' — 비주형가닥과 같은 서열 (T 대신 U)' : '떨어져 나오는 RNA', {anchor:'end', fill:'#f3d27a', size:12}) : '';
+    const lbl2 = `<text x="960" y="${TP - 50}" text-anchor="end" font-size="12" font-weight="800" fill="#2a6cb0">위: 주형가닥 (3′→5′)</text><text x="960" y="${TP - 34}" text-anchor="end" font-size="12" font-weight="800" fill="#5E584D">아래: 비주형가닥 (5′→3′)</text>`;
+    const laneLab = n > HYB + 2 || released ? svgText(960, LANE + (S.org === 'euk' && d.hasIntron ? 74 : 30), released ? (S.org === 'euk' ? (d.hasIntron ? '처음 만들어진 RNA (가공 전)' : '처음 만들어진 RNA') : 'mRNA') + ' — 비주형가닥과 같은 서열 (T 대신 U)' : '떨어져 나오는 RNA', {anchor:'end', fill:'#a8740a', size:12}) : '';
     svg.innerHTML = back + polSvg + rungs + tiles + rnaSvg + fr + strandLab + lbl2 + laneLab + layoutLabels(labels, {top:[42, 74]});
     panel(t, n, released);
+    if (t >= M.tEl + 1 && t < M.tEnd) mission('transcription', 'elong');
+    if (t >= M.tTerm) mission('transcription', 'end');
     last3 = {t, p, released};
   }
 
@@ -1879,9 +1978,9 @@ const V3 = (() => {
   const promoBand = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.45, 1, 24, 1, true), new THREE.MeshStandardMaterial({color:0xf08a5d, transparent:true, opacity:.18, side:THREE.DoubleSide, depthWrite:false}));
   promoBand.rotation.z = Math.PI / 2; view.scene.add(promoBand);
   const tfs = [0xe07a9b, 0x7fc4e0, 0xe0c46a, 0xa98be0].map(c => { const m = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 12), new THREE.MeshStandardMaterial({color:c})); view.scene.add(m); return m; });
-  const lPol = V3.makeLabel('RNA 중합효소', '#c8f0b0', 'rgba(10,16,26,.75)', 0.45); view.scene.add(lPol);
-  const lPro = V3.makeLabel('프로모터', '#f6a37f', 'rgba(10,16,26,.75)', 0.42); view.scene.add(lPro);
-  const lRna = V3.makeLabel('RNA 5′', '#f3d27a', 'rgba(10,16,26,.75)', 0.4); view.scene.add(lRna);
+  const lPol = V3.makeLabel('RNA 중합효소', '#3f8a2a', 'rgba(255,253,248,.92)', 0.45); view.scene.add(lPol);
+  const lPro = V3.makeLabel('프로모터', '#c25a2a', 'rgba(255,253,248,.92)', 0.42); view.scene.add(lPro);
+  const lRna = V3.makeLabel('RNA 5′', '#a8740a', 'rgba(255,253,248,.92)', 0.4); view.scene.add(lRna);
   let last3 = null;
   view.update = () => {
     if (!M || !last3) return;
@@ -1981,11 +2080,17 @@ const V3 = (() => {
    ===================================================================== */
 (() => {
   const svg = $('prSvg');
-  const T_CAP = [1, 2.2], T_PA = [2.2, 3.6], T_SPL = [3.6, 6.6], T_EXP = [6.8, 9.2], TT = 9.8;
+  let T_CAP, T_PA, T_SPL, T_EXP, TT;
+  function timing(){   // 기본 모드: 인트론 제거 · 이동만 / 심화 모드: 양 끝 변형 포함
+    if (S.adv){ T_CAP = [1, 2.2]; T_PA = [2.2, 3.6]; T_SPL = [3.6, 6.6]; T_EXP = [6.8, 9.2]; TT = 9.8; }
+    else { T_CAP = [1, 1]; T_PA = [1, 1]; T_SPL = [1, 4]; T_EXP = [4.4, 6.8]; TT = 7.4; }
+  }
+  timing();
   const TAIL = 7, ENV = 150, PORE_Y = 200;
   let M = null, quiz = null;
 
   function build(){
+    timing();
     const d = D();
     // 제거될 구간: 인트론 (+ 선택적 가공 시 엑손 2)
     const segs = []; let i = 0, eNo = 0, iNo = 0;
@@ -2007,7 +2112,7 @@ const V3 = (() => {
     if (!M) return;
     const {d, L, rm, keepRank, nKeep, segs} = M;
     const euk = S.org === 'euk';
-    const STEP = Math.min(22, 760 / (L + TAIL + 1)), W = Math.max(9, STEP - 1.5);
+    const STEP = Math.min(22, 760 / (L + (S.adv ? TAIL : 0) + 1)), W = Math.max(9, STEP - 1.5);
     const X0 = 185, Y = PORE_Y;
     const s = ease((t - T_SPL[0]) / (T_SPL[1] - T_SPL[0]));
     const join = ease((s - 0.62) / 0.38);
@@ -2025,11 +2130,11 @@ const V3 = (() => {
     };
     let back = '', body = '', fr = '';
     // 핵막 · 핵공
-    back += `<rect x="${ENV}" y="0" width="${980 - ENV}" height="420" fill="#6b4f9e22"/><rect x="0" y="0" width="${ENV}" height="420" fill="#d8b36a12"/>`;
+    back += `<rect x="${ENV}" y="0" width="${980 - ENV}" height="420" fill="#6b4f9e22"/><rect x="0" y="0" width="${ENV}" height="420" fill="#d8b36a33"/>`;
     back += `<path d="M ${ENV - 6} 0 V ${PORE_Y - 26} M ${ENV + 6} 0 V ${PORE_Y - 26} M ${ENV - 6} ${PORE_Y + 26} V 420 M ${ENV + 6} ${PORE_Y + 26} V 420" stroke="#a98be0" stroke-width="3"/>`;
-    back += `<path d="M ${ENV - 14} ${PORE_Y - 26} h 28 M ${ENV - 14} ${PORE_Y + 26} h 28" stroke="#c9b3f0" stroke-width="5" stroke-linecap="round"/>`;
-    back += svgText(ENV + 24, 56, '핵', {anchor:'start', fill:'#c9b3f0', size:14}) + svgText(ENV - 20, 56, '세포질', {anchor:'end', fill:'#e6cf9a', size:14});
-    back += svgText(ENV, PORE_Y + 48, '핵공', {fill:'#c9b3f0', size:12});
+    back += `<path d="M ${ENV - 14} ${PORE_Y - 26} h 28 M ${ENV - 14} ${PORE_Y + 26} h 28" stroke="#6a4fb0" stroke-width="5" stroke-linecap="round"/>`;
+    back += svgText(ENV + 24, 56, '핵', {anchor:'start', fill:'#6a4fb0', size:14}) + svgText(ENV - 20, 56, '세포질', {anchor:'end', fill:'#8a6a1f', size:14});
+    back += svgText(ENV, PORE_Y + 48, '핵공', {fill:'#6a4fb0', size:12});
     // 구간 막대 (엑손/인트론)
     const pos = [];
     for (let k = 0; k < L; k++){
@@ -2056,7 +2161,7 @@ const V3 = (() => {
       const op = 1 - ease((t - T_SPL[0]) / 1.2);
       const xa = pos[sg.a].x, xb = pos[sg.b].x;
       const col = sg.t === 'E' ? 'var(--exon)' : 'var(--intron)';
-      body += `<g opacity="${op}"><rect x="${xa - W / 2}" y="${Y + 18}" width="${xb - xa + W}" height="6" rx="3" fill="${col}"/>${svgText((xa + xb) / 2, Y + 40, (sg.t === 'E' ? '엑손 ' : '인트론 ') + sg.no, {fill: sg.t === 'E' ? '#9ccaf5' : '#aab3c0', size:11.5})}</g>`;
+      body += `<g opacity="${op}"><rect x="${xa - W / 2}" y="${Y + 18}" width="${xb - xa + W}" height="6" rx="3" fill="${col}"/>${svgText((xa + xb) / 2, Y + 40, (sg.t === 'E' ? '엑손 ' : '인트론 ') + sg.no, {fill: sg.t === 'E' ? '#2a6cb0' : '#5E584D', size:11.5})}</g>`;
     });
     for (let k = 0; k < L; k++){
       const p = pos[k]; if (p.op <= 0.02 || p.x < -10) continue;
@@ -2065,24 +2170,24 @@ const V3 = (() => {
     }
     // 가위(잘림) 표시
     if (s > 0.36 && s < 0.7) rm.forEach(z => {
-      [z.a - 0.5, z.b + 0.5].forEach(e => { const x = X0 + e * STEP; fr += svgText(x, Y + 34, '✂', {fill:'#ffcf6b', size:18}); });
+      [z.a - 0.5, z.b + 0.5].forEach(e => { const x = X0 + e * STEP; fr += svgText(x, Y + 34, '✂', {fill:'#a8740a', size:18}); });
     });
-    if (s > 0.45 && s < 0.85) rm.forEach(z => { const c = (xInit(z.a) + xInit(z.b)) / 2; fr += svgText(c, Y - 110 - ease((s - .48) / .3) * 50, '잘려 나가는 부위', {fill:'#aab3c0', size:11.5}); });
+    if (s > 0.45 && s < 0.85) rm.forEach(z => { const c = (xInit(z.a) + xInit(z.b)) / 2; fr += svgText(c, Y - 110 - ease((s - .48) / .3) * 50, '잘려 나가는 부위', {fill:'#5E584D', size:11.5}); });
     // 5' 캡
     const first = pos.findIndex(p => !p.rm);
-    if (first >= 0 && t >= T_CAP[0]){
+    if (S.adv && first >= 0 && t >= T_CAP[0]){
       const k = ease((t - T_CAP[0]) / (T_CAP[1] - T_CAP[0]));
       const p0 = pos[first];
       const [cx, cy] = [lerp(p0.x - 70, p0.x - W - 6, k), lerp(p0.y - 70, p0.y, k)];
       fr += `<g opacity="${k}"><circle cx="${cx}" cy="${cy}" r="${Math.max(8, W * 0.55)}" fill="var(--cap)" stroke="#fff6"/>${t < T_EXP[0] ? svgText(cx, cy - 18, '5′ 캡', {fill:'var(--cap)', size:11.5}) : ''}</g>`;
     } else if (first >= 0){
-      fr += svgText(pos[first].x - 20, pos[first].y + 4, `5${PRIME}`, {fill:'#f3d27a', size:12});
+      fr += svgText(pos[first].x - 20, pos[first].y + 4, `5${PRIME}`, {fill:'#a8740a', size:12});
     }
     // 폴리 A 꼬리
     let lastK = -1; for (let k = L - 1; k >= 0; k--) if (!pos[k].rm){ lastK = k; break; }
     if (lastK >= 0){
       const pl = pos[lastK];
-      const nA = t >= T_PA[0] ? Math.floor(ease((t - T_PA[0]) / (T_PA[1] - T_PA[0])) * TAIL + 1e-6) : 0;
+      const nA = S.adv && t >= T_PA[0] ? Math.floor(ease((t - T_PA[0]) / (T_PA[1] - T_PA[0])) * TAIL + 1e-6) : 0;
       let tail = '';
       for (let a = 0; a < nA; a++){
         const [tx, ty] = along(lerp(xInit(lastK), xFinal(lastK), join) + (a + 1) * STEP, Y);
@@ -2090,35 +2195,37 @@ const V3 = (() => {
       }
       fr += tail;
       if (nA > 0 && t < T_EXP[0]){ const [tx, ty] = along(lerp(xInit(lastK), xFinal(lastK), join) + (nA / 2 + 0.5) * STEP, Y); fr += svgText(tx, ty - 16, '폴리 A 꼬리', {fill:'var(--polya)', size:11.5}); }
-      if (nA === 0) fr += svgText(pl.x + 22, pl.y + 4, `3${PRIME}`, {fill:'#f3d27a', size:12});
+      if (nA === 0) fr += svgText(pl.x + 22, pl.y + 4, `3${PRIME}`, {fill:'#a8740a', size:12});
     }
     // 퀴즈용 클릭 영역
     if (quiz){
       segs.forEach((sg, j) => {
         const xa = pos[sg.a].x, xb = pos[sg.b].x, found = quiz.found.has(j);
-        fr += `<rect data-seg="${j}" x="${xa - W / 2 - 2}" y="${Y - 16}" width="${xb - xa + W + 4}" height="32" rx="6" fill="${found ? '#ff8f8f33' : '#ffffff05'}" stroke="${found ? 'var(--bad)' : '#ffcf6b'}" stroke-dasharray="${found ? '' : '4 3'}" style="cursor:pointer"/>`;
+        fr += `<rect data-seg="${j}" x="${xa - W / 2 - 2}" y="${Y - 16}" width="${xb - xa + W + 4}" height="32" rx="6" fill="${found ? '#c0392b33' : '#00000005'}" stroke="${found ? 'var(--bad)' : '#a8740a'}" stroke-dasharray="${found ? '' : '4 3'}" style="cursor:pointer"/>`;
         if (found) fr += svgText((xa + xb) / 2, Y - 24, '✂ 인트론', {fill:'var(--bad)', size:11.5});
       });
-      fr += svgText(560, 90, quiz.msg || '처음 만들어진 RNA에서 잘려 나갈 부위(인트론)를 모두 눌러 보세요.', {fill:'#ffcf6b', size:14});
+      fr += svgText(560, 90, quiz.msg || '처음 만들어진 RNA에서 잘려 나갈 부위(인트론)를 모두 눌러 보세요.', {fill:'#a8740a', size:14});
     }
-    if (!d.hasIntron && t > T_SPL[0] && t < T_SPL[1]) fr += svgText(560, 110, '이 유전자에는 인트론이 없어 잘려 나가는 부위가 없습니다.', {fill:'#ffcf6b', size:13.5});
-    if (ex > 0.3) fr += svgText(70, 400, '→ 세포질의 라이보솜으로', {fill:'#e6cf9a', size:12});
+    if (!d.hasIntron && t > T_SPL[0] && t < T_SPL[1]) fr += svgText(560, 110, '이 유전자에는 인트론이 없어 잘려 나가는 부위가 없습니다.', {fill:'#a8740a', size:13.5});
+    if (ex > 0.3) fr += svgText(70, 400, '→ 세포질의 라이보솜으로', {fill:'#8a6a1f', size:12});
     svg.innerHTML = back + body + fr;
     panel(t, s);
+    if (s > 0.7) mission('processing', 'splice');
+    if (t >= T_EXP[0] + 1) mission('processing', 'export');
   }
 
   function panel(t, s){
     const d = M.d;
     let step, txt;
-    if (t < T_CAP[0]){ step = '처음 만들어진 RNA'; txt = d.hasIntron ? `전사로 처음 만들어진 RNA에는 단백질을 암호화하는 엑손(${d.nExon}개)과 그 사이의 인트론(${d.nExon - 1}개)이 모두 들어 있습니다.` : '전사로 처음 만들어진 RNA입니다. 이 유전자에는 인트론이 없습니다.'; }
+    if (t < T_CAP[0] || (!S.adv && t < T_SPL[0])){ step = '처음 만들어진 RNA'; txt = d.hasIntron ? `전사로 처음 만들어진 RNA에는 단백질을 암호화하는 엑손(${d.nExon}개)과 그 사이의 인트론(${d.nExon - 1}개)이 모두 들어 있습니다.` : '전사로 처음 만들어진 RNA입니다. 이 유전자에는 인트론이 없습니다.'; }
     else if (t < T_PA[0]){ step = '① 5′ 끝 변형'; txt = 'RNA의 5′ 끝에 변형된 뉴클레오타이드(5′ 캡)가 붙습니다. mRNA를 분해 효소로부터 보호하고, 세포질에서 라이보솜 소단위체가 결합하는 것을 돕습니다.'; }
     else if (t < T_SPL[0]){ step = '② 3′ 끝 변형'; txt = '3′ 끝에는 아데닌(A) 뉴클레오타이드가 길게 이어진 꼬리(폴리 A 꼬리)가 붙습니다. mRNA가 쉽게 분해되지 않게 하고 핵 밖으로의 이동을 돕습니다.'; }
-    else if (t < T_SPL[1]){ step = '③ 인트론 제거 (RNA 스플라이싱)'; txt = d.hasIntron ? (d.altOn ? '인트론과 함께 엑손 2까지 잘려 나가고 남은 엑손이 이어집니다(선택적 RNA 가공). 같은 유전자에서 다른 mRNA가 만들어집니다.' : '인트론이 고리 모양으로 잘려 나가고, 엑손끼리 연결됩니다.') : '인트론이 없으므로 잘려 나가는 부위가 없습니다.'; }
+    else if (t < T_SPL[1]){ step = S.adv ? '③ 인트론 제거 (RNA 스플라이싱)' : '① 인트론 제거'; txt = d.hasIntron ? (d.altOn ? '인트론과 함께 엑손 2까지 잘려 나가고 남은 엑손이 이어집니다(선택적 RNA 가공). 같은 유전자에서 다른 mRNA가 만들어집니다.' : '인트론이 고리 모양으로 잘려 나가고, 엑손끼리 연결됩니다.') : '인트론이 없으므로 잘려 나가는 부위가 없습니다.'; }
     else if (t < T_EXP[0]){ step = '가공 완료 — mRNA'; txt = '양 끝이 변형되고 엑손만 남은 mRNA가 완성되었습니다.'; }
-    else { step = '④ 핵공을 통해 세포질로'; txt = 'mRNA는 핵공을 통해 세포질로 이동하여 라이보솜과 결합합니다. → ‘5. 번역’'; }
+    else { step = S.adv ? '④ 핵공을 통해 세포질로' : '② 핵공을 통해 세포질로'; txt = 'mRNA는 핵공을 통해 세포질로 이동하여 라이보솜과 결합합니다. → ‘5. 번역’'; }
     $('prStep').textContent = step; $('prPhase').textContent = txt;
     const pre = d.pre.length, mat = d.mature.length;
-    $('prCount').innerHTML = `처음 만들어진 RNA <b>${pre}</b>개 염기 → mRNA <b>${mat}</b>개 염기 (+ 5′ 캡, 폴리 A 꼬리) · 잘려 나간 염기 <b>${pre - mat}</b>개`;
+    $('prCount').innerHTML = `처음 만들어진 RNA <b>${pre}</b>개 염기 → mRNA <b>${mat}</b>개 염기 ${S.adv ? '(+ 5′ 캡, 폴리 A 꼬리)' : ''} · 잘려 나간 염기 <b>${pre - mat}</b>개`;
     // 선택적 RNA 가공 비교
     const out = $('prAltOut');
     if (d.altOK){
@@ -2154,6 +2261,7 @@ const V3 = (() => {
     }});
   Loop.add(dt => { if (S.tab === 'processing') TL.tick(dt); });
 
+  $('prLoadEx').addEventListener('click', () => loadPreset('euk3'));
   $('prAlt').addEventListener('change', e => { S.alt = e.target.checked; fireGene(); });
   $('prAddIntron').addEventListener('click', () => {
     const g = S.gene, code = segsToCode(g.segs);
@@ -2235,7 +2343,7 @@ const V3 = (() => {
     let shade = '', m = '';
     for (let c = 0; c < codons.length; c++){
       const x0 = (start + 3 * c) * baseW - baseW / 2;
-      shade += `<rect x="${x0}" y="${MY - 19}" width="${codonW}" height="38" rx="6" fill="${c % 2 ? '#ffffff14' : '#ffffff06'}"/>`;
+      shade += `<rect x="${x0}" y="${MY - 19}" width="${codonW}" height="38" rx="6" fill="${c % 2 ? '#00000012' : '#00000005'}"/>`;
     }
     for (let n = 0; n < mrna.length; n++){
       const inORF = n >= start && n < start + 3 * codons.length;
@@ -2251,14 +2359,14 @@ const V3 = (() => {
   function drawTRNA(tr, st){
     const X = siteX[tr.site], codon = mrna.substr(start + 3 * tr.c, 3), anti = antiOf(codon);
     let g = '';
-    const col = tr.init ? '#c9a7ff' : '#9b8ce0';
+    const col = tr.init ? '#7a4fc8' : '#9b8ce0';
     // 클로버잎 모양 tRNA
     const top = AA_Y + 18, mid = (top + ANTI_Y) / 2 - 4;
     g += `<path d="M ${X} ${top} V ${ANTI_Y - 14}" stroke="${col}" stroke-width="7" stroke-linecap="round"/>`;
     g += `<circle cx="${X - 15}" cy="${mid}" r="8" fill="none" stroke="${col}" stroke-width="5"/><circle cx="${X + 15}" cy="${mid}" r="8" fill="none" stroke="${col}" stroke-width="5"/>`;
     g += `<path d="M ${X - 6} ${top + 2} l 0 -6 M ${X + 6} ${top + 2} l 0 -10" stroke="${col}" stroke-width="3"/>`;
     for (let j = 0; j < 3; j++) g += bbox(X + (j - 1) * baseW, ANTI_Y, anti[j], true);
-    for (let j = 0; j < 3; j++){ const bx = X + (j - 1) * baseW; g += `<line x1="${bx}" y1="${ANTI_Y + 11}" x2="${bx}" y2="${MY - 12}" stroke="#bfb3df" stroke-width="1.5" stroke-dasharray="2 2" opacity=".75"/>`; }
+    for (let j = 0; j < 3; j++){ const bx = X + (j - 1) * baseW; g += `<line x1="${bx}" y1="${ANTI_Y + 11}" x2="${bx}" y2="${MY - 12}" stroke="#8f80c0" stroke-width="1.5" stroke-dasharray="2 2" opacity=".75"/>`; }
     if (tr.aa && !tr.empty && tr.site !== st.chainSite) g += aaBead(X, AA_Y, tr.aa);
     return g;
   }
@@ -2282,7 +2390,7 @@ const V3 = (() => {
     const ax = siteX[st.chainSite], ay = AA_Y - lift;
     const P = chainPositions(seq.length, ax, ay);       // P[0] = 최신
     let lines = '', beads = '';
-    for (let k = 1; k < P.length; k++) lines += `<line x1="${P[k - 1][0]}" y1="${P[k - 1][1]}" x2="${P[k][0]}" y2="${P[k][1]}" stroke="#d3c8ef" stroke-width="2.6"/>`;
+    for (let k = 1; k < P.length; k++) lines += `<line x1="${P[k - 1][0]}" y1="${P[k - 1][1]}" x2="${P[k][0]}" y2="${P[k][1]}" stroke="#8f80c0" stroke-width="2.6"/>`;
     for (let k = 0; k < P.length; k++){ const aa = seq[seq.length - 1 - k]; beads += aaBead(P[k][0], P[k][1], aa, 13); }
     let s = lines + beads;
     const first = P[P.length - 1];
@@ -2295,7 +2403,7 @@ const V3 = (() => {
     const back = $('tlBack'), front = $('tlFront'), mr = $('tlMrna');
     if (err || !frames.length){
       back.innerHTML = ''; mr.innerHTML = ''; lastKey = null;
-      front.innerHTML = `<text x="490" y="220" text-anchor="middle" fill="#ff9b9b" font-size="16" font-weight="700">${esc(err || '서열을 입력하세요')}</text>` +
+      front.innerHTML = `<text x="490" y="220" text-anchor="middle" fill="#c0392b" font-size="16" font-weight="700">${esc(err || '서열을 입력하세요')}</text>` +
         (start < 0 && codons.length === 0 && mrna.length >= 3 ? `<text x="490" y="250" text-anchor="middle" fill="var(--ink-2)" font-size="13">(교과서 그림 Ⅱ-6처럼 코돈과 아미노산의 대응만 보려면 ‘0. 한눈에 보기’의 유전정보 흐름을 확인하세요)</text>` : '');
       panel(null, null); last3 = null; return;
     }
@@ -2312,12 +2420,12 @@ const V3 = (() => {
       b += `<g opacity="${st.sep ? .55 : 1}"><path d="M ${RIBO - 150} ${y0 + 132} Q ${RIBO - 168} ${y0 + 10} ${RIBO - 40} ${y0} Q ${RIBO + 60} ${y0 - 14} ${RIBO + 130} ${y0 + 30} Q ${RIBO + 176} ${y0 + 70} ${RIBO + 150} ${y0 + 132} Z" fill="#d8b36a" stroke="#a9843d" stroke-width="2"/>`;
       ['E', 'P', 'A'].forEach(s => { const x = siteX[s]; b += `<rect x="${x - 30}" y="${y0 + 26}" width="60" height="${MY - 22 - (y0 + 26) - 4}" rx="28" fill="#c79c4c" stroke="#a9843d"/>`; });
       b += `</g>`;
-      b += svgText(RIBO + 190, 236 - sepY, '대단위체', {fill:'#e6c78a', size:12, anchor:'start'});
+      b += svgText(RIBO + 190, 236 - sepY, '대단위체', {fill:'#8a6a1f', size:12, anchor:'start'});
     }
     if (st.small){
       const y1 = MY + 14 + sepY;
       b += `<g opacity="${st.sep ? .55 : 1}"><path d="M ${RIBO - 160} ${y1 + 8} Q ${RIBO - 150} ${y1 + 46} ${RIBO} ${y1 + 44} Q ${RIBO + 150} ${y1 + 46} ${RIBO + 160} ${y1 + 8} Q ${RIBO} ${y1 - 4} ${RIBO - 160} ${y1 + 8} Z" fill="#d8b36a" stroke="#a9843d" stroke-width="2"/></g>`;
-      b += svgText(RIBO + 178, y1 + 30, '소단위체', {fill:'#e6c78a', size:12, anchor:'start'});
+      b += svgText(RIBO + 178, y1 + 30, '소단위체', {fill:'#8a6a1f', size:12, anchor:'start'});
     }
     back.innerHTML = b;
     // 앞 레이어
@@ -2333,9 +2441,9 @@ const V3 = (() => {
       fr += `<rect x="${x - 36}" y="${MY - 20}" width="72" height="40" rx="7" fill="none" stroke="var(--accent)" stroke-width="2.6"/>` + svgText(x, MY + 70, '개시코돈 AUG', {fill:'var(--accent)', size:12.5});
     }
     if (st.stopA && !st.sep){
-      fr += svgText(siteX.A, 300, '?', {fill:'#ff9b9b', size:30});
-      fr += svgText(siteX.A, 330, '결합하는 tRNA 없음', {fill:'#ff9b9b', size:11.5});
-      fr += svgText(siteX.A, MY + 70, '종결코돈', {fill:'#ff9b9b', size:12.5});
+      fr += svgText(siteX.A, 300, '?', {fill:'#c0392b', size:30});
+      fr += svgText(siteX.A, 330, '결합하는 tRNA 없음', {fill:'#c0392b', size:11.5});
+      fr += svgText(siteX.A, MY + 70, '종결코돈', {fill:'#c0392b', size:12.5});
     }
     let tr = '';
     st.tRNAs.forEach(t => {
@@ -2391,7 +2499,7 @@ const V3 = (() => {
     const made = aas.slice(0, st.chainLen).filter(a => a !== 'Stop');
     $('tlPoly').innerHTML = made.length ? `폴리펩타이드 (${made.length}개): <b>${made.join('-')}</b><br><span style="color:var(--ink-3)">${made.map(a => AANAME[a]).join(' - ')}</span>` : '아직 아미노산이 연결되지 않았습니다.';
   }
-  $('tlMatch').addEventListener('click', e => { const b = e.target.closest('[data-codon]'); if (b) openCodonTable(b.dataset.codon); });
+  $('tlMatch').addEventListener('click', e => { const b = e.target.closest('[data-codon]'); if (b){ mission('translation', 'codon'); openCodonTable(b.dataset.codon); } });
 
   /* 예측 질문 */
   async function maybeAsk(f){
@@ -2414,6 +2522,9 @@ const V3 = (() => {
     n = clamp(n, 0, frames.length - 1);
     if (n > fi){ busy = true; try{ await maybeAsk(frames[n]); } finally{ busy = false; } }
     fi = n; render();
+    const fk = frames[fi] && frames[fi].k;
+    if (frames.slice(0, fi + 1).some(f => f.k === 'large')) mission('translation', 'init');
+    if (fk === 'term' || fk === 'release' || fk === 'noStop') mission('translation', 'term');
   }
   function stopPlay(){ if (timer){ clearTimeout(timer); timer = null; } $('tlPlay').textContent = '▷ 재생'; }
   $('tlPrev').addEventListener('click', () => { stopPlay(); go(fi - 1); });
@@ -2423,7 +2534,7 @@ const V3 = (() => {
     if (timer){ stopPlay(); return; }
     if (fi >= frames.length - 1){ fi = 0; asked.clear(); render(); }
     $('tlPlay').textContent = '⏸ 멈춤';
-    const stepF = async () => { if (!timer) return; if (fi >= frames.length - 1){ stopPlay(); return; } await go(fi + 1); if (timer) timer = setTimeout(stepF, 1300); };
+    const stepF = async () => { if (!timer) return; if (fi >= frames.length - 1){ stopPlay(); return; } await go(fi + 1); if (timer) timer = setTimeout(stepF, 1800); };
     timer = setTimeout(stepF, 500);
   });
 
@@ -2436,11 +2547,11 @@ const V3 = (() => {
   const largeShell = new THREE.Mesh(new THREE.SphereGeometry(1, 36, 24), mat(0xd8b36a, {transparent:true, opacity:.3, depthWrite:false})); largeShell.scale.set(3.6, 2.3, 2.4); large.add(largeShell);
   const siteCol = {E:0x7fa9c9, P:0x9b8ce0, A:0xe08a9b}, SX = {E:-1.5, P:0, A:1.5};
   ['E', 'P', 'A'].forEach(s => { const lab = V3.makeLabel(s, '#ffffff', '#' + siteCol[s].toString(16).padStart(6, '0'), 0.5); lab.position.set(SX[s], 2.5, 0); large.add(lab); });
-  const lLarge = V3.makeLabel('대단위체', '#e6c78a', 'rgba(10,16,26,.7)', 0.42); lLarge.position.set(3.9, 2.0, 0); large.add(lLarge);
-  const lSmall = V3.makeLabel('소단위체', '#e6c78a', 'rgba(10,16,26,.7)', 0.42); sc.add(lSmall);
+  const lLarge = V3.makeLabel('대단위체', '#8a6a1f', 'rgba(255,253,248,.92)', 0.42); lLarge.position.set(3.9, 2.0, 0); large.add(lLarge);
+  const lSmall = V3.makeLabel('소단위체', '#8a6a1f', 'rgba(255,253,248,.92)', 0.42); sc.add(lSmall);
   const mrnaG = new THREE.Group(); sc.add(mrnaG);
-  const lM5 = V3.makeLabel('mRNA 5′', '#f0b8ef', 'rgba(10,16,26,.7)', 0.4); mrnaG.add(lM5);
-  const lM3 = V3.makeLabel('3′', '#f0b8ef', 'rgba(10,16,26,.7)', 0.4); mrnaG.add(lM3);
+  const lM5 = V3.makeLabel('mRNA 5′', '#b0389f', 'rgba(255,253,248,.92)', 0.4); mrnaG.add(lM5);
+  const lM3 = V3.makeLabel('3′', '#b0389f', 'rgba(255,253,248,.92)', 0.4); mrnaG.add(lM3);
   let mrnaKey = null; const NTW = 0.5;
   function buildMRNA3(){
     const key = mrna + '|' + start; if (key === mrnaKey) return; mrnaKey = key;
@@ -2576,9 +2687,9 @@ const V3 = (() => {
   function callout(x, y, n, title, sub, tab){
     const w = Math.max(title.length * 13, sub.length * 10.6) + 38;
     x = Math.min(x, 972 - w);
-    return `<g class="ovgo" data-go="${tab}" style="cursor:pointer"><rect x="${x}" y="${y}" width="${w}" height="${sub ? 44 : 28}" rx="9" fill="#0f1520e6" stroke="#7cc4ff" stroke-width="1.4"/>
-      <circle cx="${x + 15}" cy="${y + 14}" r="10" fill="#7cc4ff"/><text x="${x + 15}" y="${y + 18}" text-anchor="middle" font-size="12" font-weight="900" fill="#06121e">${n}</text>
-      <text x="${x + 31}" y="${y + 19}" font-size="13" font-weight="800" fill="#eaf0f7">${title}</text>${sub ? `<text x="${x + 31}" y="${y + 36}" font-size="11" font-weight="600" fill="#a3b3c6">${sub}</text>` : ''}</g>`;
+    return `<g class="ovgo" data-go="${tab}" style="cursor:pointer"><rect x="${x}" y="${y}" width="${w}" height="${sub ? 44 : 28}" rx="9" fill="#FFFFFFF0" stroke="#2F7BC4" stroke-width="1.4"/>
+      <circle cx="${x + 15}" cy="${y + 14}" r="10" fill="#2F7BC4"/><text x="${x + 15}" y="${y + 18}" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">${n}</text>
+      <text x="${x + 31}" y="${y + 19}" font-size="13" font-weight="800" fill="#25231E">${title}</text>${sub ? `<text x="${x + 31}" y="${y + 36}" font-size="11" font-weight="600" fill="#5E584D">${sub}</text>` : ''}</g>`;
   }
   const AACOLS = ['#d9a93a', '#45a98a', '#e0603f', '#5f86d6', '#c069b0', '#3fae6f'];
   function chain(x, y, n, ang = -Math.PI / 2){
@@ -2593,20 +2704,20 @@ const V3 = (() => {
   /* ---- 진핵생물 ---- */
   function euk(t){
     let g = '', calls = '';
-    g += `<rect x="0" y="0" width="980" height="560" fill="#2b2618"/>`;
+    g += `<rect x="0" y="0" width="980" height="560" fill="#F8EDD3"/>`;
     // 세포질의 tRNA들
     for (let i = 0; i < 9; i++){
       const x = 520 + (i * 97) % 430 + Math.sin(t * 0.6 + i) * 12, y = 70 + (i * 61) % 140 + Math.cos(t * 0.5 + i * 2) * 10;
       g += trna(x, y, AACOLS[i % 6], 0.95);
     }
-    g += svgText(830, 40, 'tRNA (아미노산 운반)', {fill:'#c9b8f0', size:11.5});
+    g += svgText(830, 40, 'tRNA (아미노산 운반)', {fill:'#6a4fb0', size:11.5});
     // 핵
-    g += `<circle cx="215" cy="285" r="205" fill="#5b3f8c" opacity=".85"/><circle cx="215" cy="285" r="205" fill="none" stroke="#b79be8" stroke-width="5"/><circle cx="215" cy="285" r="196" fill="none" stroke="#b79be8" stroke-width="2" opacity=".6"/>`;
-    [-60, -20, 20, 60, 110, 160, 210].forEach(a => { const r = a * Math.PI / 180; g += `<rect x="${215 + 200 * Math.cos(r) - 7}" y="${285 + 200 * Math.sin(r) - 7}" width="14" height="14" rx="4" fill="#3b2a5c" stroke="#e5d6ff" transform="rotate(${a} ${215 + 200 * Math.cos(r)} ${285 + 200 * Math.sin(r)})"/>`; });
-    g += svgText(120, 120, '핵', {fill:'#e5d6ff', size:16}) + svgText(600, 300, '세포질', {fill:'#e6cf9a', size:16, anchor:'start'});
+    g += `<circle cx="215" cy="285" r="205" fill="#E3D5F5" opacity="1"/><circle cx="215" cy="285" r="205" fill="none" stroke="#8A6CC4" stroke-width="5"/><circle cx="215" cy="285" r="196" fill="none" stroke="#8A6CC4" stroke-width="2" opacity=".6"/>`;
+    [-60, -20, 20, 60, 110, 160, 210].forEach(a => { const r = a * Math.PI / 180; g += `<rect x="${215 + 200 * Math.cos(r) - 7}" y="${285 + 200 * Math.sin(r) - 7}" width="14" height="14" rx="4" fill="#B9A3E3" stroke="#6a4fb0" transform="rotate(${a} ${215 + 200 * Math.cos(r)} ${285 + 200 * Math.sin(r)})"/>`; });
+    g += svgText(120, 120, '핵', {fill:'#6a4fb0', size:16}) + svgText(600, 300, '세포질', {fill:'#8a6a1f', size:16, anchor:'start'});
     // DNA 이중나선
-    g += helix(40, 240, 330, 150, 13, 6, '#6fb6e6', '#9fd3ff', '#cfe8ff');
-    g += svgText(60, 205, 'DNA', {fill:'#cfe8ff', size:13});
+    g += helix(40, 240, 330, 150, 13, 6, '#6fb6e6', '#2a6cb0', '#2a6cb0');
+    g += svgText(60, 205, 'DNA', {fill:'#2a6cb0', size:13});
     // RNA 중합효소 + pre-mRNA
     const u = (t * 0.12) % 1, px = lerp(110, 300, u), py = lerp(218, 159, u);
     g += `<ellipse cx="${px}" cy="${py}" rx="22" ry="17" fill="#8fd17a66" stroke="#8fd17a" stroke-width="2"/>`;
@@ -2616,11 +2727,11 @@ const V3 = (() => {
     // RNA 가공 모습
     const pr = [[150, 330], [175, 345], [200, 330], [225, 345], [250, 332]];
     g += poly(smooth(pr), 'stroke="#e070c8" stroke-width="4"') + `<path d="M 186 340 q 6 -26 14 0" stroke="#9aa5b5" stroke-width="3" fill="none" opacity="${0.5 + 0.5 * Math.sin(t * 2)}"/>`;
-    g += `<circle cx="146" cy="330" r="5" fill="var(--cap)"/>` + svgText(200, 380, '인트론 제거 · 양 끝 변형', {fill:'#e5d6ff', size:11});
+    g += `<circle cx="146" cy="330" r="5" fill="var(--cap)"/>` + svgText(200, 380, '인트론 제거 · 양 끝 변형', {fill:'#6a4fb0', size:11});
     // mRNA → 핵공 → 세포질 경로
     const path = smooth([[260, 340], [330, 330], [400, 318], [460, 330], [540, 400], [640, 430], [760, 420], [850, 380], [930, 360]], 10);
     g += poly(path, 'stroke="#e070c8" stroke-width="5" opacity=".9"');
-    g += svgText(942, 364, `3${PRIME}`, {fill:'#f0b8ef', size:12, anchor:'start'});
+    g += svgText(942, 364, `3${PRIME}`, {fill:'#b0389f', size:12, anchor:'start'});
     // 라이보솜이 mRNA를 따라 이동 (두 개, 시차)
     [0, 0.5].forEach(off => {
       const ph = ((t * 0.08) + off) % 1;
@@ -2646,17 +2757,17 @@ const V3 = (() => {
   /* ---- 원핵생물 ---- */
   function pro(t){
     let g = '', calls = '';
-    g += `<rect x="0" y="0" width="980" height="560" fill="#14202a"/>`;
-    g += `<rect x="30" y="40" width="920" height="480" rx="200" fill="#2b2618" stroke="#c7b07a" stroke-width="5"/>`;
-    g += svgText(80, 90, '세포질 (핵막 없음)', {fill:'#e6cf9a', size:15, anchor:'start'});
+    g += `<rect x="0" y="0" width="980" height="560" fill="#EEF3F6"/>`;
+    g += `<rect x="30" y="40" width="920" height="480" rx="200" fill="#F8EDD3" stroke="#B8975A" stroke-width="5"/>`;
+    g += svgText(80, 90, '세포질 (핵막 없음)', {fill:'#8a6a1f', size:15, anchor:'start'});
     // 원형 DNA(핵양체) 일부
     const loop = []; for (let k = 0; k <= 80; k++){ const a = k / 80 * Math.PI * 2; loop.push([230 + Math.cos(a) * 120 + Math.sin(a * 7) * 10, 380 + Math.sin(a) * 70 + Math.cos(a * 5) * 8]); }
-    g += poly(loop, 'stroke="#6fb6e6" stroke-width="3" opacity=".7"') + svgText(230, 380, '원형 DNA', {fill:'#9fd3ff', size:12});
+    g += poly(loop, 'stroke="#6fb6e6" stroke-width="3" opacity=".7"') + svgText(230, 380, '원형 DNA', {fill:'#2a6cb0', size:12});
     // 전사되는 유전자 (수평)
     const X1 = 160, X2 = 900, Y = 170;
-    g += helix(X1 - 40, Y, X2 + 20, Y, 9, 22, '#6fb6e6', '#9fd3ff', '#cfe8ff');
-    g += svgText(X1 - 40, Y - 22, 'DNA', {fill:'#cfe8ff', size:13, anchor:'start'});
-    g += `<path d="M ${X1 + 280} ${Y - 30} h 90 m -10 -6 l 10 6 l -10 6" stroke="#ff7b7b" stroke-width="2.4" fill="none"/>` + svgText(X1 + 325, Y - 38, '전사 방향', {fill:'#ff9b9b', size:11});
+    g += helix(X1 - 40, Y, X2 + 20, Y, 9, 22, '#6fb6e6', '#2a6cb0', '#2a6cb0');
+    g += svgText(X1 - 40, Y - 22, 'DNA', {fill:'#2a6cb0', size:13, anchor:'start'});
+    g += `<path d="M ${X1 + 280} ${Y - 30} h 90 m -10 -6 l 10 6 l -10 6" stroke="#ff7b7b" stroke-width="2.4" fill="none"/>` + svgText(X1 + 325, Y - 38, '전사 방향', {fill:'#c0392b', size:11});
     // RNA 중합효소 여러 개 + 각각 매달린 mRNA와 라이보솜(폴리솜)
     const N = 4, period = 1 / N;
     for (let k = 0; k < N; k++){
@@ -2692,7 +2803,7 @@ const V3 = (() => {
       svg.setAttribute('viewBox', '0 0 980 1130');
       const e = euk(T), p = pro(T);
       anim = `<g>${e.g}</g><g transform="translate(0,570)">${p.g}</g>` +
-        `<text x="16" y="28" font-size="15" font-weight="900" fill="#fff">진핵생물</text><text x="16" y="598" font-size="15" font-weight="900" fill="#fff">원핵생물</text>`;
+        `<text x="16" y="28" font-size="15" font-weight="900" fill="#25231E">진핵생물</text><text x="16" y="598" font-size="15" font-weight="900" fill="#25231E">원핵생물</text>`;
       calls = `<g>${e.calls}</g><g transform="translate(0,570)">${p.calls}</g>`;
     } else {
       svg.setAttribute('viewBox', '0 0 980 560');
@@ -2836,7 +2947,8 @@ const V3 = (() => {
     $('muToFlow').disabled = !!C.fixed;
     $('muToFlow').title = C.fixed ? '개시코돈이 없는 유전자 중간 부분이라 전 과정 보기를 할 수 없습니다.' : '';
   }
-  async function applied(){
+  async function applied(manual){
+    if (manual) mission('mutation', 'manual');
     const o = analyze(orig), m = analyze(seqOf(arr)), c = classify(o, m);
     if (S.predict && c){
       reveal = false; draw(true);
@@ -2854,9 +2966,9 @@ const V3 = (() => {
   function sub(i, b){ if (arr[i].b === b) return false; hist.push(`${posNo(i)}번 ${arr[i].b}→${b} 치환`); if (!arr[i].tag) arr[i].tag = 'sub'; arr[i].b = b; return true; }
   function ins(i, bs){ hist.push(`${posNo(i)}번 다음 ${bs} 삽입`); bs.split('').forEach((b, k) => arr.splice(i + 1 + k, 0, {b, tag:'ins'})); return i + bs.length; }
   function del(i){ hist.push(`${posNo(i)}번 ${arr[i].b} 결실`); if (arr[i].tag === 'ins') arr.splice(i, 1); else { arr[i] = {b:'-', tag:'del', ob:arr[i].b}; } }
-  $('muSub').addEventListener('click', e => { const b = e.target.closest('[data-b]'); if (!b || sel < 0) return; if (sub(sel, b.dataset.b)) applied(); });
-  $('muIns').addEventListener('click', e => { const b = e.target.closest('[data-b]'); if (!b || sel < 0) return; sel = ins(sel, b.dataset.b); applied(); });
-  $('muDel').addEventListener('click', () => { if (sel < 0) return; del(sel); sel = -1; applied(); });
+  $('muSub').addEventListener('click', e => { const b = e.target.closest('[data-b]'); if (!b || sel < 0) return; if (sub(sel, b.dataset.b)) applied(true); });
+  $('muIns').addEventListener('click', e => { const b = e.target.closest('[data-b]'); if (!b || sel < 0) return; sel = ins(sel, b.dataset.b); applied(true); });
+  $('muDel').addEventListener('click', () => { if (sel < 0) return; del(sel); sel = -1; applied(true); });
   $('muReset').addEventListener('click', () => loadCase(C.id));
   $('muRand').addEventListener('click', () => {
     const live = arr.map((x, i) => x.tag === 'del' ? -1 : i).filter(i => i >= 0);
@@ -2865,12 +2977,14 @@ const V3 = (() => {
     if (r < 0.6){ const opts = ['A', 'T', 'G', 'C'].filter(b => b !== arr[i].b); sub(i, opts[Math.floor(Math.random() * 3)]); }
     else if (r < 0.8) ins(i, 'ATGC'[Math.floor(Math.random() * 4)]);
     else del(i);
-    sel = -1; applied();
+    sel = -1; applied(true);
   });
   $('muQuick').addEventListener('click', e => {
     const b = e.target.closest('[data-q]'); if (!b) return;
     arr = orig.split('').map(x => ({b:x, tag:''})); hist = []; sel = -1;
     const q = C.quick[+b.dataset.q];
+    if (C.id === 'p80') mission('mutation', 'p80');
+    if (C.id === 'hbb' && +b.dataset.q === 0) mission('mutation', 'sickle');
     // 결실이 여러 개면 원래 위치 기준
     q.ops.forEach(([op, i, v]) => { if (op === 'sub') sub(i, v); else if (op === 'ins') ins(i, v); else del(i); });
     hist = [q.lab];
@@ -2922,54 +3036,54 @@ const V3 = (() => {
   }
   function drawLac(time){
     const rep = 1 / (1 + Math.pow(L.lac / 0.08, 4)), on = rep < 0.5, Y = 140;
-    let g = `<rect width="980" height="420" fill="#121a24"/>`;
+    let g = `<rect width="980" height="420" fill="#FFFDF8"/>`;
     // DNA
-    const seg = (x1, x2, col, lab, sub) => `<rect x="${x1}" y="${Y - 13}" width="${x2 - x1}" height="26" rx="6" fill="${col}"/>` + svgText((x1 + x2) / 2, Y - 22, lab, {fill:'#dfe8f2', size:12.5}) + (sub ? svgText((x1 + x2) / 2, Y + 5, sub, {fill:'#0b1220', size:12}) : '');
+    const seg = (x1, x2, col, lab, sub) => `<rect x="${x1}" y="${Y - 13}" width="${x2 - x1}" height="26" rx="6" fill="${col}"/>` + svgText((x1 + x2) / 2, Y - 22, lab, {fill:'#25231E', size:12.5}) + (sub ? svgText((x1 + x2) / 2, Y + 5, sub, {fill:'#0b1220', size:12}) : '');
     g += `<rect x="30" y="${Y - 9}" width="920" height="18" rx="9" fill="#6b7f99"/>`;
     g += seg(70, 200, '#5cbf6a', '조절유전자') + seg(290, 380, '#f08a5d', '프로모터') + seg(380, 450, '#8f86d6', '작동부위');
     g += seg(450, 600, '#6fb6e6', '', '1') + seg(602, 752, '#6fb6e6', '', '2') + seg(754, 904, '#6fb6e6', '', '3');
-    g += svgText(677, Y - 22, '구조유전자 (젖당 이용 효소 3가지)', {fill:'#dfe8f2', size:12.5});
-    g += `<path d="M 290 ${Y - 44} h 614" stroke="#c9d6e6" stroke-width="1.3" fill="none"/><path d="M 290 ${Y - 48} v 8 M 904 ${Y - 48} v 8" stroke="#c9d6e6" stroke-width="1.3"/>`;
-    g += svgText(597, Y - 52, '젖당오페론', {fill:'#c9d6e6', size:13});
+    g += svgText(677, Y - 22, '구조유전자 (젖당 이용 효소 3가지)', {fill:'#25231E', size:12.5});
+    g += `<path d="M 290 ${Y - 44} h 614" stroke="#5E584D" stroke-width="1.3" fill="none"/><path d="M 290 ${Y - 48} v 8 M 904 ${Y - 48} v 8" stroke="#5E584D" stroke-width="1.3"/>`;
+    g += svgText(597, Y - 52, '젖당오페론', {fill:'#5E584D', size:13});
     // 조절유전자 → mRNA → 억제단백질 (항상)
-    g += `<path d="M 135 ${Y + 18} v 26" stroke="#9fb2c6" stroke-width="2" marker-end=""/>` + `<path d="M 105 ${Y + 58} q 15 -10 30 0 t 30 0" stroke="#e070c8" stroke-width="3" fill="none"/>` + `<path d="M 135 ${Y + 66} v 18" stroke="#9fb2c6" stroke-width="2"/>`;
-    g += svgText(60, Y + 62, 'mRNA', {fill:'#f0b8ef', size:11});
+    g += `<path d="M 135 ${Y + 18} v 26" stroke="#5E584D" stroke-width="2" marker-end=""/>` + `<path d="M 105 ${Y + 58} q 15 -10 30 0 t 30 0" stroke="#e070c8" stroke-width="3" fill="none"/>` + `<path d="M 135 ${Y + 66} v 18" stroke="#5E584D" stroke-width="2"/>`;
+    g += svgText(60, Y + 62, 'mRNA', {fill:'#b0389f', size:11});
     // 억제단백질 위치
     const repX = on ? 300 : 415, repY = on ? 300 : Y - 4;
     const cx = lerp(415, 300, on ? 1 : 0);
     g += shape(on ? 'repOff' : 'rep', on ? 330 : 415, on ? 262 : Y - 2 + 20, '#f0c24a', 1.1);
     if (on){
       g += `<circle cx="323" cy="258" r="7" fill="#3fb6a8" stroke="#fff6"/><circle cx="337" cy="258" r="7" fill="#3fb6a8" stroke="#fff6"/>`;
-      g += svgText(330, 296, '억제단백질 + 젖당 유도체', {fill:'#f0c24a', size:11.5}) + svgText(330, 311, '→ 구조가 바뀌어 작동부위에 결합 못 함', {fill:'#f0c24a', size:11});
-      g += `<path d="M 165 ${Y + 104} Q 230 ${Y + 128} 296 ${Y + 124}" stroke="#9fb2c6" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>`;
+      g += svgText(330, 296, '억제단백질 + 젖당 유도체', {fill:'#946300', size:11.5}) + svgText(330, 311, '→ 구조가 바뀌어 작동부위에 결합 못 함', {fill:'#946300', size:11});
+      g += `<path d="M 165 ${Y + 104} Q 230 ${Y + 128} 296 ${Y + 124}" stroke="#5E584D" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>`;
     } else {
-      g += svgText(415, Y + 50, '억제단백질이 작동부위에 결합', {fill:'#f0c24a', size:11.5});
-      g += `<path d="M 160 ${Y + 100} Q 300 ${Y + 120} 400 ${Y + 36}" stroke="#9fb2c6" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>`;
+      g += svgText(415, Y + 50, '억제단백질이 작동부위에 결합', {fill:'#946300', size:11.5});
+      g += `<path d="M 160 ${Y + 100} Q 300 ${Y + 120} 400 ${Y + 36}" stroke="#5E584D" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>`;
     }
     g += shape('rep', 135, Y + 104, '#f0c24a', 0.9);
-    g += svgText(135, Y + 132, '억제단백질 (항상 만들어짐)', {fill:'#f0c24a', size:11});
+    g += svgText(135, Y + 132, '억제단백질 (항상 만들어짐)', {fill:'#946300', size:11});
     // RNA 중합효소
     if (on){
       const ph = (time * 0.18) % 1, px = lerp(335, 900, ph);
-      g += `<ellipse cx="${px}" cy="${Y}" rx="30" ry="22" fill="#ffb3c766" stroke="#ff9fbf" stroke-width="2"/>` + svgText(px, Y + 40, 'RNA 중합효소', {fill:'#ff9fbf', size:11.5});
+      g += `<ellipse cx="${px}" cy="${Y}" rx="30" ry="22" fill="#e88aa866" stroke="#c0392b" stroke-width="2"/>` + svgText(px, Y + 40, 'RNA 중합효소', {fill:'#c0392b', size:11.5});
       const mlen = (px - 335);
       g += `<path d="M ${px - 20} ${Y + 18} q ${-mlen * 0.3} 40 ${-mlen * 0.8} 30" stroke="#e070c8" stroke-width="3" fill="none"/>`;
     } else {
-      g += `<ellipse cx="335" cy="${Y - 70}" rx="30" ry="22" fill="#ffb3c744" stroke="#ff9fbf" stroke-width="2" stroke-dasharray="4 3"/>` + svgText(335, Y - 100, 'RNA 중합효소', {fill:'#ff9fbf', size:11.5});
-      g += svgText(335, Y - 64, '✕', {fill:'#ff8f8f', size:18}) + svgText(520, Y - 76, '프로모터에 결합하지 못해 전사가 일어나지 않음', {fill:'#ff9b9b', size:11.5});
+      g += `<ellipse cx="335" cy="${Y - 70}" rx="30" ry="22" fill="#e88aa844" stroke="#c0392b" stroke-width="2" stroke-dasharray="4 3"/>` + svgText(335, Y - 100, 'RNA 중합효소', {fill:'#c0392b', size:11.5});
+      g += svgText(335, Y - 64, '✕', {fill:'#c0392b', size:18}) + svgText(520, Y - 76, '프로모터에 결합하지 못해 전사가 일어나지 않음', {fill:'#c0392b', size:11.5});
     }
     // 구조유전자 mRNA와 효소
     const nm = Math.round(L.m * 4), nE = Math.min(12, Math.round(L.E * 2.2));
     for (let k = 0; k < nm; k++){ const x = 480 + k * 90 + Math.sin(time + k) * 6; g += `<path d="M ${x} 228 q 15 -10 30 0 t 30 0 t 30 0" stroke="#e070c8" stroke-width="3" fill="none"/>`; }
-    if (nm) g += svgText(940, 222, '구조유전자 mRNA', {fill:'#f0b8ef', size:11, anchor:'end'});
+    if (nm) g += svgText(940, 222, '구조유전자 mRNA', {fill:'#b0389f', size:11, anchor:'end'});
     for (let k = 0; k < nE; k++){ const x = 520 + (k % 6) * 66 + Math.sin(time * 0.8 + k) * 5, y = 268 + Math.floor(k / 6) * 34;
       g += `<path transform="translate(${x},${y})" d="M -16 4 Q -18 -12 -4 -10 Q 0 -16 6 -10 Q 18 -12 16 4 Q 0 12 -16 4 Z" fill="#b38be8" stroke="#0005"/>`; }
-    if (nE) g += svgText(940, 345, '젖당 분해 효소 등', {fill:'#c9a7ff', size:11, anchor:'end'});
+    if (nE) g += svgText(940, 345, '젖당 분해 효소 등', {fill:'#7a4fc8', size:11, anchor:'end'});
     // 젖당
     const nl = Math.min(16, Math.round(L.lac * 12));
     for (let k = 0; k < nl; k++){ const [x, y] = lacPos[k]; const xx = x + Math.sin(time * 0.7 + k) * 8, yy = y + Math.cos(time * 0.6 + k) * 5;
       g += `<circle cx="${xx - 6}" cy="${yy}" r="6.5" fill="#3fb6a8" stroke="#fff6"/><circle cx="${xx + 6}" cy="${yy}" r="6.5" fill="#3fb6a8" stroke="#fff6"/>`; }
-    if (nl) g += svgText(50, 405, `젖당 ${nl}`, {fill:'#7fe0d4', size:11, anchor:'start'});
+    if (nl) g += svgText(50, 405, `젖당 ${nl}`, {fill:'#1f8a7e', size:11, anchor:'start'});
     $('lacSvg').innerHTML = g;
     $('lacState').innerHTML = on ? '<b style="color:var(--good)">젖당 있음</b> → 억제단백질이 작동부위에서 떨어짐 → 구조유전자 전사' : '<b style="color:var(--bad)">젖당 없음</b> → 억제단백질이 작동부위에 결합 → 전사 억제';
   }
@@ -2980,8 +3094,8 @@ const V3 = (() => {
     const hs = L.hist; if (hs.length > 1){
       const t0 = Math.max(0, L.t - 40), X = t => x0 + (t - t0) / 40 * w;
       const line = (key, sc, col) => `<polyline points="${hs.map(p => `${X(p.t).toFixed(1)},${(y0 - clamp(p[key] / sc, 0, 1) * h).toFixed(1)}`).join(' ')}" fill="none" stroke="${col}" stroke-width="2.5"/>`;
-      g += line('lac', 1.6, '#9fd3ff') + line('m', 1.4, '#ff7b7b') + line('E', 5, '#c9a7ff');
-      (L.events || []).forEach(ev => { if (ev.t < t0) return; const x = X(ev.t); g += `<line x1="${x}" y1="${y0}" x2="${x}" y2="${y0 - h}" stroke="#ffcf6b" stroke-dasharray="3 3"/>` + svgText(x + 3, y0 - h + 12, ev.l, {anchor:'start', fill:'#ffcf6b', size:10.5}); });
+      g += line('lac', 1.6, '#2a6cb0') + line('m', 1.4, '#ff7b7b') + line('E', 5, '#7a4fc8');
+      (L.events || []).forEach(ev => { if (ev.t < t0) return; const x = X(ev.t); g += `<line x1="${x}" y1="${y0}" x2="${x}" y2="${y0 - h}" stroke="#a8740a" stroke-dasharray="3 3"/>` + svgText(x + 3, y0 - h + 12, ev.l, {anchor:'start', fill:'#a8740a', size:10.5}); });
     }
     $('lacGraph').innerHTML = g;
   }
@@ -2994,6 +3108,7 @@ const V3 = (() => {
         options:[{label:'젖당 유도체와 결합해 구조가 바뀌고, 작동부위에서 떨어진다', value:'off'}, {label:'작동부위에 더 단단히 결합한다', value:'on'}, {label:'억제단백질이 더 이상 만들어지지 않는다', value:'gone'}],
         explain:'억제단백질이 작동부위에서 떨어지면 RNA 중합효소가 프로모터에 결합해 구조유전자가 전사됩니다. 조절유전자는 항상 발현됩니다.'});
     }
+    mission('regulation', 'lac');
     L.lac = Math.min(1.6, L.lac + 1); L.events.push({t:L.t, l:'젖당 추가'});
   });
   $('lacRemove').addEventListener('click', () => { L.lac = 0; L.events.push({t:L.t, l:'젖당 제거'}); });
@@ -3008,7 +3123,7 @@ const V3 = (() => {
   /* ---------------- 진핵: 전사인자 조합 ---------------- */
   const TF = {
     a:{col:'#e07a9b', sh:'circle', name:'A'}, b:{col:'#7fc4e0', sh:'square', name:'B'}, c:{col:'#e0c46a', sh:'diamond', name:'C'},
-    d:{col:'#9be07a', sh:'tri', name:'D'}, e:{col:'#c9a7ff', sh:'pill', name:'E'}, f:{col:'#f4a261', sh:'hex', name:'F'}};
+    d:{col:'#9be07a', sh:'tri', name:'D'}, e:{col:'#7a4fc8', sh:'pill', name:'E'}, f:{col:'#f4a261', sh:'hex', name:'F'}};
   const GENES = [
     {id:'resp', name:'호흡 효소 유전자', need:['c', 'f'], prot:'호흡 효소'},
     {id:'alb', name:'알부민 유전자', need:['a', 'b', 'c'], prot:'알부민 (혈액 속 단백질)'},
@@ -3031,6 +3146,7 @@ const V3 = (() => {
   }
   $('tfChips').addEventListener('click', e => {
     const b = e.target.closest('[data-tf]'); if (!b) return;
+    mission('regulation', 'tf');
     const k = b.dataset.tf; have.has(k) ? have.delete(k) : have.add(k);
     cell = 'custom'; [...$('tfCell').children].forEach(x => x.classList.toggle('on', x.dataset.c === 'custom'));
     tfChips(); drawTF();
@@ -3042,8 +3158,8 @@ const V3 = (() => {
     tfChips(); drawTF();
   });
   function drawTF(time = performance.now() / 1000){
-    let g = `<rect width="980" height="470" fill="#1a1430"/>`;
-    g += svgText(20, 24, `핵 속 · ${cell === 'custom' ? '직접 고른 세포' : CELLS[cell].name}`, {anchor:'start', fill:'#c9b3f0', size:13});
+    let g = `<rect width="980" height="470" fill="#F5F0FA"/>`;
+    g += svgText(20, 24, `핵 속 · ${cell === 'custom' ? '직접 고른 세포' : CELLS[cell].name}`, {anchor:'start', fill:'#6a4fb0', size:13});
     GENES.forEach((G, r) => {
       const Y = 110 + r * 140, ok = G.need.every(k => have.has(k));
       anim[G.id] = anim[G.id] ?? 0; anim[G.id] += ((ok ? 1 : 0) - anim[G.id]) * 0.12;
@@ -3054,26 +3170,26 @@ const V3 = (() => {
       // 펴진 DNA ↔ 고리를 이룬 DNA(원거리조절부위가 프로모터 위로 옴)를 서로 겹쳐 전환
       if (k < 0.98) g += `<path d="M 30 ${Y} L 950 ${Y}" stroke="#6fb6e6" stroke-width="9" fill="none" stroke-linecap="round" opacity="${.85 * (1 - k)}"/>`;
       if (k > 0.02) g += `<path d="M 950 ${Y - 62} L 360 ${Y - 62} C 270 ${Y - 62} 270 ${Y} 360 ${Y} L 950 ${Y}" stroke="#6fb6e6" stroke-width="9" fill="none" stroke-linecap="round" opacity="${.85 * k}"/>`;
-      if (k < 0.5) g += `<path d="M 390 ${Y - 12} l 10 24 M 404 ${Y - 12} l 10 24" stroke="#1a1430" stroke-width="5"/><path d="M 390 ${Y - 12} l 10 24 M 404 ${Y - 12} l 10 24" stroke="#9fb2c6" stroke-width="1.5"/>`;
+      if (k < 0.5) g += `<path d="M 390 ${Y - 12} l 10 24 M 404 ${Y - 12} l 10 24" stroke="#F5F0FA" stroke-width="5"/><path d="M 390 ${Y - 12} l 10 24 M 404 ${Y - 12} l 10 24" stroke="#5E584D" stroke-width="1.5"/>`;
       // 원거리조절부위
-      g += `<rect x="${ex - 70}" y="${ey - 8}" width="140" height="16" rx="5" fill="#f0e08a"/>` + (k > .5 ? svgText(ex - 76, ey - 14, '원거리조절부위', {fill:'#f0e08a', size:11, anchor:'end'}) : svgText(ex, ey + 30, '원거리조절부위', {fill:'#f0e08a', size:11}));
+      g += `<rect x="${ex - 70}" y="${ey - 8}" width="140" height="16" rx="5" fill="#f0e08a"/>` + (k > .5 ? svgText(ex - 76, ey - 14, '원거리조절부위', {fill:'#8a6a1f', size:11, anchor:'end'}) : svgText(ex, ey + 30, '원거리조절부위', {fill:'#8a6a1f', size:11}));
       G.need.forEach((n, j) => { const sx = ex - 44 + j * 44; g += `<rect x="${sx - 13}" y="${ey - 6}" width="26" height="12" rx="3" fill="${TF[n].col}55" stroke="${TF[n].col}"/>`;
         if (have.has(n)) g += tfShape(n, sx, ey - 18, 1, 1); });
       // 프로모터 + 유전자
-      g += `<rect x="600" y="${Y - 10}" width="80" height="20" rx="5" fill="#f08a5d"/>` + svgText(640, Y + 32, '프로모터', {fill:'#f6a37f', size:11});
+      g += `<rect x="600" y="${Y - 10}" width="80" height="20" rx="5" fill="#f08a5d"/>` + svgText(640, Y + 32, '프로모터', {fill:'#c25a2a', size:11});
       g += `<rect x="680" y="${Y - 10}" width="250" height="20" rx="5" fill="#5aa0e6"/>` + svgText(805, Y + 4, G.name, {fill:'#08121e', size:12});
       // 전사개시복합체
       if (k > 0.6){
         const op = ease((k - 0.6) / 0.4);
-        g += `<g opacity="${op}"><ellipse cx="660" cy="${Y - 6}" rx="40" ry="26" fill="#e9e3ff55" stroke="#e9e3ff"/>`;
+        g += `<g opacity="${op}"><ellipse cx="660" cy="${Y - 6}" rx="40" ry="26" fill="#6a4fb055" stroke="#6a4fb0"/>`;
         for (let q = 0; q < 6; q++) g += `<circle cx="${612 + q * 9}" cy="${Y - 30 + (q % 2) * 8}" r="8" fill="#a98be0" stroke="#0004"/>`;
-        g += svgText(700, Y + 50, '전사개시복합체 (전사인자 + RNA 중합효소)', {fill:'#e9e3ff', size:11, anchor:'start'}) + '</g>';
+        g += svgText(700, Y + 50, '전사개시복합체 (전사인자 + RNA 중합효소)', {fill:'#6a4fb0', size:11, anchor:'start'}) + '</g>';
         const ph = (time * 0.4 + r * 0.3) % 1;
         g += `<path d="M 690 ${Y - 26} h ${60 + ph * 150} m -8 -5 l 8 5 l -8 5" stroke="#ff7b7b" stroke-width="2.4" fill="none" opacity="${op}"/>`;
         g += `<path d="M 700 ${Y + 22} q 20 14 40 0 t 40 0 t 40 0" stroke="#e070c8" stroke-width="3" fill="none" opacity="${op}"/>`;
       }
       const missing = G.need.filter(n => !have.has(n)).map(n => TF[n].name);
-      g += `<text x="950" y="${Y - 40}" text-anchor="end" font-size="13" font-weight="900" fill="${ok ? '#5fd39a' : '#ff8f8f'}">${ok ? '✓ 발현됨 → ' + G.prot : '✗ 발현 안 됨 (전사인자 ' + missing.join(', ') + ' 없음)'}</text>`;
+      g += `<text x="950" y="${Y - 40}" text-anchor="end" font-size="13" font-weight="900" fill="${ok ? '#2e9d62' : '#c0392b'}">${ok ? '✓ 발현됨 → ' + G.prot : '✗ 발현 안 됨 (전사인자 ' + missing.join(', ') + ' 없음)'}</text>`;
     });
     $('tfSvg').innerHTML = g;
     // 표
@@ -3094,24 +3210,24 @@ const V3 = (() => {
     {n:'⑤', t:'번역 후 조절', d:'합성된 폴리펩타이드가 입체 구조를 형성하는 과정을 조절하거나 활성화된 단백질을 분해하여 유전자발현을 조절한다.', go:null}];
   let lvSel = 0;
   function drawLevels(){
-    let g = `<rect width="980" height="360" fill="#1a1430"/><rect x="0" y="0" width="560" height="360" fill="#5b3f8c55"/>` + svgText(20, 26, '핵', {anchor:'start', fill:'#e5d6ff', size:14}) + svgText(960, 26, '세포질', {anchor:'end', fill:'#e6cf9a', size:14});
+    let g = `<rect width="980" height="360" fill="#F5F0FA"/><rect x="0" y="0" width="560" height="360" fill="#DCCBF2AA"/>` + svgText(20, 26, '핵', {anchor:'start', fill:'#6a4fb0', size:14}) + svgText(960, 26, '세포질', {anchor:'end', fill:'#8a6a1f', size:14});
     g += `<path d="M 560 0 V 360" stroke="#b79be8" stroke-width="4" stroke-dasharray="40 14"/>`;
     const xs = [100, 290, 470, 660, 860];
     // 아이콘
     const icon = [
-      x => { let s = ''; for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) s += `<circle cx="${x - 42 + i * 28}" cy="${150 + j * 22}" r="11" fill="#a98be0" stroke="#e5d6ff"/>`; return s; },
+      x => { let s = ''; for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) s += `<circle cx="${x - 42 + i * 28}" cy="${150 + j * 22}" r="11" fill="#a98be0" stroke="#6a4fb0"/>`; return s; },
       x => `<path d="M ${x - 70} 170 h 140" stroke="#6fb6e6" stroke-width="8"/><ellipse cx="${x}" cy="164" rx="30" ry="20" fill="#8fd17a66" stroke="#8fd17a"/><circle cx="${x - 40}" cy="152" r="9" fill="#e07a9b"/><circle cx="${x - 26}" cy="146" r="8" fill="#e0c46a"/>`,
       x => `<path d="M ${x - 70} 170 q 20 -14 40 0 t 40 0 t 40 0" stroke="#e070c8" stroke-width="4" fill="none"/><path d="M ${x - 12} 168 q 12 -40 24 0" stroke="#9aa5b5" stroke-width="4" fill="none"/><circle cx="${x - 72}" cy="170" r="6" fill="#ffd166"/>`,
       x => `<path d="M ${x - 70} 180 h 140" stroke="#e070c8" stroke-width="4"/>${'<g>'}<path d="M ${x - 30} 176 Q ${x - 34} 140 ${x} 138 Q ${x + 34} 140 ${x + 30} 176 Z" fill="#d8b36a"/><path d="M ${x - 34} 184 Q ${x} 198 ${x + 34} 184 Z" fill="#d8b36a"/></g>`,
       x => `<path d="M ${x - 40} 170 C ${x - 60} 120 ${x + 10} 120 ${x} 160 S ${x + 60} 200 ${x + 40} 140" stroke="#9be07a" stroke-width="7" fill="none"/>`];
     LV.forEach((L, i) => {
       const x = xs[i], on = i === lvSel;
-      g += `<g data-lv="${i}" style="cursor:pointer"><rect x="${x - 88}" y="90" width="176" height="200" rx="14" fill="${on ? '#7cc4ff22' : '#ffffff08'}" stroke="${on ? '#7cc4ff' : '#ffffff22'}" stroke-width="${on ? 2.5 : 1}"/>`;
+      g += `<g data-lv="${i}" style="cursor:pointer"><rect x="${x - 88}" y="90" width="176" height="200" rx="14" fill="${on ? '#2F7BC422' : '#00000005'}" stroke="${on ? '#2F7BC4' : '#00000022'}" stroke-width="${on ? 2.5 : 1}"/>`;
       g += icon[i](x);
-      g += svgText(x, 250, `${L.n} ${L.t}`, {fill: on ? '#7cc4ff' : '#eaf0f7', size:14}) + '</g>';
-      if (i < 4) g += `<path d="M ${x + 92} 190 h ${xs[i + 1] - x - 184} m -8 -6 l 8 6 l -8 6" stroke="#9fb2c6" stroke-width="2" fill="none"/>`;
+      g += svgText(x, 250, `${L.n} ${L.t}`, {fill: on ? '#2F7BC4' : '#25231E', size:14}) + '</g>';
+      if (i < 4) g += `<path d="M ${x + 92} 190 h ${xs[i + 1] - x - 184} m -8 -6 l 8 6 l -8 6" stroke="#5E584D" stroke-width="2" fill="none"/>`;
     });
-    g += svgText(100, 312, 'DNA (염색질)', {fill:'#c9b3f0', size:11.5}) + svgText(290, 312, 'DNA → RNA', {fill:'#c9b3f0', size:11.5}) + svgText(470, 312, 'RNA → mRNA', {fill:'#c9b3f0', size:11.5}) + svgText(660, 312, 'mRNA → 폴리펩타이드', {fill:'#e6cf9a', size:11.5}) + svgText(860, 312, '단백질 (입체 구조)', {fill:'#e6cf9a', size:11.5});
+    g += svgText(100, 312, 'DNA (염색질)', {fill:'#6a4fb0', size:11.5}) + svgText(290, 312, 'DNA → RNA', {fill:'#6a4fb0', size:11.5}) + svgText(470, 312, 'RNA → mRNA', {fill:'#6a4fb0', size:11.5}) + svgText(660, 312, 'mRNA → 폴리펩타이드', {fill:'#8a6a1f', size:11.5}) + svgText(860, 312, '단백질 (입체 구조)', {fill:'#8a6a1f', size:11.5});
     $('lvSvg').innerHTML = g;
     const L = LV[lvSel];
     $('lvStep').textContent = `${L.n} ${L.t}`; $('lvText').textContent = L.d;
@@ -3126,7 +3242,7 @@ const V3 = (() => {
   /* ---------------- 발생: 핵심조절유전자 연쇄 ---------------- */
   const DEV = [
     {id:'myoD', name:'마이오디유전자 (myoD)', prot:'마이오디단백질 (MyoD)', col:'#7fc4e0', up:null},
-    {id:'x', name:'조절유전자 x', prot:'조절단백질 X', col:'#c9a7ff', up:'myoD'},
+    {id:'x', name:'조절유전자 x', prot:'조절단백질 X', col:'#7a4fc8', up:'myoD'},
     {id:'myo', name:'마이오신 유전자', prot:'마이오신', col:'#f4a261', up:'x'},
     {id:'act', name:'액틴 유전자', prot:'액틴', col:'#e0c46a', up:'x'}];
   const ko = new Set();
@@ -3134,34 +3250,34 @@ const V3 = (() => {
   function devChips(){
     $('devKO').innerHTML = DEV.map(d => `<button class="btn sm${ko.has(d.id) ? ' on' : ''}" data-ko="${d.id}" style="${ko.has(d.id) ? 'background:var(--bad);border-color:var(--bad);color:#200' : ''}">${ko.has(d.id) ? '✕ ' : ''}${d.name.replace(/ \(myoD\)/, '')}</button>`).join('');
   }
-  $('devKO').addEventListener('click', e => { const b = e.target.closest('[data-ko]'); if (!b) return; const k = b.dataset.ko; ko.has(k) ? ko.delete(k) : ko.add(k); devChips(); drawDev(); });
+  $('devKO').addEventListener('click', e => { const b = e.target.closest('[data-ko]'); if (!b) return; const k = b.dataset.ko; ko.has(k) ? ko.delete(k) : ko.add(k); if (k === 'myoD' && ko.has(k)) mission('regulation', 'dev'); devChips(); drawDev(); });
   $('devReset').addEventListener('click', () => { ko.clear(); devChips(); drawDev(); });
   function drawDev(){
     const pos = {myoD:[150, 120], x:[420, 120], myo:[700, 70], act:[700, 200]};
-    let g = '<rect width="980" height="400" fill="#1a1430"/>';
+    let g = '<rect width="980" height="400" fill="#F5F0FA"/>';
     DEV.forEach(d => {
       const [x, y] = pos[d.id], on = expressed(d.id), dead = ko.has(d.id);
       g += `<rect x="${x - 100}" y="${y - 10}" width="200" height="20" rx="5" fill="#6fb6e6" opacity=".85"/><rect x="${x - 40}" y="${y - 10}" width="80" height="20" rx="4" fill="${d.col}"/>`;
       if (dead) g += svgText(x, y + 5, '✕ 돌연변이', {fill:'#7a0d0d', size:12});
-      g += svgText(x, y - 18, d.name, {fill:'#dfe8f2', size:12.5});
-      g += `<path d="M ${x} ${y + 12} v 22" stroke="${on ? '#ff7b7b' : '#55607055'}" stroke-width="2"/>` + svgText(x + 28, y + 30, 'mRNA', {fill: on ? '#f0b8ef' : '#55607088', size:10.5});
+      g += svgText(x, y - 18, d.name, {fill:'#25231E', size:12.5});
+      g += `<path d="M ${x} ${y + 12} v 22" stroke="${on ? '#ff7b7b' : '#55607055'}" stroke-width="2"/>` + svgText(x + 28, y + 30, 'mRNA', {fill: on ? '#b0389f' : '#55607088', size:10.5});
       g += on ? `<circle cx="${x}" cy="${y + 52}" r="13" fill="${d.col}" stroke="#fff8"/>` : `<circle cx="${x}" cy="${y + 52}" r="13" fill="none" stroke="#55607099" stroke-dasharray="3 3"/>`;
       g += svgText(x, y + 82, d.prot + (on ? '' : ' (없음)'), {fill: on ? d.col : '#7d8ea3', size:11.5});
     });
     // 연쇄 화살표: 조절단백질 → 다음 유전자 촉진
     const arrow = (a, b) => { const [x1, y1] = pos[a], [x2, y2] = pos[b], on = expressed(a);
-      return `<path d="M ${x1 + 16} ${y1 + 52} C ${x1 + 120} ${y1 + 52} ${x2 - 160} ${y2 - 40} ${x2 - 40} ${y2 - 12}" stroke="${on ? '#9fe0c0' : '#55607066'}" stroke-width="2.4" fill="none" stroke-dasharray="${on ? '' : '5 4'}"/>`
-        + `<circle cx="${x2 - 40}" cy="${y2 - 12}" r="4" fill="${on ? '#9fe0c0' : '#556070'}"/>`; };
+      return `<path d="M ${x1 + 16} ${y1 + 52} C ${x1 + 120} ${y1 + 52} ${x2 - 160} ${y2 - 40} ${x2 - 40} ${y2 - 12}" stroke="${on ? '#2e8a5f' : '#55607066'}" stroke-width="2.4" fill="none" stroke-dasharray="${on ? '' : '5 4'}"/>`
+        + `<circle cx="${x2 - 40}" cy="${y2 - 12}" r="4" fill="${on ? '#2e8a5f' : '#556070'}"/>`; };
     g += arrow('myoD', 'x') + arrow('x', 'myo') + arrow('x', 'act');
-    g += svgText(285, 72, '촉진', {fill:'#9fe0c0', size:11}) + svgText(560, 60, '촉진', {fill:'#9fe0c0', size:11});
+    g += svgText(285, 72, '촉진', {fill:'#2e8a5f', size:11}) + svgText(560, 60, '촉진', {fill:'#2e8a5f', size:11});
     // 세포 모양
     const muscle = expressed('myo') && expressed('act');
-    g += svgText(150, 320, '근육아세포', {fill:'#e9b8c8', size:13});
+    g += svgText(150, 320, '근육아세포', {fill:'#b04a5a', size:13});
     g += `<ellipse cx="150" cy="355" rx="40" ry="18" fill="#e9a3b8" stroke="#fff6"/><circle cx="150" cy="355" r="6" fill="#8c3a55"/>`;
     g += `<path d="M 230 355 h 420 m -10 -7 l 10 7 l -10 7" stroke="${muscle ? '#9fb8ff' : '#55607088'}" stroke-width="3" fill="none"/>`;
-    g += svgText(440, 345, muscle ? '분화' : '분화하지 못함', {fill: muscle ? '#9fb8ff' : '#ff8f8f', size:12.5});
-    if (muscle){ g += `<rect x="690" y="335" width="230" height="40" rx="18" fill="#e48a8a" stroke="#fff6"/>`; for (let i = 0; i < 14; i++) g += `<line x1="${705 + i * 15}" y1="338" x2="${705 + i * 15}" y2="372" stroke="#b05050" stroke-width="2"/>`; g += svgText(805, 320, '근육세포 (마이오신·액틴 섬유)', {fill:'#f4b0b0', size:13}); }
-    else g += `<ellipse cx="760" cy="355" rx="40" ry="18" fill="#e9a3b8" stroke="#fff6" opacity=".6"/>` + svgText(760, 320, '근육세포가 되지 못함', {fill:'#ff8f8f', size:13});
+    g += svgText(440, 345, muscle ? '분화' : '분화하지 못함', {fill: muscle ? '#9fb8ff' : '#c0392b', size:12.5});
+    if (muscle){ g += `<rect x="690" y="335" width="230" height="40" rx="18" fill="#e48a8a" stroke="#fff6"/>`; for (let i = 0; i < 14; i++) g += `<line x1="${705 + i * 15}" y1="338" x2="${705 + i * 15}" y2="372" stroke="#b05050" stroke-width="2"/>`; g += svgText(805, 320, '근육세포 (마이오신·액틴 섬유)', {fill:'#b04a5a', size:13}); }
+    else g += `<ellipse cx="760" cy="355" rx="40" ry="18" fill="#e9a3b8" stroke="#fff6" opacity=".6"/>` + svgText(760, 320, '근육세포가 되지 못함', {fill:'#c0392b', size:13});
     $('devSvg').innerHTML = g;
     const miss = DEV.filter(d => !expressed(d.id)).map(d => d.prot);
     $('devText').innerHTML = !ko.size ? '마이오디유전자가 발현되어 생성된 마이오디단백질이 전사인자로 작용해 조절유전자 <i>x</i>의 발현을 촉진하고, 조절단백질 X가 다시 마이오신·액틴 유전자의 발현을 촉진합니다. 이렇게 연쇄적으로 근육 단백질이 만들어져 근육아세포가 근육세포로 분화합니다.'
@@ -3184,17 +3300,30 @@ const V3 = (() => {
   $('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) showTab(b.dataset.tab); });
   $('orgSeg').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b || b.dataset.org === S.org) return;
-    S.org = b.dataset.org; S.alt = false;
+    S.org = b.dataset.org; S.alt = false; if (S.org === 'pro') mission('overview', 'pro');
     [...$('orgSeg').children].forEach(x => x.classList.toggle('on', x === b));
     fireGene();
   });
   $('predictToggle').addEventListener('change', e => { S.predict = e.target.checked; });
+  function applyMode(){
+    document.body.classList.toggle('adv', S.adv);
+    document.querySelectorAll('details.d3').forEach(d => { d.open = S.adv; });
+  }
+  $('advToggle').addEventListener('change', e => { S.adv = e.target.checked; S.alt = false; applyMode(); fireGene(); });
+  initMissions();
+  $('tResetM').addEventListener('click', () => { resetMissions(); $('tMsg').textContent = '미션 기록을 초기화했습니다.'; });
+  [['repPlay', 'replication'], ['trPlay', 'transcription'], ['prPlay', 'processing']].forEach(([id, tab]) => $(id).addEventListener('click', () => mission(tab, 'play')));
+  // 한눈에 보기 미션
+  $('ovSvg').addEventListener('click', e => { if (e.target.closest('[data-go]')) mission('overview', 'call'); }, true);
+  const flipped = new Set();
+  $('analogy').addEventListener('click', e => { const c = e.target.closest('.an'); if (!c) return; c.classList.toggle('flip'); flipped.add(c.dataset.an); if (flipped.size >= 5) mission('overview', 'analogy'); });
   onGene(renderSeqBar);
   // 초기 상태
-  loadPreset('euk3'); S.ver = 0;      // 기본 유전자 (silent 아님: 아래에서 다시 그림)
+  loadPreset('p63'); S.ver = 0;      // 기본 유전자 (silent 아님: 아래에서 다시 그림)
   const tab = readURL();
   [...$('orgSeg').children].forEach(x => x.classList.toggle('on', x.dataset.org === S.org));
   $('predictToggle').checked = S.predict;
+  $('advToggle').checked = S.adv; applyMode();
   fireGene();
   showTab(tab || 'overview');
 })();
