@@ -2592,7 +2592,7 @@ const V3 = (() => {
 
   /* ---- 진핵생물 ---- */
   function euk(t){
-    let g = '';
+    let g = '', calls = '';
     g += `<rect x="0" y="0" width="980" height="560" fill="#2b2618"/>`;
     // 세포질의 tRNA들
     for (let i = 0; i < 9; i++){
@@ -2633,19 +2633,19 @@ const V3 = (() => {
     // 떠다니는 소단위체·대단위체
     g += ribosome(700, 270 + Math.sin(t) * 5, 0.75, 0.9, 'large') + ribosome(530, 480 + Math.cos(t) * 4, 0.75, 0.9, 'small');
     // 설명 상자
-    g += callout(150, 22, '①', '전사', '핵에서 DNA의 유전정보가 RNA로', 'transcription');
-    g += callout(30, 420, '+', 'RNA 가공', '인트론 제거 · 양 끝 변형 (70쪽)', 'processing');
-    g += callout(330, 220, '②', 'mRNA가 핵공을 통해', '세포질로 이동한다', 'processing');
-    g += callout(470, 488, '③', 'mRNA가 라이보솜', '소단위체와 결합', 'translation');
-    g += callout(560, 160, '④', '번역(개시)', '개시 tRNA → 대단위체 결합', 'translation');
-    g += callout(660, 470, '⑤', '번역(신장)', 'tRNA가 운반한 아미노산이 연결', 'translation');
-    g += callout(780, 230, '⑥', '번역(종결)', '종결코돈에서 폴리펩타이드 분리', 'translation');
-    return g;
+    calls += callout(150, 22, '①', '전사', '핵에서 DNA의 유전정보가 RNA로', 'transcription');
+    calls += callout(30, 420, '+', 'RNA 가공', '인트론 제거 · 양 끝 변형 (70쪽)', 'processing');
+    calls += callout(330, 220, '②', 'mRNA가 핵공을 통해', '세포질로 이동한다', 'processing');
+    calls += callout(470, 488, '③', 'mRNA가 라이보솜', '소단위체와 결합', 'translation');
+    calls += callout(560, 160, '④', '번역(개시)', '개시 tRNA → 대단위체 결합', 'translation');
+    calls += callout(660, 470, '⑤', '번역(신장)', 'tRNA가 운반한 아미노산이 연결', 'translation');
+    calls += callout(780, 230, '⑥', '번역(종결)', '종결코돈에서 폴리펩타이드 분리', 'translation');
+    return {g, calls};
   }
 
   /* ---- 원핵생물 ---- */
   function pro(t){
-    let g = '';
+    let g = '', calls = '';
     g += `<rect x="0" y="0" width="980" height="560" fill="#14202a"/>`;
     g += `<rect x="30" y="40" width="920" height="480" rx="200" fill="#2b2618" stroke="#c7b07a" stroke-width="5"/>`;
     g += svgText(80, 90, '세포질 (핵막 없음)', {fill:'#e6cf9a', size:15, anchor:'start'});
@@ -2672,22 +2672,35 @@ const V3 = (() => {
       }
       g += `<g opacity="${op}">${poly(pts, 'stroke="#e070c8" stroke-width="3"')}${rr}<ellipse cx="${x}" cy="${Y}" rx="15" ry="12" fill="#8fd17a88" stroke="#8fd17a" stroke-width="1.8"/></g>`;
     }
-    g += callout(560, 60, '①', '전사', 'RNA 중합효소가 DNA를 따라 이동하며 mRNA 합성', 'transcription');
-    g += callout(420, 440, '②', '전사 중인 mRNA에 라이보솜 결합', '핵막이 없어 전사와 번역이 동시에 일어남', 'translation');
-    g += callout(700, 300, '③', '폴리솜', 'mRNA 하나에 라이보솜 여러 개', 'translation');
-    return g;
+    calls += callout(560, 60, '①', '전사', 'RNA 중합효소가 DNA를 따라 이동하며 mRNA 합성', 'transcription');
+    calls += callout(420, 440, '②', '전사 중인 mRNA에 라이보솜 결합', '핵막이 없어 전사와 번역이 동시에 일어남', 'translation');
+    calls += callout(700, 300, '③', '폴리솜', 'mRNA 하나에 라이보솜 여러 개', 'translation');
+    return {g, calls};
   }
 
+  // 움직이는 그림(ovA)은 매 프레임, 번호 상자(ovC)는 화면 구성이 바뀔 때만 다시 그린다.
+  // (매 프레임 다시 그리면 누르는 사이에 상자가 교체되어 클릭이 사라짐)
+  let callKey = '';
   function render(){
     const cmp = $('ovCompare').checked;
+    const key = (cmp ? 'cmp' : S.org);
+    if (!svg.querySelector('#ovA') || key !== callKey){
+      svg.innerHTML = '<g id="ovA"></g><g id="ovC"></g>';
+    }
+    let anim, calls;
     if (cmp){
       svg.setAttribute('viewBox', '0 0 980 1130');
-      svg.innerHTML = `<g>${euk(T)}</g>${svgText(20, 555, '', {})}<g transform="translate(0,570)">${pro(T)}</g>` +
+      const e = euk(T), p = pro(T);
+      anim = `<g>${e.g}</g><g transform="translate(0,570)">${p.g}</g>` +
         `<text x="16" y="28" font-size="15" font-weight="900" fill="#fff">진핵생물</text><text x="16" y="598" font-size="15" font-weight="900" fill="#fff">원핵생물</text>`;
+      calls = `<g>${e.calls}</g><g transform="translate(0,570)">${p.calls}</g>`;
     } else {
       svg.setAttribute('viewBox', '0 0 980 560');
-      svg.innerHTML = S.org === 'euk' ? euk(T) : pro(T);
+      const r = S.org === 'euk' ? euk(T) : pro(T);
+      anim = r.g; calls = r.calls;
     }
+    svg.querySelector('#ovA').innerHTML = anim;
+    if (key !== callKey){ svg.querySelector('#ovC').innerHTML = calls; callKey = key; }
   }
   svg.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) showTab(g.dataset.go); });
   $('ovPlay').addEventListener('click', () => { playing = !playing; $('ovPlay').textContent = playing ? '⏸ 멈춤' : '▷ 재생'; });
@@ -2712,7 +2725,7 @@ const V3 = (() => {
       <div class="cdrow">${cd || '<span class="fstep">읽을 코돈이 없습니다.</span>'}</div>
       <div class="count">코돈 1개 = 염기 3개 = 아미노산 1개 (3염기조합) · 폴리펩타이드: <b>${esc(proteinText(noStart ? {aas:fr.aas, stop:false, fragment:true} : d) || '없음')}</b></div>`;
   }
-  onGene(flow);
+  onGene(() => { flow(); if (S.tab === 'overview') render(); });
   TABS.overview = {show(){ flow(); render(); }, hide(){}};
 })();
 
