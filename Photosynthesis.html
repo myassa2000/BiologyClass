@@ -4183,6 +4183,510 @@ VIEW["ps-cc"].lab={
   }
 };
 
+/* ============================================================
+   광합성 색소 탭 (정리 그림 + 직접 해 보기)
+   흡수·작용 스펙트럼은 모양을 보여 주는 상댓값이다(실제 값은 측정 조건에 따라 조금씩 다르다).
+   Rf 값도 전개액·종이·온도에 따라 달라지므로 순서와 계산 방법을 중심으로 다룬다
+   ============================================================ */
+SUB.ps.splice(1,0,["ps-pg","광합성 색소"]);
+const PGG=(l,m,s)=>Math.exp(-((l-m)*(l-m))/(2*s*s));
+const PGSPEC={
+  a:l=>Math.min(1,0.95*PGG(l,430,14)+0.25*PGG(l,410,12)+0.80*PGG(l,662,11)+0.12*PGG(l,615,14)+0.08*PGG(l,580,14)),
+  b:l=>Math.min(1,1.0*PGG(l,455,13)+0.15*PGG(l,430,12)+0.55*PGG(l,644,11)+0.10*PGG(l,595,14)),
+  c:l=>Math.min(1,0.55*PGG(l,425,11)+0.90*PGG(l,450,12)+0.80*PGG(l,478,11))
+};
+/* 작용 스펙트럼(상댓값): 초록빛에서도 0이 아니다 */
+const pgAct=l=>{ const base=0.30*(l<680?1:Math.max(0,1-(l-680)/25)); return Math.min(1,base+0.7*Math.max(PGSPEC.a(l),PGSPEC.b(l)*0.9,PGSPEC.c(l)*0.8)); };
+const PGCOL={a:"#1F8A70",b:"#93B83A",c:"#E9862B",car:"#F07A1A",xan:"#E8C21A",act:"#2B2A30"};
+const PGNAME={car:"카로틴",xan:"잔토필",a:"엽록소 a",b:"엽록소 b"};
+const PGI={car:"카로틴이",xan:"잔토필이",a:"엽록소 a가",b:"엽록소 b가"};   // 조사 붙인 이름
+const PGRF={car:0.95,xan:0.72,a:0.60,b:0.45};
+const PGBAND={car:"#F28C28",xan:"#F2D024",a:"#2E8B6E",b:"#A3C44A"};
+function pgRGB(l){ let r=0,g=0,b=0;
+  if(l<440){ r=-(l-440)/60; b=1; } else if(l<490){ g=(l-440)/50; b=1; } else if(l<510){ g=1; b=-(l-510)/20; }
+  else if(l<580){ r=(l-510)/70; g=1; } else if(l<645){ r=1; g=-(l-645)/65; } else r=1;
+  const f=l<420?0.35+0.65*(l-400)/20:l>680?0.35+0.65*(700-l)/20:1;
+  return `rgb(${Math.round(255*Math.max(0,r)*f)},${Math.round(255*Math.max(0,g)*f)},${Math.round(255*Math.max(0,b)*f)})`; }
+const pgColName=l=>l<450?"보라·남색":l<495?"파란색":l<570?"초록색":l<590?"노란색":l<620?"주황색":"빨간색";
+function pgCurve(f,x0,x1,yb,h,l0,l1){ let d=""; for(let l=l0;l<=l1;l+=2){ const x=x0+(l-400)*(x1-x0)/300, y=yb-f(l)*h; d+=(d?"L":"M")+x.toFixed(1)+","+y.toFixed(1); } return d; }
+function pgBar(x0,x1,y,h){ let s=""; for(let l=400;l<700;l+=4){ const x=x0+(l-400)*(x1-x0)/300; s+=`<rect x="${x.toFixed(1)}" y="${y}" width="${((x1-x0)/75+0.6).toFixed(1)}" height="${h}" fill="${pgRGB(l+2)}"/>`; } return s; }
+/* 엥겔만 실험의 세균 자리(작용 스펙트럼에 비례해서 모인다) */
+const PGBAC=(()=>{ let s=19; const rnd=()=>{ s=(s*9301+49297)%233280; return s/233280; };
+  const out=[]; while(out.length<80){ const l=400+rnd()*300; if(rnd()<pgAct(l)*0.95){ out.push({l,dy:(rnd()<.5?-1:1)*(12+rnd()*30),x0:rnd(),y0:rnd()}); } } return out; })();
+
+/* ---------------- 정리 그림 ---------------- */
+VIEW["ps-pg"]={
+  title:"광합성 색소",
+  sub:"엽록체의 색소는 어떤 빛을 흡수하고, 그 빛에너지는 어디로 가는가",
+  vb:"0 0 1180 620",
+  legend:["hot"],
+  ctrl:`<label class="tog"><input type="checkbox" id="pgFa" checked> 엽록소 a</label>
+        <label class="tog"><input type="checkbox" id="pgFb" checked> 엽록소 b</label>
+        <label class="tog"><input type="checkbox" id="pgFc" checked> 카로티노이드</label>
+        <label class="tog"><input type="checkbox" id="pgFact" checked> 작용 스펙트럼</label>
+        <label class="tog"><input type="checkbox" id="pgFAdv"> 심화 표기</label>
+        <span class="spacer"></span><button class="btn" id="pgSum">핵심 요약</button>`,
+  svg(){
+    let s=`<rect x="0" y="0" width="1180" height="620" fill="#F2F7EC"/>`;
+    /* 크로마토그래피 */
+    s+=`<rect x="16" y="16" width="290" height="588" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+      <text class="lbl" x="32" y="44">종이 크로마토그래피</text>
+      <rect x="110" y="70" width="70" height="440" fill="#FBFBF6" stroke="#C9C3B2"/>
+      <line x1="104" y1="480" x2="186" y2="480" stroke="#8C8371" stroke-dasharray="4 3"/><text class="lbl-xs" x="190" y="484">원점</text>
+      <line x1="104" y1="110" x2="186" y2="110" stroke="#5E9BC9" stroke-width="2"/><text class="lbl-xs" x="190" y="104">용매 전선</text>`;
+    Object.entries(PGRF).forEach(([k,r])=>{ const y=480-r*370;
+      s+=`<ellipse cx="145" cy="${y}" rx="28" ry="8" fill="${PGBAND[k]}"/><text class="lbl-s" x="190" y="${y+6}" font-weight="800">${PGNAME[k]}</text>`; });
+    s+=`<text class="lbl-s" x="32" y="558" font-weight="800">Rf =</text><text class="lbl-xs" x="166" y="542" text-anchor="middle">원점~색소 거리</text><line x1="80" y1="550" x2="252" y2="550" stroke="#2B2A30" stroke-width="1.5"/><text class="lbl-xs" x="166" y="568" text-anchor="middle">원점~용매 전선 거리</text>
+      <text class="lbl-xs" x="32" y="592" style="fill:#8C8371">위로 갈수록 Rf가 크다</text>`;
+    s+=hot("chrom",104,66,84,448,8)+hot("rf",26,526,270,48,8);
+    /* 흡수 스펙트럼 + 작용 스펙트럼 */
+    const X0=380,X1=840,YB=320,H=240;
+    s+=`<rect x="322" y="16" width="540" height="372" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+      <text class="lbl" x="338" y="44">흡수 스펙트럼과 작용 스펙트럼</text>
+      <line x1="${X0}" y1="${YB}" x2="${X1}" y2="${YB}" stroke="#8C8371"/><line x1="${X0}" y1="${YB}" x2="${X0}" y2="${YB-H-6}" stroke="#8C8371"/>
+      <text class="lbl-xs" x="${X0-8}" y="${YB-H+4}" text-anchor="end">높음</text><text class="lbl-xs" x="${X0-8}" y="${YB}" text-anchor="end">낮음</text>`;
+    s+=pgBar(X0,X1,YB+6,14);
+    [400,450,500,550,600,650,700].forEach(l=>{ const x=X0+(l-400)*(X1-X0)/300; s+=`<text class="lbl-xs" x="${x}" y="${YB+38}" text-anchor="middle">${l}</text>`; });
+    s+=`<text class="lbl-xs" x="${X1}" y="${YB+56}" text-anchor="end">파장 (nm)</text>`;
+    s+=`<g id="pgCa"><path d="${pgCurve(PGSPEC.a,X0,X1,YB,H,400,700)}" fill="none" stroke="${PGCOL.a}" stroke-width="3"/></g>
+      <g id="pgCb"><path d="${pgCurve(PGSPEC.b,X0,X1,YB,H,400,700)}" fill="none" stroke="${PGCOL.b}" stroke-width="3"/></g>
+      <g id="pgCc"><path d="${pgCurve(PGSPEC.c,X0,X1,YB,H,400,700)}" fill="none" stroke="${PGCOL.c}" stroke-width="3"/></g>
+      <g id="pgCact"><path d="${pgCurve(pgAct,X0,X1,YB,H*0.92,400,700)}" fill="none" stroke="${PGCOL.act}" stroke-width="2.5" stroke-dasharray="7 5"/></g>`;
+    const lg=[["a","엽록소 a",PGCOL.a,""],["b","엽록소 b",PGCOL.b,""],["c","카로티노이드",PGCOL.c,""],["act","작용 스펙트럼",PGCOL.act,'stroke-dasharray="7 5"']];
+    lg.forEach(([k,t,c,d],i)=>{ const x=588+(i%2)*130, y=60+Math.floor(i/2)*22; s+=`<line x1="${x}" y1="${y}" x2="${x+26}" y2="${y}" stroke="${c}" stroke-width="3" ${d}/><text class="lbl-xs" x="${x+32}" y="${y+5}">${t}</text>`; });
+    s+=`<text class="lbl-xs" x="${X0+(530-400)*(X1-X0)/300}" y="${YB-96}" text-anchor="middle" style="fill:#3f6b31" font-weight="800">초록빛은</text><text class="lbl-xs" x="${X0+(530-400)*(X1-X0)/300}" y="${YB-78}" text-anchor="middle" style="fill:#3f6b31" font-weight="800">적게 흡수</text>`;
+    s+=hot("abs",X0-4,YB-H-10,X1-X0+8,H+12,8)+hot("act",714,48,140,26,8);
+    /* 엥겔만 실험 */
+    const EX0=380,EX1=840;
+    s+=`<rect x="322" y="402" width="540" height="202" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+      <text class="lbl" x="338" y="430">엥겔만 실험</text><text class="lbl-xs" x="460" y="430">프리즘으로 나눈 빛을 해캄에 비춘다</text>
+      <rect x="${EX0}" y="${470}" width="${EX1-EX0}" height="22" rx="11" fill="#6FAE4F" stroke="#3F7A2E"/>`;
+    for(let x=EX0+30;x<EX1;x+=30) s+=`<line x1="${x}" y1="471" x2="${x}" y2="491" stroke="#3F7A2E" stroke-width="1"/>`;
+    s+=pgBar(EX0,EX1,500,14);
+    PGBAC.forEach(b=>{ const x=EX0+(b.l-400)*(EX1-EX0)/300; s+=`<circle cx="${x.toFixed(1)}" cy="${(481+b.dy*0.75).toFixed(1)}" r="3" fill="#6B4E8C"/>`; });
+    s+=`<text class="lbl-xs" x="${EX0}" y="540">해캄</text><text class="lbl-xs" x="${EX0}" y="584" style="fill:#6B4E8C" font-weight="800">● 호기성 세균: 빨간빛·파란빛 쪽에 많이 모인다 = O₂가 많이 나온 곳</text>`;
+    s+=hot("eng",EX0-6,446,EX1-EX0+12,74,8);
+    /* 광계: 빛에너지 전달 */
+    s+=`<rect x="878" y="16" width="286" height="372" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+      <text class="lbl" x="894" y="44">광계에서의 빛에너지 전달</text>`;
+    const CX=1021,CY=210,R=104;
+    for(let i=0;i<12;i++){ const ang=i*30*Math.PI/180, x=CX+R*Math.cos(ang), y=CY+R*Math.sin(ang), k=["b","c","a"][i%3];
+      s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="14" fill="${k==="b"?PGBAND.b:k==="c"?PGBAND.car:PGBAND.a}" stroke="#fff" stroke-width="2"/>`; }
+    s+=`<path d="M${CX+R-14},${CY} Q${CX+50},${CY-30} ${CX+30},${CY-6}" fill="none" stroke="#E0A400" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#aOr)"/>
+      <circle cx="${CX}" cy="${CY}" r="26" fill="#2E8B6E" stroke="#1F5F4C" stroke-width="3"/><text x="${CX}" y="${CY+4}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">엽록소 a</text>
+      <text class="lbl-xs" x="${CX}" y="${CY+48}" text-anchor="middle" font-weight="800">반응 중심</text>
+      <text class="lbl-xs" x="894" y="346">둘레의 색소들이 흡수한 빛에너지가</text><text class="lbl-xs" x="894" y="366">반응 중심의 엽록소 a로 모인다</text>`;
+    s+=hot("antenna",908,92,226,236,12)+hotC("rc",CX,CY,30);
+    /* 색소 표 */
+    s+=`<rect x="878" y="402" width="286" height="202" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+      <text class="lbl" x="894" y="430">색소의 종류와 색</text>`;
+    [["a","엽록소 a","청록색","엽록소"],["b","엽록소 b","황록색","엽록소"],["car","카로틴","주황색","카로티노이드"],["xan","잔토필","노란색","카로티노이드"]].forEach(([k,n,c,g],i)=>{ const y=462+i*36;
+      s+=`<rect x="894" y="${y-14}" width="22" height="22" rx="5" fill="${PGBAND[k]}"/><text class="lbl-s" x="926" y="${y+3}" font-weight="800">${n}</text><text class="lbl-xs" x="1026" y="${y+2}">${c}</text><text class="lbl-xs" x="1084" y="${y+2}" style="fill:#8C8371">${g}</text>`; });
+    s+=hot("chla",888,432,270,34,6)+hot("chlb",888,468,270,34,6)+hot("car",888,504,270,34,6)+hot("xan",888,540,270,34,6);
+    return s;
+  },
+  info:{
+    chrom:{t:"종이 크로마토그래피",r:"색소를 분리하는 방법",rc:"t",d:[
+      ["방법","잎의 색소 추출액을 원점에 찍고, 종이 끝을 전개액에 담그면 전개액이 종이를 타고 올라가며 색소를 끌고 간다."],
+      ["분리되는 까닭","색소마다 전개액에 녹는 정도와 종이에 달라붙는 정도가 달라 이동하는 거리가 다르다."],
+      ["주의","원점은 전개액 표면보다 위에 있어야 한다. 원점이 잠기면 색소가 전개액 속으로 녹아 나와 버린다."],
+      ["결과 (위에서부터)","카로틴 → 잔토필 → 엽록소 a → 엽록소 b"]
+    ],adv:"엽록소 a와 b는 구조가 거의 같지만 작은 차이 때문에 엽록소 b가 종이(극성)에 더 잘 붙어 덜 이동한다. 카로틴은 극성이 거의 없어 전개액을 따라 가장 멀리 간다."},
+    rf:{t:"Rf 값",r:"이동 거리의 비",rc:"t",d:[
+      ["식","Rf = (원점에서 색소 띠까지 거리) ÷ (원점에서 용매 전선까지 거리)"],
+      ["범위","항상 0과 1 사이이다. 색소는 용매보다 멀리 갈 수 없기 때문이다."],
+      ["쓰임","같은 조건이면 같은 색소는 Rf가 같으므로, Rf로 색소를 구별할 수 있다."]
+    ],adv:"Rf 값은 전개액의 종류, 종이, 온도에 따라 달라진다. 그래서 책마다 숫자는 조금씩 다르지만 색소의 순서는 같다."},
+    abs:{t:"흡수 스펙트럼",r:"색소가 파장별로 빛을 흡수하는 정도",rc:"b",d:[
+      ["엽록소","파란빛(보라~남색)과 빨간빛을 많이 흡수하고, 초록빛은 적게 흡수한다."],
+      ["카로티노이드","파란빛~청록빛을 흡수하고, 빨간빛은 거의 흡수하지 않는다."],
+      ["잎이 초록인 까닭","흡수되지 않은 초록빛이 반사되거나 투과되어 우리 눈에 들어오기 때문이다."],
+      ["그래프 읽기","세로축은 상댓값이다. 모양(어느 빛을 많이 흡수하는가)에 주목하자."]
+    ]},
+    act:{t:"작용 스펙트럼",r:"파장별 광합성 속도",rc:"b",d:[
+      ["뜻","빛의 파장에 따른 광합성 속도(또는 O₂ 발생량)를 나타낸 그래프"],
+      ["흡수 스펙트럼과 비교","모양이 비슷하다. 색소가 흡수한 빛이 광합성에 쓰인다는 증거이다."],
+      ["초록빛","광합성 속도가 낮지만 0은 아니다. 초록빛도 조금은 흡수되어 쓰인다."]
+    ],adv:"작용 스펙트럼이 엽록소 a 하나의 흡수 스펙트럼보다 넓은 것은 엽록소 b와 카로티노이드 같은 보조 색소가 흡수한 빛도 광합성에 쓰이기 때문이다."},
+    eng:{t:"엥겔만 실험",r:"작용 스펙트럼을 처음 보여 준 실험",rc:"p",d:[
+      ["방법","해캄(녹조류)에 프리즘으로 나눈 빛을 비추고, 호기성 세균이 어디에 모이는지 관찰했다."],
+      ["결과","세균이 빨간빛과 파란빛을 받은 부분에 많이 모였다."],
+      ["해석","호기성 세균은 O₂가 많은 곳에 모인다. → 빨간빛과 파란빛에서 광합성이 활발하여 O₂가 많이 나왔다."],
+      ["결론","광합성에 효과적인 빛은 엽록소가 잘 흡수하는 빨간빛과 파란빛이다."]
+    ],adv:"엥겔만은 1880년대에 이 실험을 했다. O₂ 측정 장치 없이도 살아 있는 세균을 '산소 측정기'로 쓴 독창적인 실험이다."},
+    antenna:{t:"광계와 보조 색소",r:"빛을 모으는 안테나",rc:"p",d:[
+      ["구조","광계는 여러 색소와 단백질이 모인 복합체이다. 가운데에 반응 중심이 있다."],
+      ["보조 색소","엽록소 b, 카로티노이드(카로틴, 잔토필), 그리고 반응 중심이 아닌 엽록소 a"],
+      ["하는 일","흡수한 빛에너지를 이웃 색소로 차례로 전달하여 반응 중심의 엽록소 a로 모은다."],
+      ["의미","여러 파장의 빛을 모아 쓸 수 있다."]
+    ],adv:"카로티노이드는 지나치게 강한 빛의 에너지를 열로 흩어 엽록소가 손상되는 것을 막는 역할도 한다."},
+    rc:{t:"반응 중심 엽록소 a",r:"전자를 내보내는 색소",rc:"t",d:[
+      ["하는 일","모인 빛에너지로 들뜬 전자를 1차 전자수용체로 내보낸다. 명반응이 여기서 시작된다."],
+      ["어느 색소인가","특별한 자리에 있는 엽록소 a이다. 다른 색소는 전자를 내보내지 않고 에너지만 전달한다."]
+    ],adv:"광계 II의 반응 중심 엽록소 a는 P680, 광계 I의 것은 P700이라고 부른다. 숫자는 가장 잘 흡수하는 빛의 파장(nm)이다."},
+    chla:{t:"엽록소 a",r:"청록색 · 엽록소",rc:"t",d:[
+      ["흡수하는 빛","파란빛과 빨간빛"],
+      ["역할","주된 광합성 색소. 반응 중심에서 전자를 내보내는 색소는 엽록소 a뿐이다."],
+      ["크로마토그래피","세 번째 띠 (엽록소 b보다 위)"]
+    ]},
+    chlb:{t:"엽록소 b",r:"황록색 · 엽록소",rc:"t",d:[
+      ["흡수하는 빛","파란빛과 주황~빨간빛. 엽록소 a와 흡수 봉우리가 조금 다르다."],
+      ["역할","보조 색소. 흡수한 빛에너지를 엽록소 a로 전달한다."],
+      ["크로마토그래피","가장 아래 띠 (가장 적게 이동)"]
+    ]},
+    car:{t:"카로틴",r:"주황색 · 카로티노이드",rc:"b",d:[
+      ["흡수하는 빛","파란빛~청록빛. 빨간빛은 거의 흡수하지 않는다."],
+      ["역할","보조 색소. 당근의 주황색도 카로틴 때문이다."],
+      ["크로마토그래피","가장 위 띠 (가장 멀리 이동, Rf가 가장 크다)"]
+    ],adv:"가을에 엽록소가 분해되면 그동안 가려져 있던 카로티노이드의 노란색·주황색이 드러나 단풍이 든다."},
+    xan:{t:"잔토필",r:"노란색 · 카로티노이드",rc:"b",d:[
+      ["흡수하는 빛","파란빛~청록빛"],
+      ["역할","보조 색소. 카로틴과 함께 카로티노이드 계열이다."],
+      ["크로마토그래피","두 번째 띠 (카로틴 아래)"]
+    ],adv:"잔토필은 카로틴에 산소가 들어간 형태로, 카로틴보다 극성이 커서 종이에 더 붙어 덜 이동한다."}
+  },
+  init(svg){
+    [["pgFa","pgCa"],["pgFb","pgCb"],["pgFc","pgCc"],["pgFact","pgCact"]].forEach(([c,g])=>{ $("#"+c).onchange=e=>Q(svg,g).classList.toggle("hide",!e.target.checked); });
+    const adv=$("#pgFAdv"); adv.checked=state.adv; adv.onchange=()=>{ state.adv=adv.checked; document.body.classList.toggle("adv",state.adv); };
+    document.body.classList.toggle("adv",state.adv);
+    $("#pgSum").onclick=()=>summary("광합성 색소","핵심 정리",[
+      "엽록체의 광합성 색소: <b>엽록소 a</b>(청록색), <b>엽록소 b</b>(황록색), <b>카로티노이드</b>(카로틴 주황색, 잔토필 노란색)",
+      "<b>종이 크로마토그래피</b>로 분리하면 위에서부터 <b>카로틴 → 잔토필 → 엽록소 a → 엽록소 b</b>. <b>Rf = 색소 이동 거리 ÷ 용매 이동 거리</b>",
+      "엽록소는 <b>파란빛과 빨간빛</b>을 많이 흡수하고 <b>초록빛</b>은 적게 흡수한다(<b>흡수 스펙트럼</b>). 그래서 잎이 초록색으로 보인다.",
+      "파장별 광합성 속도(<b>작용 스펙트럼</b>)는 흡수 스펙트럼과 모양이 비슷하다. → 색소가 흡수한 빛이 광합성에 쓰인다.",
+      "<b>엥겔만 실험</b>: 프리즘으로 나눈 빛을 해캄에 비추면 호기성 세균이 빨간빛·파란빛 쪽에 모인다. → 그곳에서 광합성이 활발해 O₂가 많이 나온다.",
+      "광계의 보조 색소가 흡수한 빛에너지는 <b>반응 중심의 엽록소 a</b>로 모이고, 반응 중심 엽록소 a가 전자를 내보내 <b>명반응</b>이 시작된다."
+    ]);
+  }
+};
+QB["ps-pg"]={
+_all:[
+["종이 크로마토그래피에서 Rf 값을 구하는 식은?","원점~색소 띠 거리 ÷ 원점~용매 전선 거리",["원점~용매 전선 거리 ÷ 원점~색소 띠 거리","원점~색소 띠 거리 × 원점~용매 전선 거리","색소 띠의 폭 ÷ 종이의 길이"],"Rf는 항상 0과 1 사이이다.","색소는 용매보다 멀리 갈 수 없으므로 색소 이동 거리를 용매 이동 거리로 나눈다."],
+["같은 조건의 종이 크로마토그래피에서 가장 멀리 이동하는 색소는?","카로틴",["잔토필","엽록소 a","엽록소 b"],"가장 위에 있는 주황색 띠를 보자.","위에서부터 카로틴 → 잔토필 → 엽록소 a → 엽록소 b 순이다."],
+["엽록소가 가장 적게 흡수하는 빛은?","초록빛",["파란빛","빨간빛","보랏빛"],"흡수 스펙트럼에서 가운데 움푹 들어간 곳을 보자.","엽록소는 초록빛을 적게 흡수하고 반사·투과시켜 잎이 초록으로 보인다."],
+["엥겔만 실험에서 호기성 세균이 빨간빛과 파란빛 쪽에 많이 모인 까닭은?","그 빛에서 광합성이 활발해 O₂가 많이 발생했기 때문이다.",["세균이 그 색의 빛을 좋아하기 때문이다.","그 빛에서 CO₂가 많이 발생했기 때문이다.","해캄이 그 빛을 반사하기 때문이다."],"호기성 세균에게 필요한 것을 떠올리자.","호기성 세균은 O₂가 많은 곳에 모인다. 광합성이 활발한 곳일수록 O₂가 많다."],
+["작용 스펙트럼과 흡수 스펙트럼의 모양이 비슷하다는 것으로 알 수 있는 것은?","광합성 색소가 흡수한 빛이 광합성에 쓰인다.",["초록빛은 광합성에 전혀 쓰이지 않는다.","카로티노이드만 광합성에 쓰인다.","빛의 파장과 광합성 속도는 관계없다."],"두 그래프가 무엇을 나타내는지 비교하자.","흡수를 많이 하는 파장에서 광합성도 활발하다. 초록빛에서도 광합성 속도는 낮지만 0은 아니다."],
+["광계의 반응 중심에서 전자를 내보내는 색소는?","엽록소 a",["엽록소 b","카로틴","잔토필"],"보조 색소는 에너지만 전달한다.","반응 중심의 엽록소 a가 들뜬 전자를 1차 전자수용체로 내보낸다."]],
+rf:[["원점에서 용매 전선까지 10 cm, 원점에서 어떤 색소 띠까지 6 cm일 때 Rf는?","0.6",["1.67","6","0.4"],"색소 거리 ÷ 용매 거리","6 ÷ 10 = 0.6"]],
+chrom:[["크로마토그래피에서 원점이 전개액 표면보다 위에 있어야 하는 까닭은?","원점이 잠기면 색소가 전개액 속으로 녹아 나와 버리기 때문이다.",["색소가 빛을 받아야 하기 때문이다.","전개액이 증발하지 않게 하기 위해서이다.","종이가 찢어지지 않게 하기 위해서이다."],"색소가 녹는다는 점을 떠올리자.","원점이 잠기면 색소가 종이를 타고 올라가지 않고 전개액에 녹아 퍼진다."]],
+car:[["다음 중 카로티노이드 계열 색소끼리 짝지은 것은?","카로틴, 잔토필",["엽록소 a, 엽록소 b","엽록소 a, 카로틴","엽록소 b, 잔토필"],"색소 표의 '카로티노이드' 칸을 보자.","카로틴(주황색)과 잔토필(노란색)이 카로티노이드 계열이다."]],
+xan:[["잔토필의 색은?","노란색",["주황색","청록색","황록색"],"색소 표를 보자.","잔토필은 노란색, 카로틴은 주황색이다."]],
+chla:[["엽록소 a에 대한 설명으로 옳은 것은?","반응 중심에서 전자를 내보낸다.",["초록빛을 가장 많이 흡수한다.","크로마토그래피에서 가장 멀리 이동한다.","카로티노이드 계열이다."],"반응 중심을 보자.","엽록소 a는 파란빛과 빨간빛을 흡수하고, 반응 중심에서 전자를 내보낸다."]],
+chlb:[["크로마토그래피에서 가장 적게 이동하는 색소는?","엽록소 b",["엽록소 a","잔토필","카로틴"],"가장 아래 띠를 보자.","엽록소 b의 Rf가 가장 작다."]],
+abs:[["카로티노이드가 거의 흡수하지 않는 빛은?","빨간빛",["파란빛","청록빛","보랏빛"],"주황색 곡선이 어디서 0에 가까운지 보자.","카로티노이드는 파란빛~청록빛을 흡수하고 빨간빛은 거의 흡수하지 않는다."]],
+act:[["초록빛에서의 광합성 속도에 대한 설명으로 옳은 것은?","낮지만 0은 아니다.",["0이다.","가장 높다.","빨간빛보다 높다."],"점선 그래프의 가운데를 보자.","초록빛도 조금은 흡수되어 광합성에 쓰인다."]],
+eng:[["엥겔만 실험에서 호기성 세균은 무엇을 알려 주는 역할을 하는가?","O₂가 많이 발생한 곳",["CO₂가 많은 곳","온도가 높은 곳","빛이 가장 센 곳"],"호기성 세균에게 필요한 기체를 떠올리자.","호기성 세균이 모인 곳은 O₂가 많은 곳, 곧 광합성이 활발한 곳이다."]],
+antenna:[["보조 색소가 흡수한 빛에너지의 행방으로 옳은 것은?","이웃 색소를 거쳐 반응 중심의 엽록소 a로 전달된다.",["곧바로 ATP가 된다.","곧바로 포도당에 저장된다.","모두 열로 사라진다."],"광계 그림의 화살표를 보자.","보조 색소는 빛에너지를 반응 중심으로 모으는 안테나 역할을 한다."]],
+rc:[["반응 중심 엽록소 a가 빛에너지를 받으면 일어나는 일은?","들뜬 전자를 1차 전자수용체로 내보낸다.",["CO₂를 고정한다.","포도당을 분해한다.","ATP를 분해한다."],"명반응의 첫 단계를 떠올리자.","반응 중심 엽록소 a가 내보낸 전자로 명반응의 전자 흐름이 시작된다."]]
+};
+
+/* ---------------- 직접 해 보기 ---------------- */
+const PGL={};
+const PGMIS=["색소 추출액을 종이의 <b>원점</b>에 찍기",
+  "종이를 <b>전개액</b> 통에 넣어 색소 분리하기",
+  "분리된 띠 4개에 <b>색소 이름</b> 붙이기",
+  "엽록소 a의 <b>Rf 값</b> 구하기",
+  "빛 막대를 끌어 400~700 nm의 <b>흡수 스펙트럼</b> 완성하기",
+  "그래프에서 <b>잎이 초록색으로 보이는 까닭</b> 찾기",
+  "<b>프리즘</b>을 놓아 해캄에 나눈 빛 비추기 (엥겔만 실험)",
+  "세균 분포로 <b>작용 스펙트럼</b> 그리기",
+  "광계에 빛을 비춰 <b>반응 중심</b>까지 에너지 전달하기"];
+const PGACT=["① 크로마토그래피","② 흡수 스펙트럼","③ 엥겔만 실험","④ 광계에서"];
+function pgReset(){ Object.assign(PGL,{act:0,f:Array(9).fill(false),spot:false,inJar:false,dev:0,labels:{},scanMin:999,scanMax:0,lam:550,prism:false,bacMoved:false,counted:false,overlay:false,energy:false,busy:false}); }
+pgReset();
+const pgUnlocked=()=>PGL.f[3]?(PGL.f[5]?(PGL.f[7]?3:2):1):0;
+function pgMis(){
+  const d=PGL.f, now=d.indexOf(false), all=d.every(Boolean);
+  $("#info").innerHTML=missionHTML("미션: 광합성 색소 탐구",PGMIS,all?9:now)+(all?`<div class="misdone">미션 완료! <b>정리 그림</b>이 열렸다. 이제 <b>명반응</b> 탭으로 가 보자.</div>`:"")+
+    `<div class="adv adv-only"><b>심화</b> 그래프의 흡수율과 광합성 속도는 모양을 보여 주는 상댓값이다. Rf 값도 전개액·종이·온도에 따라 달라지므로 이번 실험의 값으로만 쓰고, 색소의 순서에 주목하자.</div>`;
+  if(all&&!LABDONE["ps-pg"]){ LABDONE["ps-pg"]=true; const seg=$("#ctrl").querySelector("#labMode"); if(seg){ seg.outerHTML=modeSeg("ps-pg"); bindModeSeg("ps-pg"); } }
+}
+function pgHead(){
+  const u=pgUnlocked();
+  return PGACT.map((t,i)=>{ const x=18+i*190, on=i===PGL.act, ok=i<=u;
+    return `<g class="pgchip" data-i="${i}" style="cursor:${ok?"pointer":"default"}"><rect x="${x}" y="12" width="182" height="34" rx="10" fill="${on?"#3f6b31":ok?"#E3F2E0":"#F1EBDD"}" stroke="${on?"#2f5b28":ok?"#9CC793":"#DDD3BF"}"/>
+      <text x="${x+91}" y="34" text-anchor="middle" font-size="15" font-weight="800" fill="${on?"#fff":ok?"#2f5b28":"#B8AF9C"}">${t}${ok?"":" 🔒"}</text></g>`; }).join("");
+}
+function pgShelf(inner,hint){ return `<rect x="14" y="494" width="1152" height="152" rx="12" fill="#FFFBF2" stroke="var(--rule2)"/>
+  <text class="lbl-s" x="30" y="522" font-weight="800">재료</text><text class="lbl-xs" x="80" y="522">${hint}</text>`+inner; }
+function pgDraw(){
+  const svg=PGL.svg; if(!svg) return;
+  pgMis();
+  let s=`<rect x="0" y="0" width="1180" height="660" fill="#F2F7EC"/>`+pgHead();
+  s+=[pgA,pgB,pgC,pgD][PGL.act]();
+  svg.innerHTML=defs()+s;
+  svg.querySelectorAll(".pgchip").forEach(g=>g.addEventListener("click",()=>{ const i=+g.dataset.i; if(PGL.busy||i>pgUnlocked()) return; PGL.act=i; pgDraw(); pgIntro(); }));
+  [pgBindA,pgBindB,pgBindC,pgBindD][PGL.act](svg);
+  setCounts(null);
+}
+function pgIntro(){
+  labSay(["<b>종이 크로마토그래피</b>로 잎의 색소를 분리해 보자. 먼저 선반의 <b>색소 추출액</b>을 종이의 <b>원점</b>(연필 선)에 찍자.",
+    "색소마다 어떤 빛을 흡수하는지 알아보자. 그래프 아래의 <b>빛 막대</b>를 왼쪽 끝(400 nm)부터 오른쪽 끝(700 nm)까지 끌어 보자.",
+    "<b>엥겔만 실험</b>: 현미경 아래에 해캄과 <b>호기성 세균</b>이 있다. 선반의 <b>프리즘</b>을 빛이 들어오는 길에 놓아 빛을 나누어 비추자.",
+    "흡수한 빛에너지는 어디로 갈까? 선반의 <b>빛</b>을 광계의 둘레 색소에 비춰 보자."][PGL.act]);
+}
+/* ---- ① 크로마토그래피 ---- */
+const PGJ={x0:330,x1:490,sol:446};               // 전개액 통
+const pgStrip=()=>PGL.inJar?{x:370,o:420}:{x:110,o:420}; // 종이의 왼쪽 x, 원점 y (종이 폭 80)
+function pgA(){
+  const st=pgStrip(), p=PGL.dev, front=st.o-300*p;
+  let s=`<text class="lbl-xs" x="110" y="74">거름종이</text>
+    <rect x="${PGJ.x0}" y="60" width="${PGJ.x1-PGJ.x0}" height="420" rx="10" fill="#EAF3F8" stroke="#7FA9C4" stroke-width="2"/>
+    <rect x="${PGJ.x0+2}" y="${PGJ.sol}" width="${PGJ.x1-PGJ.x0-4}" height="32" fill="#BFDDF0"/>
+    <text class="lbl-xs" x="${(PGJ.x0+PGJ.x1)/2}" y="${PGJ.sol+22}" text-anchor="middle" style="fill:#22507F">전개액</text>
+    <text class="lbl-xs" x="${(PGJ.x0+PGJ.x1)/2}" y="54" text-anchor="middle">전개 통</text>`;
+  const hlS=!PGL.f[1]&&PGL.spot&&!PGL.inJar;
+  s+=`<g id="pgStrip"><rect x="${st.x}" y="80" width="80" height="380" fill="#FBFBF6" stroke="${hlS?"#E07B2C":"#C9C3B2"}" stroke-width="${hlS?3:1.5}" ${hlS?'class="pulse"':""}/>
+    <line x1="${st.x+6}" y1="${st.o}" x2="${st.x+74}" y2="${st.o}" stroke="#8C8371" stroke-dasharray="4 3"/>`;
+  if(p>0) s+=`<rect x="${st.x+1}" y="${front}" width="78" height="${Math.min(460,PGJ.sol+30)-front}" fill="#DCEBF5" opacity=".55"/><line x1="${st.x}" y1="${front}" x2="${st.x+80}" y2="${front}" stroke="#5E9BC9" stroke-width="2"/>`;
+  if(PGL.spot&&p===0) s+=`<ellipse cx="${st.x+40}" cy="${st.o}" rx="12" ry="6" fill="#3E7D3A"/>`;
+  if(p>0) Object.entries(PGRF).forEach(([k,r])=>{ const y=st.o-300*r*p; s+=`<ellipse cx="${st.x+40}" cy="${y}" rx="${14+12*p}" ry="${6+1.5*p}" fill="${PGBAND[k]}" opacity="${0.5+0.5*p}"/>`; });
+  s+=`</g>`;
+  if(!PGL.inJar) s+=`<text class="lbl-xs" x="${st.x+84}" y="${st.o+5}">← 원점 (연필 선)</text>`;
+  else{ s+=`<text class="lbl-xs" x="${st.x+84}" y="${st.o+5}">원점</text>`; if(p>=1) s+=`<text class="lbl-xs" x="${st.x+84}" y="${front-8}" style="fill:#22507F">용매 전선</text>`; }
+  /* 이름표 */
+  if(PGL.f[1]){
+    s+=`<rect x="580" y="60" width="360" height="198" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+      <text class="lbl-s" x="596" y="86" font-weight="800">색소 이름표</text><text class="lbl-xs" x="700" y="86">끌어서 알맞은 띠에 놓기</text>`;
+    ["car","xan","a","b"].forEach((k,i)=>{ const x=596+(i%2)*172, y=104+Math.floor(i/2)*58, used=Object.values(PGL.labels).includes(k);
+      if(!used) s+=`<g class="pglab" data-k="${k}"><rect x="${x}" y="${y}" width="160" height="44" rx="22" fill="#fff" stroke="#8C8371" stroke-width="2"/><text x="${x+80}" y="${y+28}" text-anchor="middle" font-size="18" font-weight="800">${PGNAME[k]}</text></g>`;
+      else s+=`<rect x="${x}" y="${y}" width="160" height="44" rx="22" fill="none" stroke="#DDD3BF" stroke-dasharray="5 4"/>`; });
+    s+=`<text class="lbl-xs" x="596" y="226" style="fill:#8C8371">색 힌트: 카로틴 주황 · 잔토필 노랑</text><text class="lbl-xs" x="596" y="247" style="fill:#8C8371">엽록소 a 청록 · 엽록소 b 황록</text>`;
+    Object.entries(PGL.labels).forEach(([band,k])=>{ const y=st.o-300*PGRF[band]; s+=`<line x1="${st.x+80}" y1="${y}" x2="${st.x+106}" y2="${y}" stroke="#8C8371"/><text class="lbl-s" x="${st.x+110}" y="${y+6}" font-weight="800">${PGNAME[k]}</text>`; });
+  }
+  /* Rf */
+  if(PGL.f[2]){
+    const rx=st.x-26, ya=st.o-300*PGRF.a;
+    s+=`<line x1="${rx}" y1="${st.o}" x2="${rx}" y2="${st.o-300}" stroke="#2B2A30" stroke-width="2"/>`;
+    for(let c=0;c<=10;c++){ const y=st.o-30*c; s+=`<line x1="${rx-6}" y1="${y}" x2="${rx}" y2="${y}" stroke="#2B2A30"/>`+(c%2===0?`<text class="lbl-xs" x="${rx-10}" y="${y+5}" text-anchor="end">${c}</text>`:""); }
+    s+=`<text class="lbl-xs" x="${rx-10}" y="${st.o-312}" text-anchor="end">cm</text>
+      <line x1="${rx}" y1="${ya}" x2="${st.x+40}" y2="${ya}" stroke="${PGBAND.a}" stroke-width="2" stroke-dasharray="4 3"/>`;
+    s+=`<rect x="580" y="264" width="360" height="216" rx="12" fill="#FFFDF8" stroke="${PGL.f[3]?"var(--rule2)":"#E07B2C"}" stroke-width="${PGL.f[3]?1:2.5}"/>
+      <text class="lbl-s" x="596" y="292" font-weight="800">엽록소 a의 Rf 구하기</text>
+      <text class="lbl-xs" x="596" y="318">자로 재어 보자: 원점 → 엽록소 a 띠 <tspan font-weight="800">6.0 cm</tspan></text>
+      <text class="lbl-xs" x="596" y="340">원점 → 용매 전선 <tspan font-weight="800">10.0 cm</tspan></text>`;
+    [["0.60",true],["1.67",false],["6.0",false],["0.40",false]].forEach(([t,ok],i)=>{ const x=596+i*84;
+      s+=`<g class="pgopt" data-ok="${ok}" data-t="${t}" style="cursor:pointer"><rect x="${x}" y="360" width="76" height="44" rx="10" fill="${PGL.f[3]&&ok?"#E3F2E0":"#fff"}" stroke="${PGL.f[3]&&ok?"#7CB36E":"#8C8371"}" stroke-width="2"/><text x="${x+38}" y="388" text-anchor="middle" font-size="18" font-weight="800">${t}</text></g>`; });
+    s+=`<text class="lbl-xs" x="596" y="432">Rf = 원점~색소 거리 ÷ 원점~용매 전선 거리</text>
+      <text class="lbl-xs adv-only" x="596" y="456" style="fill:#6E58A0">Rf 값은 실험 조건에 따라 조금씩 달라진다. 순서에 주목하자.</text>`;
+  }
+  /* 선반 */
+  s+=pgShelf(`<g class="pgtok" data-t="drop"><rect x="30" y="536" width="190" height="56" rx="28" fill="#DDEFD6" stroke="#3E7D3A" stroke-width="2.5" ${PGL.spot?'opacity=".4"':""}/><path d="M60 548 L70 548 L70 566 Q65 578 60 566 Z" fill="#3E7D3A"/><text x="138" y="572" text-anchor="middle" font-size="19" font-weight="800">색소 추출액</text><text class="lbl-xs" x="125" y="616" text-anchor="middle">시금치 잎을 갈아 얻은 것</text></g>
+    <text class="lbl-xs" x="260" y="560">실험 순서</text><text class="lbl-s" x="260" y="588" font-weight="800">원점에 찍기 → 전개액에 세우기 → 띠 확인 → Rf 계산</text>`,
+    PGL.spot?"이제 종이를 끌어 전개 통에 넣자":"추출액을 끌어 종이의 원점에 놓기 (눌러도 된다)");
+  return s;
+}
+function pgBindA(svg){
+  const drop=svg.querySelector('.pgtok[data-t="drop"]');
+  if(drop&&!PGL.spot) labDrag(drop,svg,{
+    start(p){ return {gh:ghost(svg,`<path d="M-6 -24 L6 -24 L6 0 Q0 14 -6 0 Z" fill="#3E7D3A"/>`,p)}; },
+    move(p,c){ c.gh&&c.gh.setAttribute("transform",`translate(${p.x},${p.y})`); }, cancel(c){ c.gh&&c.gh.remove(); },
+    end(p){ const st=pgStrip(); if(p.x>st.x-10&&p.x<st.x+90&&Math.abs(p.y-st.o)<26) pgSpot(); else if(p.x>st.x-10&&p.x<st.x+90&&p.y>70&&p.y<470) labSay("연필로 그은 <b>원점</b> 위에 찍자. 그래야 색소가 같은 출발선에서 출발한다.","no"); else labSay("추출액은 <b>종이의 원점</b>에 찍자.","no"); },
+    tap(){ pgSpot(); } });
+  const strip=svg.querySelector("#pgStrip");
+  if(strip&&PGL.spot&&!PGL.inJar) labDrag(strip,svg,{
+    start(p){ return {}; }, move(){}, cancel(){},
+    end(p){ if(p.x>PGJ.x0-20&&p.x<PGJ.x1+20) pgDevelop(); else labSay("종이를 <b>전개 통</b>에 넣자.","no"); },
+    tap(){ pgDevelop(); } });
+  svg.querySelectorAll(".pglab").forEach(g=>{ const k=g.dataset.k;
+    labDrag(g,svg,{ start(p){ if(PGL.busy) return {}; return {gh:ghost(svg,`<rect x="-83" y="-22" width="166" height="44" rx="22" fill="#fff" stroke="#8C8371" stroke-width="2"/><text y="6" text-anchor="middle" font-size="18" font-weight="800">${PGNAME[k]}</text>`,p)}; },
+      move(p,c){ c.gh&&c.gh.setAttribute("transform",`translate(${p.x},${p.y})`); }, cancel(c){ c.gh&&c.gh.remove(); },
+      end(p){ pgLabel(k,p); }, tap(){ labSay("이름표를 끌어서 알맞은 <b>띠</b> 위에 놓자.","no"); } }); });
+  svg.querySelectorAll(".pgopt").forEach(g=>g.addEventListener("click",()=>{ if(PGL.f[3]) return;
+    if(g.dataset.ok==="true"){ PGL.f[3]=true; pgDraw(); labSay("<b>Rf = 6.0 ÷ 10.0 = 0.60</b>. Rf는 항상 0과 1 사이이다. 색소는 용매보다 멀리 갈 수 없기 때문이다. 같은 조건이면 같은 색소는 Rf가 같으므로 색소를 구별하는 데 쓴다. 위의 <b>② 흡수 스펙트럼</b>으로 넘어가자.","ok"); }
+    else labSay(g.dataset.t==="1.67"?"거꾸로 나누었다. Rf는 <b>색소 거리 ÷ 용매 거리</b>이다. 그래서 1보다 클 수 없다.":g.dataset.t==="6.0"?"색소가 이동한 거리 그 자체가 아니라, <b>용매가 이동한 거리로 나눈 값</b>이다.":"용매 거리에서 색소 거리를 뺀 값이 아니다. <b>색소 거리 ÷ 용매 거리</b>를 계산하자.","no"); }));
+}
+function pgSpot(){ if(PGL.spot) return; PGL.spot=true; PGL.f[0]=true; pgDraw();
+  labSay("원점에 색소 추출액을 찍었다. 이제 <b>종이</b>를 끌어 <b>전개 통</b>에 넣자. 이때 원점이 <b>전개액 표면보다 위</b>에 오게 한다. 원점이 잠기면 색소가 전개액 속으로 녹아 나와 버린다.","ok"); }
+async function pgDevelop(){
+  if(PGL.inJar||PGL.busy) return;
+  PGL.busy=true; PGL.inJar=true; pgDraw();
+  labSay("전개액이 종이를 타고 올라가며 색소를 끌고 간다…");
+  const t0=performance.now();
+  await new Promise(res=>{ const step=t=>{ PGL.dev=Math.min(1,(t-t0)/3200); pgDraw(); if(PGL.dev<1) requestAnimationFrame(step); else res(); }; requestAnimationFrame(step); });
+  PGL.f[1]=true; PGL.busy=false; pgDraw();
+  labSay("색소가 <b>4개의 띠</b>로 나뉘었다. 색소마다 전개액에 녹는 정도와 종이에 달라붙는 정도가 달라 이동 거리가 다르기 때문이다. 오른쪽 <b>이름표</b>를 알맞은 띠에 붙여 보자."+ADVN("극성이 거의 없는 카로틴은 전개액을 따라 가장 멀리 가고, 극성이 큰 엽록소 b는 종이에 더 붙어 가장 적게 이동한다."),"ok");
+}
+function pgLabel(k,p){
+  const st=pgStrip(); if(p.x<st.x-20||p.x>st.x+180) return labSay("이름표를 종이의 <b>띠</b> 위에 놓자.","no");
+  let best=null,bd=22; Object.keys(PGRF).forEach(b=>{ const d=Math.abs(p.y-(st.o-300*PGRF[b])); if(d<bd&&!PGL.labels[b]){ bd=d; best=b; } });
+  if(!best) return labSay("이름표를 종이의 <b>띠</b> 위에 놓자.","no");
+  if(best!==k) return labSay(`이 띠는 ${PGI[k]} 아니다. 띠의 <b>색</b>을 보자. 카로틴은 주황, 잔토필은 노랑, 엽록소 a는 청록, 엽록소 b는 황록이다. 가장 멀리 간 띠가 카로틴이다.`,"no");
+  PGL.labels[best]=k; const n=Object.keys(PGL.labels).length;
+  if(n===4){ PGL.f[2]=true; pgDraw(); labSay("위에서부터 <b>카로틴 → 잔토필 → 엽록소 a → 엽록소 b</b>. 카로틴과 잔토필은 <b>카로티노이드</b> 계열이다. 이제 자로 거리를 재어 <b>엽록소 a의 Rf</b>를 구하자.","ok"); }
+  else{ pgDraw(); labSay(`맞다. 이 띠는 <b>${PGNAME[k]}</b>이다.`,"ok"); }
+}
+/* ---- ② 흡수 스펙트럼 ---- */
+const PGB={X0:110,X1:770,YB:380,H:280};
+const pgX=l=>PGB.X0+(l-400)*(PGB.X1-PGB.X0)/300, pgL=x=>400+(x-PGB.X0)*300/(PGB.X1-PGB.X0);
+function pgB(){
+  const {X0,X1,YB,H}=PGB, lo=Math.min(PGL.scanMin,PGL.lam), hi=Math.max(PGL.scanMax,PGL.lam);
+  let s=`<rect x="40" y="60" width="760" height="424" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+    <text class="lbl-s" x="56" y="86" font-weight="800">흡수 스펙트럼</text><text class="lbl-xs" x="190" y="86">세로: 빛을 흡수하는 정도 (상댓값)</text>
+    <line x1="${X0}" y1="${YB}" x2="${X1}" y2="${YB}" stroke="#8C8371"/><line x1="${X0}" y1="${YB}" x2="${X0}" y2="${YB-H}" stroke="#8C8371"/>
+    <text class="lbl-xs" x="${X0-6}" y="${YB-H+10}" text-anchor="end">높음</text><text class="lbl-xs" x="${X0-6}" y="${YB}" text-anchor="end">낮음</text>`;
+  s+=`<defs><clipPath id="pgClip"><rect x="${pgX(Math.max(400,lo))}" y="${YB-H-10}" width="${Math.max(0,pgX(Math.min(700,hi))-pgX(Math.max(400,lo)))}" height="${H+12}"/></clipPath></defs>`;
+  s+=`<g clip-path="url(#pgClip)">`+["a","b","c"].map(k=>`<path d="${pgCurve(PGSPEC[k],X0,X1,YB,H,400,700)}" fill="none" stroke="${PGCOL[k]}" stroke-width="3.5"/>`).join("")+`</g>`;
+  s+=`<line x1="${pgX(PGL.lam)}" y1="${YB-H}" x2="${pgX(PGL.lam)}" y2="${YB}" stroke="${pgRGB(PGL.lam)}" stroke-width="3" opacity=".8"/>`;
+  s+=`<g id="pgGraph"><rect x="${X0}" y="${YB-H}" width="${X1-X0}" height="${H}" fill="transparent"/></g>`;
+  s+=pgBar(X0,X1,YB+8,24);
+  [400,450,500,550,600,650,700].forEach(l=>s+=`<text class="lbl-xs" x="${pgX(l)}" y="${YB+50}" text-anchor="middle">${l}</text>`);
+  s+=`<text class="lbl-xs" x="${X1}" y="${YB+70}" text-anchor="end">파장 (nm)</text>`;
+  s+=`<g id="pgKnob" style="cursor:grab"><polygon points="${pgX(PGL.lam)},${YB+34} ${pgX(PGL.lam)-14},${YB+58} ${pgX(PGL.lam)+14},${YB+58}" fill="#2B2A30"/><rect x="${X0-10}" y="${YB+4}" width="${X1-X0+20}" height="60" fill="transparent"/></g>`;
+  if(PGL.f[4]&&!PGL.f[5]) s+=`<text class="lbl-s" x="${(X0+X1)/2}" y="${YB-H-10}" text-anchor="middle" font-weight="800" style="fill:#B85F1C">잎이 초록색으로 보이는 까닭은? 그래프에서 알맞은 곳을 눌러 보자</text>`;
+  if(PGL.f[5]) s+=`<rect x="${pgX(495)}" y="${YB-H}" width="${pgX(575)-pgX(495)}" height="${H}" fill="#7CB36E" opacity=".12"/><text class="lbl-xs" x="${pgX(535)}" y="${YB-H+18}" text-anchor="middle" style="fill:#2f5b28" font-weight="800">적게 흡수 → 반사·투과</text>`;
+  /* 오른쪽: 지금 비춘 빛 */
+  const L=PGL.lam;
+  s+=`<rect x="820" y="60" width="346" height="424" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+    <text class="lbl-s" x="836" y="86" font-weight="800">지금 비춘 빛</text>
+    <rect x="836" y="100" width="60" height="40" rx="8" fill="${pgRGB(L)}"/><text x="908" y="128" font-size="22" font-weight="800">${Math.round(L)} nm</text><text class="lbl-xs" x="1030" y="128">${pgColName(L)}</text>
+    <text class="lbl-xs" x="836" y="170">이 빛을 흡수하는 정도</text>`;
+  [["a","엽록소 a"],["b","엽록소 b"],["c","카로티노이드"]].forEach(([k,n],i)=>{ const y=190+i*56, v=PGSPEC[k](L);
+    s+=`<text class="lbl-s" x="836" y="${y+14}" font-weight="800" style="fill:${PGCOL[k]}">${n}</text><rect x="836" y="${y+22}" width="300" height="16" rx="8" fill="#F1EBDD"/><rect x="836" y="${y+22}" width="${(300*v).toFixed(1)}" height="16" rx="8" fill="${PGCOL[k]}"/>`; });
+  s+=`<text class="lbl-xs" x="836" y="380">카로티노이드 = 카로틴 + 잔토필</text><text class="lbl-xs" x="836" y="400" style="fill:#8C8371">(둘의 흡수 스펙트럼은 비슷하다)</text>
+    <text class="lbl-xs" x="836" y="440">훑어본 범위: ${PGL.scanMax?`${Math.round(Math.max(400,PGL.scanMin))}~${Math.round(Math.min(700,PGL.scanMax))} nm`:"아직 없음"}</text>`;
+  s+=pgShelf(`<text class="lbl-s" x="30" y="580" font-weight="800">빛 막대(▲)를 끌어 파장을 바꾸면 곡선이 그려진다</text>`,"흰빛을 프리즘으로 나누면 파장이 다른 여러 색의 빛이 된다");
+  return s;
+}
+function pgBindB(svg){
+  /* 끄는 동안 화면을 다시 그리므로, 다시 그려지지 않는 svg 자체에서 끌기를 받는다 */
+  if(!svg._pgKnob){ svg._pgKnob=true;
+    const set=p=>{ const l=Math.max(400,Math.min(700,pgL(p.x))); PGL.lam=l; PGL.scanMin=Math.min(PGL.scanMin,l); PGL.scanMax=Math.max(PGL.scanMax,l); pgDraw(); };
+    svg.addEventListener("pointerdown",e=>{
+      if(PGL.act!==1||PGL.busy||e.button>0) return; const p=svgP(svg,e);
+      if(p.y<PGB.YB+4||p.y>PGB.YB+64||p.x<PGB.X0-10||p.x>PGB.X1+10) return;
+      e.preventDefault(); svg.setPointerCapture(e.pointerId); set(p);
+      const mv=ev=>set(svgP(svg,ev));
+      const up=()=>{ svg.removeEventListener("pointermove",mv); svg.removeEventListener("pointerup",up); svg.removeEventListener("pointercancel",up); pgScanCheck(); };
+      svg.addEventListener("pointermove",mv); svg.addEventListener("pointerup",up); svg.addEventListener("pointercancel",up);
+    }); }
+  svg.querySelector("#pgGraph").addEventListener("click",e=>{ if(!PGL.f[4]||PGL.f[5]) return; const l=pgL(svgP(svg,e).x);
+    if(l>=495&&l<=575){ PGL.f[5]=true; pgDraw(); labSay("맞다. 세 색소 모두 <b>초록빛(약 500~570 nm)</b>을 적게 흡수한다. 흡수되지 않은 초록빛이 <b>반사되거나 투과</b>되어 우리 눈에 들어오므로 잎이 초록색으로 보인다. 엽록소는 <b>파란빛과 빨간빛</b>을 많이 흡수하고, 카로티노이드는 <b>파란빛~청록빛</b>을 흡수한다. 위의 <b>③ 엥겔만 실험</b>으로 넘어가자."+ADVN("가을에 엽록소가 분해되면 카로티노이드의 노란색·주황색이 드러나 단풍이 든다."),"ok"); }
+    else labSay(`${Math.round(l)} nm(${pgColName(l)}) 빛은 색소가 꽤 흡수한다. 우리 눈에 보이는 잎의 색은 <b>흡수되지 않고 반사·투과된 빛</b>의 색이다. 곡선이 가장 낮은 곳을 찾자.`,"no"); });
+}
+function pgScanCheck(){
+  if(PGL.f[4]) return;
+  if(PGL.scanMin<=410&&PGL.scanMax>=690){ PGL.f[4]=true; pgDraw(); labSay("흡수 스펙트럼이 완성되었다. 엽록소 a와 b는 <b>파란빛</b>과 <b>빨간빛</b>을 많이 흡수하고, 카로티노이드는 <b>파란빛~청록빛</b>만 흡수한다. 그렇다면 <b>잎이 초록색으로 보이는 까닭</b>은 무엇일까? 그래프에서 알맞은 곳을 눌러 보자.","ok"); }
+  else labSay(`지금까지 ${Math.round(Math.max(400,PGL.scanMin))}~${Math.round(Math.min(700,PGL.scanMax))} nm를 훑었다. <b>400 nm부터 700 nm까지</b> 모두 훑어 보자.`);
+}
+/* ---- ③ 엥겔만 실험 ---- */
+const PGE={X0:120,X1:780,Y:250};
+function pgC(){
+  const {X0,X1,Y}=PGE;
+  let s=`<rect x="40" y="60" width="780" height="300" rx="150" fill="#E6F2F7" stroke="#7FA9C4" stroke-width="2"/>
+    <text class="lbl-xs" x="60" y="84">현미경으로 본 모습</text>`;
+  if(PGL.prism) s+=`<g opacity=".55">${pgBar(X0,X1,Y-70,140)}</g>`;
+  else s+=`<rect x="${X0}" y="${Y-70}" width="${X1-X0}" height="140" fill="#FFFFFF" opacity=".7"/>`;
+  s+=`<rect x="${X0}" y="${Y-14}" width="${X1-X0}" height="28" rx="14" fill="#6FAE4F" stroke="#3F7A2E" stroke-width="2"/>`;
+  for(let x=X0+33;x<X1;x+=33) s+=`<line x1="${x}" y1="${Y-13}" x2="${x}" y2="${Y+13}" stroke="#3F7A2E"/>`;
+  s+=`<text class="lbl-xs" x="${X1+8}" y="${Y+5}">해캄</text>`;
+  s+=`<g id="pgBac">`; PGBAC.forEach((b,i)=>{ const tx=PGL.bacMoved?pgEX(b.l):X0+b.x0*(X1-X0), ty=PGL.bacMoved?Y+b.dy:Y-110+b.y0*220;
+    s+=`<circle r="4" fill="#6B4E8C" style="transform:translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px);transition:transform 1.8s ease-in-out ${(i%10)*0.04}s"/>`; }); s+=`</g>`;
+  s+=`<text class="lbl-xs" x="520" y="96" style="fill:#6B4E8C" font-weight="800">● 호기성 세균 (O₂가 많은 곳으로 모인다)</text>`;
+  /* 빛 */
+  s+=`<g id="pgLightPath"><rect x="40" y="370" width="780" height="40" rx="10" fill="${PGL.prism?"#F6F0FA":"#FFFBEA"}" stroke="${!PGL.prism?"#E07B2C":"#D8CDB4"}" stroke-width="${!PGL.prism?2.5:1}" stroke-dasharray="6 5"/>
+    <text class="lbl-xs" x="60" y="395">${PGL.prism?"프리즘이 흰빛을 파장별로 나누어 해캄에 비춘다":"빛이 들어오는 길: 지금은 흰빛이 고루 비친다 → 프리즘을 여기에 놓자"}</text></g>`;
+  if(PGL.prism) [400,500,600,700].forEach(l=>s+=`<text class="lbl-xs" x="${pgEX(l)}" y="${Y+92}" text-anchor="middle">${l} nm</text>`);
+  /* 그래프 */
+  if(PGL.counted){
+    const GB=476, GH=60;
+    s+=`<rect x="836" y="60" width="330" height="420" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+      <text class="lbl-s" x="852" y="86" font-weight="800">세균 수 → 작용 스펙트럼</text>`;
+    const W=300, gx=x=>852+(x-400)*W/300, base=420, gh=280, bins=[];
+    for(let l=400;l<700;l+=20){ bins.push(PGBAC.filter(b=>b.l>=l&&b.l<l+20).length); }
+    const mx=Math.max(...bins);
+    bins.forEach((n,i)=>{ const l=400+i*20; s+=`<rect x="${gx(l)+1}" y="${base-gh*n/mx}" width="${W/15-2}" height="${gh*n/mx}" fill="${pgRGB(l+10)}" opacity=".75"/>`; });
+    s+=`<path d="${pgCurve(pgAct,852,852+W,base,gh*0.95,400,700)}" fill="none" stroke="#2B2A30" stroke-width="2.5" stroke-dasharray="7 5"/>`;
+    if(PGL.overlay) s+=`<path d="${pgCurve(PGSPEC.a,852,852+W,base,gh,400,700)}" fill="none" stroke="${PGCOL.a}" stroke-width="2.5"/><path d="${pgCurve(PGSPEC.b,852,852+W,base,gh,400,700)}" fill="none" stroke="${PGCOL.b}" stroke-width="2.5"/>`;
+    s+=`<line x1="852" y1="${base}" x2="${852+W}" y2="${base}" stroke="#8C8371"/>`+[400,550,700].map(l=>`<text class="lbl-xs" x="${gx(l)}" y="${base+18}" text-anchor="middle">${l}</text>`).join("");
+    s+=`<text class="lbl-xs" x="852" y="458">막대: 세균 수 · 점선: 작용 스펙트럼</text>`;
+    s+=`<g id="pgOver" style="cursor:pointer"><rect x="852" y="104" width="${PGL.overlay?190:220}" height="30" rx="15" fill="${PGL.overlay?"#E3F2E0":"#fff"}" stroke="#3f6b31"/><text x="${852+(PGL.overlay?95:110)}" y="124" text-anchor="middle" font-size="13" font-weight="800" fill="#2f5b28">${PGL.overlay?"엽록소 흡수 스펙트럼 ✓":"엽록소 흡수 스펙트럼 겹쳐 보기"}</text></g>`;
+  } else if(PGL.bacMoved){
+    s+=`<g id="pgCount" style="cursor:pointer"><rect x="836" y="200" width="330" height="70" rx="16" fill="#fff" stroke="#E07B2C" stroke-width="3" class="pulse"/><text x="1001" y="242" text-anchor="middle" font-size="18" font-weight="800" fill="#B85F1C">세균 수 세어 그래프 그리기</text></g>`;
+  }
+  s+=pgShelf(`<g class="pgtok" data-t="prism" ${PGL.prism?'opacity=".35"':""}><rect x="30" y="536" width="170" height="56" rx="28" fill="#F1EEF8" stroke="#7A5CC0" stroke-width="2.5"/><polygon points="62,580 76,550 90,580" fill="#E9E3F7" stroke="#7A5CC0" stroke-width="2"/><text x="140" y="572" text-anchor="middle" font-size="20" font-weight="800">프리즘</text><text class="lbl-xs" x="115" y="616" text-anchor="middle">흰빛을 나눈다</text></g>
+    <text class="lbl-xs" x="240" y="560">엥겔만 (1880년대)</text><text class="lbl-s" x="240" y="588" font-weight="800">호기성 세균을 'O₂ 측정기'로 썼다</text>`,PGL.prism?"세균이 어디에 모이는지 보자":"프리즘을 끌어 아래의 '빛이 들어오는 길'에 놓기 (눌러도 된다)");
+  return s;
+}
+const pgEX=l=>PGE.X0+(l-400)*(PGE.X1-PGE.X0)/300;
+function pgBindC(svg){
+  const pr=svg.querySelector('.pgtok[data-t="prism"]');
+  if(pr&&!PGL.prism) labDrag(pr,svg,{ start(p){ return {gh:ghost(svg,`<polygon points="-22,18 0,-24 22,18" fill="#E9E3F7" stroke="#7A5CC0" stroke-width="2.5"/>`,p)}; },
+    move(p,c){ c.gh&&c.gh.setAttribute("transform",`translate(${p.x},${p.y})`); }, cancel(c){ c.gh&&c.gh.remove(); },
+    end(p){ if(p.y>40&&p.y<420&&p.x>30&&p.x<830) pgPrism(); else labSay("프리즘은 <b>빛이 들어오는 길</b>에 놓자.","no"); }, tap(){ pgPrism(); } });
+  const c=svg.querySelector("#pgCount"); if(c) c.addEventListener("click",()=>{ PGL.counted=true; PGL.f[7]=true; pgDraw();
+    labSay("세균 수를 파장별로 세어 막대그래프로 그렸더니 <b>작용 스펙트럼</b>(점선)이 나타났다. 파란빛과 빨간빛에서 높고, 초록빛에서 낮지만 <b>0은 아니다</b>. 위의 버튼으로 엽록소의 <b>흡수 스펙트럼</b>을 겹쳐 보자.","ok"); });
+  const o=svg.querySelector("#pgOver"); if(o) o.addEventListener("click",()=>{ PGL.overlay=!PGL.overlay; pgDraw();
+    if(PGL.overlay) labSay("작용 스펙트럼과 엽록소의 흡수 스펙트럼은 <b>모양이 비슷하다</b>. 색소가 <b>흡수한 빛이 광합성에 쓰인다</b>는 증거이다. 위의 <b>④ 광계에서</b>로 넘어가 흡수한 빛에너지가 어디로 가는지 보자."+ADVN("작용 스펙트럼이 엽록소 a 하나의 흡수 스펙트럼보다 넓은 것은 엽록소 b와 카로티노이드가 흡수한 빛도 광합성에 쓰이기 때문이다."),"ok"); });
+}
+async function pgPrism(){
+  if(PGL.prism||PGL.busy) return;
+  PGL.busy=true; PGL.prism=true; pgDraw(); await wait(80);
+  PGL.bacMoved=true; PGL.svg.querySelectorAll("#pgBac circle").forEach((c,i)=>{ const b=PGBAC[i]; c.style.transform=`translate(${pgEX(b.l).toFixed(1)}px,${(PGE.Y+b.dy).toFixed(1)}px)`; });
+  await wait(2300); PGL.f[6]=true; PGL.busy=false; pgDraw();
+  labSay("프리즘이 흰빛을 파장별로 나누어 해캄에 비추자, 호기성 세균이 <b>빨간빛</b>과 <b>파란빛</b>을 받은 부분에 많이 모였다. 호기성 세균은 <b>O₂가 많은 곳</b>에 모인다. 곧 그 빛에서 <b>광합성이 활발</b>해 O₂가 많이 나왔다는 뜻이다. <b>세균 수 세어 그래프 그리기</b>를 눌러 보자.","ok");
+}
+/* ---- ④ 광계에서 ---- */
+const PGD={CX:420,CY:270,R:150};
+const PGANT=Array.from({length:12},(_,i)=>({a:i*30,k:["b","car","a","xan"][i%4]}));
+const pgAntXY=i=>{ const a=PGANT[i].a*Math.PI/180; return [PGD.CX+PGD.R*Math.cos(a),PGD.CY+PGD.R*Math.sin(a)]; };
+function pgD(){
+  const {CX,CY,R}=PGD;
+  let s=`<rect x="40" y="60" width="760" height="424" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+    <text class="lbl-s" x="56" y="86" font-weight="800">광계 (타이라코이드막)</text>
+    <circle cx="${CX}" cy="${CY}" r="${R+36}" fill="#E7F1DE" stroke="#9CC793" stroke-width="2" stroke-dasharray="6 5"/>`;
+  PGANT.forEach((p,i)=>{ const [x,y]=pgAntXY(i); s+=`<g class="pgant" data-i="${i}"><circle cx="${x}" cy="${y}" r="24" fill="${PGBAND[p.k]}" stroke="#fff" stroke-width="3"/><text x="${x}" y="${y+4}" text-anchor="middle" font-size="10" font-weight="800" fill="${p.k==="a"||p.k==="b"?"#fff":"#5a3a00"}">${{a:"엽록소a",b:"엽록소b",car:"카로틴",xan:"잔토필"}[p.k]}</text></g>`; });
+  s+=`<circle id="pgRC" cx="${CX}" cy="${CY}" r="40" fill="#2E8B6E" stroke="#1F5F4C" stroke-width="4"/><text x="${CX}" y="${CY-2}" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">반응 중심</text><text x="${CX}" y="${CY+15}" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">엽록소 a</text>
+    <rect x="${CX+210}" y="${CY-120}" width="120" height="44" rx="10" fill="#fff" stroke="#2f5b28" stroke-width="2"/><text x="${CX+270}" y="${CY-92}" text-anchor="middle" font-size="13" font-weight="800">1차 전자수용체</text>`;
+  if(PGL.energy) s+=`<path d="M${CX+30},${CY-28} Q${CX+150},${CY-140} ${CX+206},${CY-100}" fill="none" stroke="#DE7A2C" stroke-width="3" marker-end="url(#aOr)"/><text x="${CX+150}" y="${CY-130}" font-size="14" font-weight="800" fill="#DE7A2C">e⁻</text>`;
+  s+=`<rect x="820" y="60" width="346" height="424" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+    <text class="lbl-s" x="836" y="86" font-weight="800">둘레의 색소 = 보조 색소</text>
+    <text class="lbl-xs" x="836" y="112">엽록소 b, 카로티노이드(카로틴·잔토필),</text><text class="lbl-xs" x="836" y="132">반응 중심이 아닌 엽록소 a</text>
+    <text class="lbl-xs" x="836" y="166">빛을 흡수해 에너지를 이웃 색소로 전달한다</text>
+    <text class="lbl-s" x="836" y="206" font-weight="800">반응 중심 엽록소 a</text>
+    <text class="lbl-xs" x="836" y="230">모인 에너지로 전자를 내보낸다</text><text class="lbl-xs" x="836" y="250">→ 명반응 시작</text>`;
+  if(PGL.energy) s+=`<g id="pgGoLR" style="cursor:pointer"><rect x="836" y="380" width="314" height="56" rx="16" fill="#3f6b31"/><text x="993" y="415" text-anchor="middle" font-size="19" font-weight="800" fill="#fff">명반응 탭으로 →</text></g>`;
+  const light=(id,x,lab,col)=>`<g class="pgtok" data-t="${id}"><rect x="${x}" y="536" width="150" height="56" rx="28" fill="#fff" stroke="${col}" stroke-width="3"/><circle cx="${x+34}" cy="564" r="14" fill="${col}"/><text x="${x+92}" y="572" text-anchor="middle" font-size="19" font-weight="800">${lab}</text></g>`;
+  s+=pgShelf(light("blue",30,"파란빛",pgRGB(450))+light("green",196,"초록빛",pgRGB(530))+light("red",362,"빨간빛",pgRGB(670)),"빛을 끌어 둘레의 색소 하나에 놓기");
+  return s;
+}
+function pgBindD(svg){
+  svg.querySelectorAll(".pgtok").forEach(g=>{ const t=g.dataset.t, col=pgRGB({blue:450,green:530,red:670}[t]);
+    labDrag(g,svg,{ start(p){ if(PGL.busy) return {}; return {gh:ghost(svg,`<circle r="16" fill="${col}" stroke="#fff" stroke-width="3"/>`,p)}; },
+      move(p,c){ c.gh&&c.gh.setAttribute("transform",`translate(${p.x},${p.y})`); }, cancel(c){ c.gh&&c.gh.remove(); },
+      end(p){ if(PGL.busy) return; let best=-1,bd=34; PGANT.forEach((a,i)=>{ const [x,y]=pgAntXY(i), d=Math.hypot(p.x-x,p.y-y); if(d<bd){ bd=d; best=i; } });
+        if(best<0) return labSay(Math.hypot(p.x-PGD.CX,p.y-PGD.CY)<44?"빛은 대부분 둘레의 <b>보조 색소</b>가 받아 반응 중심으로 전달한다. 둘레의 색소에 비춰 보자.":"빛을 <b>둘레의 색소</b> 하나에 놓자.","no");
+        pgLight(t,best); }, tap(){ if(!PGL.busy) pgLight(t,t==="red"?2:1); } }); });
+  const go2=svg.querySelector("#pgGoLR"); if(go2) go2.addEventListener("click",()=>go("ps-lr"));
+}
+async function pgLight(t,i){
+  const k=PGANT[i].k, car=k==="car"||k==="xan";
+  if(t==="green") return labSay("초록빛은 색소에 <b>거의 흡수되지 않고</b> 반사되거나 투과된다. 그래서 에너지가 전달되지 않는다. 잎이 초록으로 보이는 까닭과 같다. 다른 빛을 비춰 보자.","no");
+  if(t==="red"&&car) return labSay(`${PGNAME[k]}은 카로티노이드라서 <b>빨간빛을 거의 흡수하지 않는다</b>(흡수 스펙트럼을 떠올리자). 빨간빛은 <b>엽록소</b>에 비춰 보자.`,"no");
+  PGL.busy=true; const svg=PGL.svg;
+  /* 이웃 색소를 거쳐 반응 중심으로 */
+  const path=[i,(i+1)%12,(i+2)%12];
+  for(const j of path){ const g=svg.querySelectorAll(".pgant circle")[j]; g.setAttribute("stroke","#FFD23F"); g.setAttribute("stroke-width","7"); await wait(320); g.setAttribute("stroke","#fff"); g.setAttribute("stroke-width","3"); }
+  const [x,y]=pgAntXY(path[2]); const m=mover(svg,`<circle r="10" fill="#FFD23F" stroke="#E0A400" stroke-width="2"/>`,x,y); await wait(30); m.style.transition="transform .5s ease-in"; m.style.transform=`translate(${PGD.CX}px,${PGD.CY}px)`; await wait(560); m.remove();
+  const rc=svg.querySelector("#pgRC"); rc.setAttribute("stroke","#FFD23F"); rc.setAttribute("stroke-width","8"); await wait(400);
+  const first=!PGL.energy; PGL.energy=true; PGL.f[8]=true; PGL.busy=false; pgDraw();
+  labSay(`${PGI[k]} 흡수한 빛에너지가 <b>이웃 색소로 차례로 전달</b>되어 <b>반응 중심의 엽록소 a</b>에 모였다. 반응 중심 엽록소 a는 이 에너지로 들뜬 <b>전자를 1차 전자수용체로 내보낸다</b>. 이렇게 <b>명반응</b>이 시작된다. 보조 색소 덕분에 여러 파장의 빛을 모아 쓸 수 있다.`+(first?" 아래 <b>명반응 탭으로</b>를 눌러 이어서 해 보자.":"")+
+    ADVN("광계 II의 반응 중심 엽록소 a는 P680, 광계 I의 것은 P700이다. 보조 색소는 전자를 내보내지 않고 에너지만 전달한다. 카로티노이드는 지나친 빛에너지를 열로 흩어 엽록소를 보호하기도 한다."),"ok");
+}
+VIEW["ps-pg"].lab={
+  vb:"0 0 1180 660",
+  sub:"색소를 분리하고, 흡수하는 빛을 조사하고, 엥겔만 실험을 해 보자",
+  legend:[],
+  ctrl:`<button class="btn" id="pgLReset">처음부터</button><label class="tog"><input type="checkbox" id="pgLAdv"> 심화 표기</label>`,
+  init(svg){
+    PGL.svg=svg; svg.classList.add("dragzone");
+    $("#pgLReset").onclick=()=>{ if(PGL.busy) return; pgReset(); pgDraw(); pgIntro(); };
+    const adv=$("#pgLAdv"); adv.checked=state.adv; adv.onchange=()=>{ state.adv=adv.checked; document.body.classList.toggle("adv",state.adv); };
+    document.body.classList.toggle("adv",state.adv);
+    pgDraw(); if(PGL.f.some(Boolean)) labSay("이어서 해 보자."); else pgIntro();
+  }
+};
+
 /* ---------- 시작 ---------- */
 go("cr-gl");
 </script>
