@@ -4687,6 +4687,448 @@ VIEW["ps-pg"].lab={
   }
 };
 
+/* ============================================================
+   광합성 실험 탭: 루벤의 실험 · 벤슨의 실험 · 캘빈의 실험
+   그래프의 값은 모양을 보여 주는 상댓값이다
+   ============================================================ */
+SUB.ps.push(["ps-ex","광합성 실험"]);
+const EXC={pg:"#E9862B",rb:"#3F7A2E",fix:"#2E6FB0"};
+/* 원자·분자 그림 */
+const exO=(x,y,lab,r)=>{ r=r||11; return lab?`<circle cx="${x}" cy="${y}" r="${r}" fill="#C0392B" stroke="#7A1E14" stroke-width="1.5"/><text x="${x}" y="${y+r*0.36}" text-anchor="middle" font-size="${r*0.82}" font-weight="800" fill="#fff">¹⁸O</text>`
+  :`<circle cx="${x}" cy="${y}" r="${r}" fill="#B8C2CC" stroke="#6E7A86" stroke-width="1.5"/><text x="${x}" y="${y+r*0.36}" text-anchor="middle" font-size="${r*0.82}" font-weight="800" fill="#2B2A30">O</text>`; };
+const exO2=(x,y,lab,r)=>{ r=r||10; return exO(x-r*0.85,y,lab,r)+exO(x+r*0.85,y,lab,r); };
+const exH2O=(x,y,lab)=>`<circle cx="${x-13}" cy="${y+9}" r="7" fill="#fff" stroke="#8C8371"/><circle cx="${x+13}" cy="${y+9}" r="7" fill="#fff" stroke="#8C8371"/>`+exO(x,y,lab,12);
+const exCO2=(x,y,lab)=>exO(x-20,y,lab,10)+`<circle cx="${x}" cy="${y}" r="10" fill="#4C4A54"/><text x="${x}" y="${y+4}" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">C</text>`+exO(x+20,y,lab,10);
+
+/* ---------------- 정리 그림 ---------------- */
+VIEW["ps-ex"]={
+  title:"광합성 실험",
+  sub:"광합성의 과정은 어떤 실험으로 밝혀졌을까",
+  vb:"0 0 1180 640",
+  legend:["hot"],
+  ctrl:`<label class="tog"><input type="checkbox" id="exFAdv"> 심화 표기</label><span class="spacer"></span><button class="btn" id="exSum">핵심 요약</button>`,
+  svg(){
+    let s=`<rect x="0" y="0" width="1180" height="640" fill="#F2F7EC"/>`;
+    /* 루벤 */
+    s+=`<rect x="16" y="16" width="370" height="608" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+      <text class="lbl" x="32" y="46">루벤의 실험</text><text class="lbl-xs" x="150" y="46">산소 동위 원소 ¹⁸O로 표지</text>`;
+    const flask=(cx,y)=>`<path d="M${cx-16},${y} L${cx-16},${y+40} L${cx-62},${y+130} Q${cx-66},${y+142} ${cx-52},${y+142} L${cx+52},${y+142} Q${cx+66},${y+142} ${cx+62},${y+130} L${cx+16},${y+40} L${cx+16},${y} Z" fill="#EAF3F8" stroke="#7FA9C4" stroke-width="2"/><path d="M${cx-40},${y+86} L${cx+40},${y+86} L${cx+62},${y+130} Q${cx+66},${y+142} ${cx+52},${y+142} L${cx-52},${y+142} Q${cx-66},${y+142} ${cx-62},${y+130} Z" fill="#9CCB7A"/>`;
+    s+=`<text class="lbl-s" x="32" y="84" font-weight="800">실험 I</text>`+flask(110,96)+exH2O(110,214,true)+`<text class="lbl-xs" x="200" y="150">H₂¹⁸O + CO₂</text><path d="M200 172 L250 172" stroke="#8C8371" stroke-width="2" marker-end="url(#aOr)"/>`+exO2(300,172,true,12)+`<text class="lbl-xs" x="300" y="204" text-anchor="middle" font-weight="800" style="fill:#C0392B">¹⁸O₂ 발생</text>`;
+    s+=`<text class="lbl-s" x="32" y="284" font-weight="800">실험 II</text>`+flask(110,296)+exCO2(110,414,true)+`<text class="lbl-xs" x="200" y="350">H₂O + C¹⁸O₂</text><path d="M200 372 L250 372" stroke="#8C8371" stroke-width="2" marker-end="url(#aOr)"/>`+exO2(300,372,false,12)+`<text class="lbl-xs" x="300" y="404" text-anchor="middle" font-weight="800">보통 O₂ 발생</text>`;
+    s+=`<rect x="32" y="474" width="338" height="134" rx="10" fill="#F6EEF0" stroke="#D8B4BC"/>
+      <text class="lbl-s" x="48" y="502" font-weight="800">결론: O₂는 물(H₂O)에서 나온다</text>
+      <text class="lbl-xs" x="48" y="528">6CO₂ + 12H₂O → C₆H₁₂O₆ + 6H₂O + 6O₂</text>
+      <text class="lbl-xs" x="48" y="552" style="fill:#8C8371">O₂ 6분자의 산소 원자 12개가</text><text class="lbl-xs" x="48" y="572" style="fill:#8C8371">모두 물 12분자에서 온다</text>
+      <text class="lbl-xs" x="48" y="596" style="fill:#8C8371">→ 물의 광분해 (명반응)</text>`;
+    s+=hot("ruben",24,62,354,360,10)+hot("rubenEq",28,470,346,142,10);
+    /* 벤슨 */
+    const BX0=430,BX1=760,BY=228,BH=140;
+    s+=`<rect x="402" y="16" width="376" height="300" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+      <text class="lbl" x="418" y="46">벤슨의 실험</text><text class="lbl-xs" x="536" y="46">빛과 CO₂를 따로 공급</text>
+      <rect x="${BX0}" y="${BY-BH}" width="${(BX1-BX0)/2}" height="${BH}" fill="#FFF6C8"/><rect x="${(BX0+BX1)/2}" y="${BY-BH}" width="${(BX1-BX0)/2}" height="${BH}" fill="#DCDCDC"/>
+      <text class="lbl-xs" x="${BX0+80}" y="${BY-BH+18}" text-anchor="middle" font-weight="800">구간 A</text><text class="lbl-xs" x="${BX0+80}" y="${BY-BH+36}" text-anchor="middle">빛 O · CO₂ X</text>
+      <text class="lbl-xs" x="${BX0+245}" y="${BY-BH+18}" text-anchor="middle" font-weight="800">구간 B</text><text class="lbl-xs" x="${BX0+245}" y="${BY-BH+36}" text-anchor="middle">빛 X · CO₂ O</text>
+      <line x1="${BX0}" y1="${BY}" x2="${BX1}" y2="${BY}" stroke="#8C8371"/><line x1="${BX0}" y1="${BY}" x2="${BX0}" y2="${BY-BH}" stroke="#8C8371"/>
+      <path d="M${BX0},${BY-2} L${(BX0+BX1)/2},${BY-2} L${(BX0+BX1)/2},${BY-120} Q${(BX0+BX1)/2+40},${BY-40} ${BX1},${BY-3}" fill="none" stroke="${EXC.fix}" stroke-width="3"/>
+      <text class="lbl-xs" x="${BX0}" y="${BY+20}">시간 →</text><text class="lbl-xs" x="${BX1}" y="${BY+20}" text-anchor="end" style="fill:${EXC.fix}" font-weight="800">CO₂ 흡수(탄소 고정) 속도</text>
+      <text class="lbl-xs" x="418" y="${BY+46}" font-weight="800">결론: 탄소 고정에는 명반응 산물(ATP, NADPH)이 필요하다</text>
+      <text class="lbl-xs" x="418" y="${BY+64}" style="fill:#8C8371">빛이 직접 필요한 것은 아니지만, 산물이 바닥나면 멈춘다</text>`;
+    s+=hot("benson",410,56,360,252,10);
+    /* 캘빈: ¹⁴C */
+    s+=`<rect x="402" y="330" width="376" height="294" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+      <text class="lbl" x="418" y="360">캘빈의 실험 ①</text><text class="lbl-xs" x="556" y="360">¹⁴CO₂를 넣고 시간별로 추적</text>`;
+    const film=(x,y,t,spots)=>{ let f=`<rect x="${x}" y="${y}" width="160" height="160" rx="6" fill="#F4F1EA" stroke="#8C8371"/><text class="lbl-xs" x="${x+80}" y="${y-8}" text-anchor="middle" font-weight="800">${t}</text>`;
+      spots.forEach(([sx,sy,r,n,o])=>{ f+=`<ellipse cx="${x+sx*160}" cy="${y+sy*160}" rx="${r}" ry="${r*0.8}" fill="#2B2A30" opacity="${o}"/><text class="lbl-xs" x="${x+sx*160}" y="${y+sy*160+r+14}" text-anchor="middle" font-size="12">${n}</text>`; }); return f; };
+    s+=film(420,394,"5초 후",[[0.42,0.5,15,"3PG",0.95]])+film(600,394,"30초 후",[[0.42,0.5,14,"3PG",0.85],[0.7,0.3,10,"PGAL",0.6],[0.25,0.25,10,"RuBP",0.55],[0.7,0.7,11,"당 인산",0.7]]);
+    s+=`<text class="lbl-xs" x="418" y="604" font-weight="800">결론: CO₂가 고정되어 가장 먼저 생기는 물질은 3PG</text>`;
+    s+=hot("calvin14",410,370,360,248,10);
+    /* 캘빈: 조건 변화 */
+    s+=`<rect x="794" y="16" width="370" height="608" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>
+      <text class="lbl" x="810" y="46">캘빈의 실험 ②</text><text class="lbl-xs" x="948" y="46">조건을 바꾸면?</text>`;
+    const mini=(y,t,ev,pg,rb)=>{ const X0=830,X1=1140,H=150, ex=X0+(X1-X0)*0.4; let m=`<text class="lbl-s" x="810" y="${y-H-14}" font-weight="800">${t}</text>
+      <line x1="${X0}" y1="${y}" x2="${X1}" y2="${y}" stroke="#8C8371"/><line x1="${X0}" y1="${y}" x2="${X0}" y2="${y-H}" stroke="#8C8371"/>
+      <line x1="${ex}" y1="${y-H}" x2="${ex}" y2="${y}" stroke="#8C8371" stroke-dasharray="5 4"/><text class="lbl-xs" x="${ex+4}" y="${y-H+12}">${ev}</text>`;
+      const path=(a,b)=>`M${X0},${y-H*a} L${ex},${y-H*a} Q${ex+40},${y-H*b} ${X1},${y-H*b}`;
+      m+=`<path d="${path(0.55,pg)}" fill="none" stroke="${EXC.pg}" stroke-width="3"/><path d="${path(0.42,rb)}" fill="none" stroke="${EXC.rb}" stroke-width="3"/>
+        <text class="lbl-xs" x="${X1+4}" y="${y-H*pg+5}" style="fill:${EXC.pg}" font-weight="800" text-anchor="end">3PG</text><text class="lbl-xs" x="${X1+4}" y="${y-H*rb+18}" style="fill:${EXC.rb}" font-weight="800" text-anchor="end">RuBP</text>`; return m; };
+    s+=mini(250,"빛을 끄면",`빛 끔`,0.92,0.08)+`<text class="lbl-xs" x="810" y="282">ATP·NADPH 부족 → 3PG가 환원되지 못하고</text><text class="lbl-xs" x="810" y="300">RuBP도 재생되지 못한다 → 3PG ↑, RuBP ↓</text>`;
+    s+=mini(520,"CO₂ 농도를 낮추면",`CO₂ 낮춤`,0.12,0.92)+`<text class="lbl-xs" x="810" y="552">RuBP가 CO₂와 결합하지 못해 쌓이고</text><text class="lbl-xs" x="810" y="570">3PG는 새로 생기지 않는다 → RuBP ↑, 3PG ↓</text>`;
+    s+=hot("calvinL",800,70,358,236,10)+hot("calvinC",800,338,358,240,10);
+    return s;
+  },
+  info:{
+    ruben:{t:"루벤의 실험",r:"O₂는 어디에서 오는가",rc:"b",d:[
+      ["방법","클로렐라에 산소의 동위 원소 ¹⁸O로 표지한 물(H₂¹⁸O) 또는 CO₂(C¹⁸O₂)를 각각 주고 빛을 비춘 뒤, 발생한 O₂를 조사했다."],
+      ["결과","H₂¹⁸O를 준 쪽에서만 ¹⁸O₂가 발생했다. C¹⁸O₂를 준 쪽에서는 보통 O₂가 발생했다."],
+      ["결론","광합성에서 발생하는 O₂는 <b>물(H₂O)</b>에서 나온다. 명반응의 물의 광분해에서 생긴다."],
+      ["실험 설계","한 번에 한 물질만 표지해야 산소가 어디에서 왔는지 구별할 수 있다."]
+    ],adv:"실제 실험(1941년)에서는 ¹⁸O를 일부만 섞어 비율을 비교했다. 발생한 O₂의 ¹⁸O 비율이 CO₂가 아니라 물의 ¹⁸O 비율과 같았다. CO₂의 산소는 포도당과 새로 생기는 물로 간다."},
+    rubenEq:{t:"광합성 전체 반응식",r:"반응물과 생성물 양쪽에 물이 있는 까닭",rc:"b",d:[
+      ["식","6CO₂ + 12H₂O → C₆H₁₂O₆ + 6H₂O + 6O₂"],
+      ["까닭","O₂ 6분자의 산소 원자 12개가 모두 물에서 오므로 반응물의 물은 12분자가 필요하다."],
+      ["CO₂의 산소","포도당과 새로 생긴 물(6H₂O)로 간다."]
+    ]},
+    benson:{t:"벤슨의 실험",r:"명반응과 탄소 고정의 관계",rc:"p",d:[
+      ["방법","클로렐라에 빛과 CO₂를 따로 공급하며 CO₂ 흡수 속도(탄소 고정)를 측정했다."],
+      ["구간 A (빛 O, CO₂ X)","CO₂가 없으므로 탄소가 고정되지 않는다. 그러나 명반응은 일어나 ATP와 NADPH가 만들어진다."],
+      ["구간 B (빛 X, CO₂ O)","빛이 없는데도 처음에 CO₂가 흡수된다. 구간 A에서 만든 ATP와 NADPH를 쓰기 때문이다. 이것이 바닥나면 멈춘다."],
+      ["대조","처음부터 어두운 곳에서 CO₂만 주면 탄소가 고정되지 않는다."],
+      ["결론","탄소 고정 반응은 빛을 직접 쓰지 않지만, 명반응 산물(ATP, NADPH)이 있어야 일어난다."]
+    ],adv:"그래서 탄소 고정 반응을 '어두울 때 일어나는 반응'으로 이해하면 안 된다. 실제 식물에서는 낮에 명반응과 함께 일어난다. 루비스코 등 일부 효소는 빛이 있을 때 활성화되기도 한다."},
+    calvin14:{t:"캘빈의 실험 ① ¹⁴C 추적",r:"탄소 고정의 경로",rc:"t",d:[
+      ["방법","클로렐라에 방사성 동위 원소 ¹⁴C로 표지한 ¹⁴CO₂를 주고, 몇 초 뒤 뜨거운 알코올에 넣어 반응을 멈췄다. 물질을 크로마토그래피로 분리하고 X선 필름에 감광시켜(자기 방사법) ¹⁴C가 든 물질을 찾았다."],
+      ["5초 후","¹⁴C가 거의 모두 3PG에 있었다."],
+      ["시간이 지나면","PGAL, 당 인산, RuBP 등 여러 물질에서 ¹⁴C가 나타났다."],
+      ["결론","CO₂가 고정되어 가장 먼저 생기는 물질은 3PG이다. 시간 순서대로 따라가 캘빈 회로의 경로를 밝혔다."]
+    ],adv:"캘빈은 이 연구로 1961년 노벨 화학상을 받았다. 회로는 캘빈, 벤슨, 배셤이 함께 밝혀 캘빈-벤슨 회로라고도 부른다."},
+    calvinL:{t:"캘빈의 실험 ② 빛을 끄면",r:"3PG ↑, RuBP ↓",rc:"t",d:[
+      ["까닭","명반응이 멈춰 ATP와 NADPH가 부족해진다."],
+      ["3PG","CO₂ 고정으로 계속 만들어지지만 PGAL로 환원되지 못해 쌓인다 → 증가"],
+      ["RuBP","CO₂ 고정에 계속 쓰이지만 다시 만들어지지(재생) 못한다 → 감소"]
+    ]},
+    calvinC:{t:"캘빈의 실험 ② CO₂를 줄이면",r:"RuBP ↑, 3PG ↓",rc:"t",d:[
+      ["까닭","CO₂가 부족해 탄소 고정이 줄어든다."],
+      ["RuBP","CO₂와 결합하지 못해 덜 쓰이지만 재생은 계속된다 → 증가"],
+      ["3PG","새로 만들어지지 않지만 PGAL로 환원은 계속된다 → 감소"]
+    ]}
+  },
+  init(svg){
+    const adv=$("#exFAdv"); adv.checked=state.adv; adv.onchange=()=>{ state.adv=adv.checked; document.body.classList.toggle("adv",state.adv); };
+    document.body.classList.toggle("adv",state.adv);
+    $("#exSum").onclick=()=>summary("광합성 실험","핵심 정리",[
+      "<b>루벤의 실험</b>: ¹⁸O로 표지한 물을 주면 ¹⁸O₂가, ¹⁸O로 표지한 CO₂를 주면 보통 O₂가 발생한다. → 광합성에서 발생하는 <b>O₂는 물에서 나온다</b>.",
+      "<b>벤슨의 실험</b>: 빛만 주었다가(CO₂ X) 어둡게 하고 CO₂를 주면 잠시 CO₂가 흡수된다. → 탄소 고정에는 <b>명반응 산물(ATP, NADPH)</b>이 필요하다.",
+      "<b>캘빈의 실험 ①</b>: ¹⁴CO₂를 주고 추적하면 몇 초 만에 <b>3PG</b>에 ¹⁴C가 나타나고, 시간이 지나면 여러 물질로 퍼진다. → CO₂ 고정의 첫 산물은 3PG",
+      "<b>캘빈의 실험 ②</b>: 빛을 끄면 <b>3PG ↑, RuBP ↓</b>, CO₂를 줄이면 <b>RuBP ↑, 3PG ↓</b>"
+    ]);
+  }
+};
+QB["ps-ex"]={
+_all:[
+["루벤의 실험에서 ¹⁸O₂가 발생한 경우는?","H₂¹⁸O와 CO₂를 주었을 때",["H₂O와 C¹⁸O₂를 주었을 때","두 경우 모두","두 경우 모두 발생하지 않았다"],"O₂의 산소가 어디서 오는지 떠올리자.","O₂는 물에서 나오므로 물을 표지한 경우에만 ¹⁸O₂가 발생한다."],
+["벤슨의 실험에서 빛을 끄고 CO₂를 주었을 때 잠시 CO₂가 흡수된 까닭은?","빛이 있을 때 만들어 둔 ATP와 NADPH를 썼기 때문이다.",["탄소 고정은 어두울 때만 일어나기 때문이다.","어두우면 광합성 속도가 빨라지기 때문이다.","CO₂가 빛을 대신하기 때문이다."],"구간 A에서 일어난 일을 떠올리자.","구간 A에서 명반응으로 만든 ATP와 NADPH가 바닥날 때까지 탄소 고정이 일어난다."],
+["캘빈의 실험에서 ¹⁴CO₂를 주고 몇 초 만에 ¹⁴C가 나타나는 물질은?","3PG",["포도당","RuBP","PGAL"],"5초 후의 필름을 보자.","CO₂가 RuBP와 결합해 가장 먼저 3PG가 된다."],
+["캘빈 회로가 진행되던 중 빛을 끄면 일어나는 변화로 옳은 것은?","3PG는 증가하고 RuBP는 감소한다.",["3PG는 감소하고 RuBP는 증가한다.","둘 다 증가한다.","둘 다 변하지 않는다."],"ATP·NADPH가 부족하면 어느 단계가 막히는지 생각하자.","3PG는 환원되지 못해 쌓이고, RuBP는 재생되지 못해 줄어든다."],
+["캘빈 회로가 진행되던 중 CO₂ 농도를 낮추면 일어나는 변화로 옳은 것은?","RuBP는 증가하고 3PG는 감소한다.",["RuBP는 감소하고 3PG는 증가한다.","둘 다 감소한다.","둘 다 증가한다."],"CO₂가 부족하면 어느 단계가 막히는지 생각하자.","RuBP는 CO₂와 결합하지 못해 쌓이고, 3PG는 새로 생기지 않는다."],
+["6CO₂ + 12H₂O → C₆H₁₂O₆ + 6H₂O + 6O₂에서 반응물의 물이 12분자인 까닭은?","O₂의 산소 원자 12개가 모두 물에서 오기 때문이다.",["포도당의 수소가 12개이기 때문이다.","생성물의 물이 6분자이기 때문이다.","CO₂의 산소가 O₂로 가기 때문이다."],"루벤의 실험 결과를 떠올리자.","O₂ 6분자 = 산소 원자 12개 = 물 12분자의 산소"]],
+ruben:[["루벤의 실험에서 한 번에 한 물질만 ¹⁸O로 표지한 까닭은?","O₂의 산소가 어느 물질에서 왔는지 구별하기 위해서",["실험 비용을 줄이기 위해서","광합성 속도를 높이기 위해서","¹⁸O가 위험하기 때문에"],"두 물질을 모두 표지하면 어떻게 될까?","둘 다 표지하면 ¹⁸O₂가 어디서 왔는지 알 수 없다."]],
+benson:[["벤슨의 실험 결과로 옳지 않은 것은?","탄소 고정은 빛이 없을 때만 일어난다.",["CO₂가 없으면 빛이 있어도 탄소가 고정되지 않는다.","빛을 받은 뒤 어두워져도 잠시 탄소가 고정된다.","탄소 고정에는 명반응 산물이 필요하다."],"그래프의 구간 B가 왜 곧 0이 되는지 생각하자.","탄소 고정은 빛이 있을 때도(낮에) 명반응과 함께 일어난다."]],
+calvin14:[["캘빈의 실험에서 반응을 몇 초 만에 멈춘 까닭은?","¹⁴C가 처음 들어가는 물질을 알아내기 위해서",["클로렐라를 보호하기 위해서","¹⁴C를 아끼기 위해서","빛을 차단하기 위해서"],"시간이 길어지면 ¹⁴C가 어떻게 되는지 보자.","시간이 지나면 ¹⁴C가 여러 물질로 퍼지므로 짧게 멈춰야 첫 산물을 알 수 있다."]],
+calvinL:[["빛을 끄면 RuBP가 줄어드는 까닭은?","RuBP 재생에 필요한 ATP가 부족해지기 때문이다.",["CO₂가 줄어들기 때문이다.","RuBP가 빛에 분해되기 때문이다.","3PG가 RuBP로 바뀌기 때문이다."],"RuBP 재생 단계에 필요한 것을 떠올리자.","RuBP는 CO₂ 고정에 계속 쓰이지만 ATP가 없어 다시 만들어지지 못한다."]],
+calvinC:[["CO₂ 농도를 낮추면 3PG가 줄어드는 까닭은?","3PG가 새로 만들어지지 않지만 환원은 계속되기 때문이다.",["ATP가 부족하기 때문이다.","3PG가 RuBP와 결합하기 때문이다.","빛이 부족하기 때문이다."],"3PG가 만들어지는 반응을 떠올리자.","3PG는 CO₂가 RuBP와 결합해야 생긴다."]]
+};
+
+/* ---------------- 직접 해 보기 ---------------- */
+const EXL={};
+const EXMIS=["<b>H₂¹⁸O</b>와 <b>C¹⁸O₂</b>를 서로 다른 플라스크에 넣기",
+  "빛을 비추고, 발생한 O₂를 <b>질량 분석기</b>로 조사하기",
+  "O₂의 산소가 <b>어디에서 왔는지</b> 고르기",
+  "대조 실험: 처음부터 <b>어둡게</b> 하고 CO₂만 주기",
+  "<b>빛만</b> 준 뒤(CO₂ X), <b>어둡게</b> 하고 CO₂ 주기",
+  "벤슨의 실험의 <b>결론</b> 고르기",
+  "¹⁴CO₂를 넣고 <b>5초</b> 뒤 반응 멈추기",
+  "¹⁴CO₂를 넣고 <b>30초</b> 뒤 반응 멈추기",
+  "¹⁴C가 <b>가장 먼저</b> 나타나는 물질 고르기",
+  "<b>빛을 끄면</b> 3PG와 RuBP가 어떻게 될지 예상하고 확인하기",
+  "<b>CO₂를 줄이면</b> 3PG와 RuBP가 어떻게 될지 예상하고 확인하기"];
+const EXACT=["① 루벤의 실험","② 벤슨의 실험","③ 캘빈: ¹⁴C 추적","④ 캘빈: 조건 바꾸기"];
+function exReset(){ Object.assign(EXL,{act:0,f:Array(11).fill(false),busy:false,
+  r:{A:null,B:null},lit:false,an:{A:false,B:false},last:null,
+  b:{light:false,co2:false,S:0,segs:[],show:false},
+  c:{sel:null,films:{},q:false},
+  d:{cond:"off",pred:{pg:null,rb:null},shown:{off:false,low:false},anim:1}}); }
+exReset();
+function exMis(){
+  const d=EXL.f, now=d.indexOf(false), all=d.every(Boolean);
+  $("#info").innerHTML=missionHTML("미션: 광합성을 밝힌 실험",EXMIS,all?11:now)+(all?`<div class="misdone">미션 완료! <b>정리 그림</b>이 열렸다.</div>`:"")+
+    `<div style="font-size:12.5px;color:var(--ink3);margin-top:6px">위의 실험 단추로 어느 실험부터 해도 된다.</div>`+
+    `<div class="adv adv-only"><b>심화</b> 그래프의 값은 모양을 보여 주는 상댓값이다.</div>`;
+  if(all&&!LABDONE["ps-ex"]){ LABDONE["ps-ex"]=true; const seg=$("#ctrl").querySelector("#labMode"); if(seg){ seg.outerHTML=modeSeg("ps-ex"); bindModeSeg("ps-ex"); } }
+}
+function exHead(){
+  const done=[[0,1,2],[3,4,5],[6,7,8],[9,10]].map(a=>a.every(i=>EXL.f[i]));
+  return EXACT.map((t,i)=>{ const x=18+i*190, on=i===EXL.act;
+    return `<g class="exchip" data-i="${i}" style="cursor:pointer"><rect x="${x}" y="12" width="182" height="34" rx="10" fill="${on?"#3f6b31":done[i]?"#E3F2E0":"#FFFDF7"}" stroke="${on?"#2f5b28":done[i]?"#9CC793":"#CFC3A6"}"/>
+      <text x="${x+91}" y="34" text-anchor="middle" font-size="15" font-weight="800" fill="${on?"#fff":"#2f5b28"}">${t}${done[i]&&!on?" ✔":""}</text></g>`; }).join("");
+}
+const exShelf=(inner,hint)=>`<rect x="14" y="494" width="1152" height="152" rx="12" fill="#FFFBF2" stroke="var(--rule2)"/>
+  <text class="lbl-s" x="30" y="522" font-weight="800">재료·장치</text><text class="lbl-xs" x="120" y="522">${hint}</text>`+inner;
+const exBtn=(id,x,y,w,t,on,dis,h)=>{ h=h||44; return `<g class="exbtn" data-b="${id}" style="cursor:${dis?"default":"pointer"}" opacity="${dis?.4:1}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${on?"#3f6b31":"#fff"}" stroke="${on?"#2f5b28":"#8C8371"}" stroke-width="2"/><text x="${x+w/2}" y="${y+h/2+6}" text-anchor="middle" font-size="16" font-weight="800" fill="${on?"#fff":"#25231E"}">${t}</text></g>`; };
+function exDraw(){
+  const svg=EXL.svg; if(!svg) return;
+  exMis();
+  let s=`<rect x="0" y="0" width="1180" height="660" fill="#F2F7EC"/>`+exHead()+[exA,exB,exC,exD][EXL.act]();
+  svg.innerHTML=defs()+s;
+  svg.querySelectorAll(".exchip").forEach(g=>g.addEventListener("click",()=>{ if(EXL.busy) return; EXL.act=+g.dataset.i; exDraw(); exIntro(); }));
+  svg.querySelectorAll(".exbtn").forEach(g=>g.addEventListener("click",()=>{ if(EXL.busy||g.getAttribute("opacity")==="0.4") return; exClick(g.dataset.b); }));
+  [exBindA,()=>{},exBindC,()=>{}][EXL.act](svg);
+  setCounts(null);
+}
+function exIntro(){
+  labSay(["<b>루벤의 실험</b>: 광합성에서 나오는 O₂의 산소는 물(H₂O)에서 올까, CO₂에서 올까? 무거운 산소 <b>¹⁸O</b>로 표지한 물질을 플라스크에 넣어 알아보자. 한 플라스크에는 <b>한 물질만</b> 표지한다.",
+    "<b>벤슨의 실험</b>: 아래 단추로 <b>빛</b>과 <b>CO₂</b>를 켜고 끈 뒤 <b>▶ 진행</b>을 누르면 그래프에 CO₂ 흡수 속도(탄소 고정)가 그려진다. 먼저 대조 실험으로 <b>처음부터 어둡게 하고 CO₂만</b> 주어 보자.",
+    "<b>캘빈의 실험</b>: 클로렐라에 방사성 탄소 <b>¹⁴C</b>로 표지한 CO₂를 주고, 정한 시간 뒤 반응을 멈추어 ¹⁴C가 어떤 물질에 들어갔는지 찾는다. 먼저 <b>시간</b>을 고르고 <b>¹⁴CO₂</b>를 플라스크에 넣자.",
+    "<b>캘빈의 실험 (조건 바꾸기)</b>: 캘빈 회로가 일정하게 돌고 있을 때 조건을 바꾸면 3PG와 RuBP의 양은 어떻게 될까? 조건을 고르고, <b>먼저 예상</b>한 뒤 결과를 확인하자."][EXL.act]);
+}
+function exClick(b){
+  if(EXL.act===0&&b.startsWith("r")) return exConcl(0,b);
+  if(EXL.act===1){ if(b==="light"){ EXL.b.light=!EXL.b.light; exDraw(); return; } if(b==="co2"){ EXL.b.co2=!EXL.b.co2; exDraw(); return; } if(b==="run") return exRun(); if(b==="clear"){ EXL.b.segs=[]; EXL.b.S=0; EXL.b.light=false; EXL.b.co2=false; exDraw(); labSay("그래프를 지우고 처음 상태(오랫동안 어두운 곳에 둔 클로렐라)로 되돌렸다."); return; } if(b.startsWith("q")) return exConcl(1,b); }
+  if(EXL.act===2){ if(b==="t5"||b==="t30"){ EXL.c.sel=b==="t5"?5:30; exDraw(); labSay(`${EXL.c.sel}초로 정했다. 이제 <b>¹⁴CO₂</b>를 플라스크에 넣자.`); return; } if(b.startsWith("q")) return exConcl(2,b); }
+  if(EXL.act===3){ if(b==="off"||b==="low"){ EXL.d.cond=b; EXL.d.pred={pg:null,rb:null}; EXL.d.anim=EXL.d.shown[b]?1:0; exDraw(); labSay(b==="off"?"<b>빛을 끈다</b>. 3PG와 RuBP는 각각 늘어날까, 줄어들까? 예상을 고르자.":"<b>CO₂ 농도를 낮춘다</b>. 3PG와 RuBP는 각각 늘어날까, 줄어들까? 예상을 고르자."); return; }
+    if(b.startsWith("p")){ const [,k,v]=b.split("_"); EXL.d.pred[k]=v; exDraw(); return; }
+    if(b==="show") return exShow(); }
+}
+/* ---- ① 루벤 ---- */
+const EXF={A:170,B:430};
+function exFlask(k){
+  const cx=EXF[k], y=150, lab=EXL.r[k], hl=!EXL.f[0]&&!lab;
+  let s=`<path d="M${cx-18},${y} L${cx-18},${y+60} L${cx-92},${y+230} Q${cx-98},${y+252} ${cx-76},${y+252} L${cx+76},${y+252} Q${cx+98},${y+252} ${cx+92},${y+230} L${cx+18},${y+60} L${cx+18},${y} Z" fill="#EAF3F8" stroke="${hl?"#E07B2C":"#7FA9C4"}" stroke-width="${hl?3.5:2}" ${hl?'class="pulse"':""}/>
+    <path d="M${cx-58},${y+150} L${cx+58},${y+150} L${cx+92},${y+230} Q${cx+98},${y+252} ${cx+76},${y+252} L${cx-76},${y+252} Q${cx-98},${y+252} ${cx-92},${y+230} Z" fill="#9CCB7A"/>`;
+  for(let i=0;i<14;i++) s+=`<circle cx="${cx-62+(i*37)%124}" cy="${y+170+((i*23)%70)}" r="5" fill="#3F7A2E" opacity=".75"/>`;
+  /* O₂ 모으는 관 */
+  const tubeHl=EXL.lit&&!EXL.an[k];
+  s+=`<g class="extube" data-k="${k}" style="cursor:${EXL.lit?"grab":"default"}"><rect x="${cx-22}" y="62" width="44" height="80" rx="10" fill="#FFFFFF" stroke="${tubeHl?"#E07B2C":"#7FA9C4"}" stroke-width="${tubeHl?3:2}" ${tubeHl?'class="pulse"':""}/>`;
+  if(EXL.lit) [0,1].forEach(j=>s+=exO2(cx,82+j*30,k===EXL.lab18W,9));
+  s+=`</g><text class="lbl-xs" x="${cx+28}" y="80">${EXL.lit?"모인 O₂":"O₂ 모으는 관"}</text>`;
+  s+=`<text class="lbl-s" x="${cx}" y="430" text-anchor="middle" font-weight="800">플라스크 ${k}</text>
+    <text class="lbl-xs" x="${cx}" y="454" text-anchor="middle">물: <tspan font-weight="800" style="fill:${lab==="W"?"#C0392B":"#25231E"}">${lab==="W"?"H₂¹⁸O":"H₂O"}</tspan> · CO₂: <tspan font-weight="800" style="fill:${lab==="C"?"#C0392B":"#25231E"}">${lab==="C"?"C¹⁸O₂":"CO₂"}</tspan></text>
+    <text class="lbl-xs" x="${cx}" y="474" text-anchor="middle" style="fill:#8C8371">클로렐라 (녹조류)</text>`;
+  return s;
+}
+function exA(){
+  EXL.lab18W=EXL.r.A==="W"?"A":EXL.r.B==="W"?"B":null;
+  let s=exFlask("A")+exFlask("B");
+  if(EXL.lit) s+=`<g opacity=".9"><circle cx="300" cy="96" r="22" fill="#FFE27A" stroke="#E0A400" stroke-width="2"/><text x="300" y="102" text-anchor="middle" font-size="14" font-weight="800">빛</text></g>`;
+  /* 질량 분석기 */
+  s+=`<rect x="590" y="60" width="350" height="428" rx="14" fill="#FFFDF8" stroke="${EXL.lit&&!(EXL.an.A&&EXL.an.B)?"#E07B2C":"var(--rule2)"}" stroke-width="${EXL.lit&&!(EXL.an.A&&EXL.an.B)?2.5:1}" id="exMS"/>
+    <text class="lbl-s" x="606" y="86" font-weight="800">질량 분석기</text><text class="lbl-xs" x="706" y="86">O₂ 관을 끌어다 놓기</text>`;
+  const k=EXL.last;
+  if(k){ const lab=EXL.lab18W===k, X0=640,YB=290;
+    s+=`<text class="lbl-xs" x="606" y="114">플라스크 ${k}에서 나온 O₂</text><line x1="${X0}" y1="${YB}" x2="910" y2="${YB}" stroke="#8C8371"/><line x1="${X0}" y1="${YB}" x2="${X0}" y2="140" stroke="#8C8371"/>
+      <text class="lbl-xs" x="${X0-6}" y="150" text-anchor="end">많음</text>`;
+    [[32,"보통 O₂",!lab],[34,"",false],[36,"¹⁸O₂",lab]].forEach(([m,n,on],i)=>{ const x=X0+40+i*90; s+=`<rect x="${x}" y="${on?140:YB-4}" width="50" height="${on?YB-140:4}" fill="${m===36?"#C0392B":"#8C99A6"}"/><text class="lbl-xs" x="${x+25}" y="${YB+20}" text-anchor="middle">${m}</text><text class="lbl-xs" x="${x+25}" y="${YB+38}" text-anchor="middle" font-weight="800">${n}</text>`; });
+    s+=`<text class="lbl-xs" x="910" y="${YB+56}" text-anchor="end">분자의 질량</text>`;
+  }
+  /* 결과 표 */
+  s+=`<rect x="958" y="60" width="208" height="420" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/><text class="lbl-s" x="972" y="86" font-weight="800">결과</text>`;
+  ["A","B"].forEach((f,i)=>{ const y=120+i*110, lab=EXL.r[f];
+    s+=`<text class="lbl-s" x="972" y="${y}" font-weight="800">플라스크 ${f}</text><text class="lbl-xs" x="972" y="${y+24}">표지: ${lab?(lab==="W"?"물 (H₂¹⁸O)":"CO₂ (C¹⁸O₂)"):"-"}</text>
+      <text class="lbl-xs" x="972" y="${y+48}">발생한 O₂: ${EXL.an[f]?(EXL.lab18W===f?"<tspan style='fill:#C0392B' font-weight='800'>¹⁸O₂</tspan>":"<tspan font-weight='800'>보통 O₂</tspan>"):"?"}</text>`; });
+  if(EXL.an.A&&EXL.an.B){
+    s+=`<text class="lbl-s" x="606" y="380" font-weight="800">O₂의 산소는 어디에서 왔을까?</text>`;
+    [["rW","물 (H₂O)"],["rC","CO₂"],["rB","물과 CO₂ 모두"],["rG","포도당"]].forEach(([id,t],i)=>s+=exBtn(id,606+(i%2)*168,392+Math.floor(i/2)*46,160,t,EXL.f[2]&&id==="rW",false,40));
+  }
+  s+=exShelf(`<g class="extok" data-t="W"><rect x="30" y="536" width="160" height="56" rx="28" fill="#fff" stroke="#C0392B" stroke-width="2.5" ${EXL.f[0]?'opacity=".35"':""}/>${exH2O(66,560,true)}<text x="138" y="572" text-anchor="middle" font-size="19" font-weight="800">H₂¹⁸O</text></g>
+    <g class="extok" data-t="C"><rect x="206" y="536" width="160" height="56" rx="28" fill="#fff" stroke="#C0392B" stroke-width="2.5" ${EXL.f[0]?'opacity=".35"':""}/>${exCO2(250,564,true)}<text x="320" y="572" text-anchor="middle" font-size="19" font-weight="800">C¹⁸O₂</text></g>
+    <g class="extok" data-t="L"><rect x="382" y="536" width="150" height="56" rx="28" fill="#FFF3B0" stroke="#E0A400" stroke-width="2.5" ${EXL.lit?'opacity=".35"':""}/><circle cx="414" cy="564" r="14" fill="#FFD23F" stroke="#E0A400"/><text x="472" y="572" text-anchor="middle" font-size="20" font-weight="800">빛</text></g>
+    ${exO(570,561,true,11)}<text class="lbl-xs" x="590" y="566">= 무거운 산소 (¹⁸O, 산소의 동위 원소)</text>${exO(570,599,false,11)}<text class="lbl-xs" x="590" y="604">= 보통 산소</text>`,
+    "¹⁸O로 표지한 물질을 플라스크에 끌어다 놓기 (눌러도 된다)");
+  return s;
+}
+function exBindA(svg){
+  svg.querySelectorAll(".extok").forEach(g=>{ const t=g.dataset.t;
+    const gh=t==="W"?exH2O(0,0,true):t==="C"?exCO2(0,0,true):`<circle r="20" fill="#FFD23F" stroke="#E0A400" stroke-width="2"/>`;
+    labDrag(g,svg,{ start(p){ if(EXL.busy) return {}; return {gh:ghost(svg,gh,p)}; }, move(p,c){ c.gh&&c.gh.setAttribute("transform",`translate(${p.x},${p.y})`); }, cancel(c){ c.gh&&c.gh.remove(); },
+      end(p){ if(t==="L"&&p.x>40&&p.x<560&&p.y>50&&p.y<480) return exPut("L","A"); const k=Math.abs(p.x-EXF.A)<110?"A":Math.abs(p.x-EXF.B)<110?"B":null; if(!k||p.y<50||p.y>480) return labSay(t==="L"?"빛은 플라스크 쪽에 비추자.":"플라스크에 놓자.","no"); exPut(t,k); },
+      tap(){ exPut(t,t==="L"?"A":!EXL.r.A?"A":"B"); } }); });
+  svg.querySelectorAll(".extube").forEach(g=>{ const k=g.dataset.k;
+    labDrag(g,svg,{ start(p){ if(!EXL.lit||EXL.busy) return {}; return {gh:ghost(svg,exO2(0,0,EXL.lab18W===k,10),p)}; }, move(p,c){ c.gh&&c.gh.setAttribute("transform",`translate(${p.x},${p.y})`); }, cancel(c){ c.gh&&c.gh.remove(); },
+      end(p){ if(!EXL.lit) return; if(p.x>590&&p.x<940&&p.y>60&&p.y<480) exAnalyze(k); else labSay("O₂ 관을 <b>질량 분석기</b>에 놓자.","no"); },
+      tap(){ if(EXL.lit) exAnalyze(k); else labSay("아직 O₂가 모이지 않았다. 먼저 빛을 비추자.","no"); } }); });
+}
+function exPut(t,k){
+  if(t==="L"){
+    if(EXL.lit) return;
+    if(!EXL.r.A||!EXL.r.B) return labSay("먼저 두 플라스크에 <b>H₂¹⁸O</b>와 <b>C¹⁸O₂</b>를 하나씩 넣자.","no");
+    EXL.busy=true; EXL.lit=true; exDraw();
+    const svg=EXL.svg; ["A","B"].forEach(f=>{ for(let i=0;i<5;i++){ const b=mover(svg,`<circle r="6" fill="#fff" stroke="#7FA9C4"/>`,EXF[f]-30+i*15,360); setTimeout(()=>{ b.style.transition="transform 1.2s ease-in"; b.style.transform=`translate(${EXF[f]}px,130px)`; setTimeout(()=>b.remove(),1300); },60+i*150); } });
+    setTimeout(()=>{ EXL.busy=false; exDraw(); labSay("빛을 받은 클로렐라가 광합성을 하여 <b>O₂</b>가 발생했고, 위의 관에 모였다. 이제 각 관을 <b>질량 분석기</b>로 끌어 O₂의 산소가 무거운 산소(¹⁸O)인지 조사하자.","ok"); },1900);
+    return;
+  }
+  if(EXL.r[k]) return labSay(`플라스크 ${k}에는 이미 ${EXL.r[k]==="W"?"H₂¹⁸O":"C¹⁸O₂"}를 넣었다. 다른 플라스크에 넣자.`,"no");
+  const other=k==="A"?"B":"A";
+  if(EXL.r[other]===t) return labSay("두 플라스크에 같은 물질을 표지하면 비교할 수 없다. 이 플라스크에는 <b>다른 물질</b>을 표지하자.","no");
+  EXL.r[k]=t; if(EXL.r.A&&EXL.r.B) EXL.f[0]=true; exDraw();
+  labSay(EXL.f[0]?"플라스크 A와 B에 서로 다른 물질을 표지했다. 한 번에 <b>한 물질만</b> 표지해야 O₂의 산소가 어디서 왔는지 구별할 수 있다. 이제 <b>빛</b>을 비추자."
+    :`플라스크 ${k}에 ${t==="W"?"<b>H₂¹⁸O</b>(물의 산소를 표지)":"<b>C¹⁸O₂</b>(CO₂의 산소를 표지)"}를 넣었다. 다른 플라스크에는 다른 물질을 넣자.`,"ok");
+}
+function exAnalyze(k){
+  EXL.an[k]=true; EXL.last=k; if(EXL.an.A&&EXL.an.B) EXL.f[1]=true; exDraw();
+  const lab=EXL.lab18W===k;
+  labSay(`플라스크 ${k}(${EXL.r[k]==="W"?"H₂¹⁸O를 준 쪽":"C¹⁸O₂를 준 쪽"})에서 나온 O₂는 ${lab?"질량이 36인 <b>¹⁸O₂</b>이다.":"질량이 32인 <b>보통 O₂</b>이다."}`+(EXL.f[1]?" 두 결과를 비교해 O₂의 산소가 <b>어디에서 왔는지</b> 골라 보자.":" 다른 관도 조사하자."),"ok");
+}
+function exConcl(i,b){
+  if(i===0){ if(b==="rW"){ EXL.f[2]=true; exDraw(); labSay("맞다. 물을 표지한 쪽에서만 ¹⁸O₂가 나왔으므로 광합성에서 발생하는 <b>O₂는 물(H₂O)에서</b> 나온다. 명반응의 <b>물의 광분해</b>에서 생긴다. 그래서 광합성 식을 <b>6CO₂ + 12H₂O → C₆H₁₂O₆ + 6H₂O + 6O₂</b>로 쓴다. O₂ 6분자의 산소 원자 12개가 모두 물 12분자에서 오기 때문이다."+ADVN("CO₂의 산소는 포도당과 새로 생긴 물로 간다. 실제 실험(1941년)에서는 ¹⁸O를 일부만 섞어 비율을 비교했다."),"ok"); }
+    else labSay(b==="rC"?"CO₂를 표지한 쪽에서는 보통 O₂가 나왔다. 결과 표를 다시 보자.":b==="rB"?"둘 다라면 두 플라스크 모두에서 ¹⁸O가 든 O₂가 나와야 한다. 결과 표를 다시 보자.":"이 실험에서는 포도당을 표지하지 않았다. 결과 표를 보자.","no"); return; }
+  if(i===1){ if(b==="q1"){ EXL.f[5]=true; EXL.b.show=true; exDraw(); labSay("맞다. 빛이 있을 때 <b>명반응</b>으로 ATP와 NADPH가 만들어져 쌓였고, CO₂가 들어오자 이것을 써서 <b>탄소 고정</b>이 일어났다. 바닥나면 멈춘다. 탄소 고정 반응은 빛을 직접 쓰지 않지만 <b>명반응 산물이 꼭 필요</b>하다. 왼쪽에 이제 '명반응 산물' 눈금이 보인다. 다시 실험해 보며 눈금이 어떻게 변하는지 보자."+ADVN("그래서 탄소 고정 반응을 '어두울 때 일어나는 반응'으로 이해하면 안 된다. 실제 식물에서는 낮에 명반응과 함께 일어난다."),"ok"); }
+    else labSay({q2:"구간 B에서 탄소 고정이 곧 멈춘 것을 보자. 어두운 곳에 계속 두면 탄소가 고정되지 않는다. 실제 식물에서는 낮에 명반응과 함께 일어난다.",q3:"빛이 없는 구간 B에서도 처음에는 탄소가 고정되었다. 빛이 직접 필요하다면 그럴 수 없다.",q4:"빛만 있고 CO₂가 없을 때(구간 A) 그래프를 보자. 탄소가 고정되지 않았다."}[b],"no"); return; }
+  if(i===2){ if(b==="q3PG"){ EXL.f[8]=true; exDraw(); labSay("맞다. 5초 만에 ¹⁴C가 거의 모두 <b>3PG</b>에 있었다. CO₂가 RuBP와 결합해 <b>가장 먼저 3PG</b>가 된다. 시간이 지날수록 ¹⁴C는 PGAL, 당 인산, RuBP 등으로 퍼진다. 캘빈은 이렇게 시간 순서를 따라가 회로의 경로를 밝혔다."+ADVN("캘빈, 벤슨, 배셤이 함께 밝혀 캘빈-벤슨 회로라고도 부른다. 캘빈은 1961년 노벨 화학상을 받았다."),"ok"); }
+    else labSay("5초 필름에서 검게 나타난 점을 다시 보자. 가장 짧은 시간에 ¹⁴C가 들어간 물질이 가장 먼저 만들어진 물질이다.","no"); }
+}
+/* ---- ② 벤슨 ---- */
+const EXG={X0:500,X1:1140,Y:400,H:300,SEG:80};
+function exB(){
+  const B=EXL.b;
+  let s=`<rect x="40" y="60" width="420" height="420" rx="14" fill="${B.light?"#FFFBE6":"#E4E4E4"}" stroke="var(--rule2)"/>
+    <text class="lbl-s" x="56" y="86" font-weight="800">클로렐라 배양 장치</text>`;
+  s+=`<g opacity="${B.light?1:.3}"><circle cx="250" cy="130" r="30" fill="#FFE27A" stroke="#E0A400" stroke-width="2"/>${[0,45,90,135,180,225,270,315].map(a=>`<line x1="${250+38*Math.cos(a*Math.PI/180)}" y1="${130+38*Math.sin(a*Math.PI/180)}" x2="${250+50*Math.cos(a*Math.PI/180)}" y2="${130+50*Math.sin(a*Math.PI/180)}" stroke="#E0A400" stroke-width="3"/>`).join("")}</g>
+    <text class="lbl-xs" x="250" y="200" text-anchor="middle" font-weight="800">빛 ${B.light?"O":"X"}</text>
+    <rect x="150" y="220" width="200" height="200" rx="20" fill="#EAF3F8" stroke="#7FA9C4" stroke-width="2"/><rect x="152" y="290" width="196" height="128" rx="18" fill="#9CCB7A"/>`;
+  for(let i=0;i<16;i++) s+=`<circle cx="${170+(i*41)%160}" cy="${305+((i*29)%100)}" r="5" fill="#3F7A2E" opacity=".75"/>`;
+  s+=`<rect x="70" y="260" width="44" height="140" rx="14" fill="${B.co2?"#D8DEE4":"#F4F4F4"}" stroke="#6E7A86" stroke-width="2"/><text x="92" y="336" text-anchor="middle" font-size="13" font-weight="800">CO₂</text>
+    <line x1="114" y1="330" x2="150" y2="330" stroke="${B.co2?"#6E7A86":"#C9C9C9"}" stroke-width="5" ${B.co2?"":'stroke-dasharray="4 4"'}/>
+    <text class="lbl-xs" x="92" y="420" text-anchor="middle" font-weight="800">CO₂ ${B.co2?"O":"X"}</text>`;
+  if(B.co2&&EXL.b.lastRate>0.05) for(let i=0;i<3;i++) s+=`<circle cx="${124+i*10}" cy="330" r="4" fill="#6E7A86"/>`;
+  if(B.show) s+=`<rect x="380" y="240" width="30" height="180" rx="8" fill="#F1EBDD" stroke="#8C8371"/><rect x="380" y="${420-180*B.S}" width="30" height="${180*B.S}" rx="8" fill="var(--atp)"/>
+    <text class="lbl-xs" x="395" y="234" text-anchor="middle" font-weight="800">명반응 산물</text><text class="lbl-xs" x="395" y="446" text-anchor="middle">ATP·NADPH</text>`;
+  /* 그래프 */
+  const {X0,X1,Y,H,SEG}=EXG;
+  s+=`<rect x="476" y="60" width="690" height="420" rx="14" fill="#FFFDF8" stroke="var(--rule2)"/>
+    <text class="lbl-s" x="492" y="86" font-weight="800">CO₂ 흡수 속도 (탄소 고정)</text>`;
+  B.segs.forEach((g,i)=>{ const x=X0+i*SEG; s+=`<rect x="${x}" y="${Y-H}" width="${SEG}" height="${H}" fill="${g.light?"#FFF6C8":"#DCDCDC"}" opacity=".8"/>
+    <text class="lbl-xs" x="${x+SEG/2}" y="${Y+20}" text-anchor="middle">빛 ${g.light?"O":"X"}</text><text class="lbl-xs" x="${x+SEG/2}" y="${Y+38}" text-anchor="middle">CO₂ ${g.co2?"O":"X"}</text>`; });
+  s+=`<line x1="${X0}" y1="${Y}" x2="${X1}" y2="${Y}" stroke="#8C8371"/><line x1="${X0}" y1="${Y}" x2="${X0}" y2="${Y-H}" stroke="#8C8371"/>
+    <text class="lbl-xs" x="${X0-6}" y="${Y-H+10}" text-anchor="end">높음</text><text class="lbl-xs" x="${X0-6}" y="${Y}" text-anchor="end">0</text>`;
+  let d=""; B.segs.forEach((g,i)=>g.r.forEach((r,j)=>{ const x=X0+i*SEG+(j+0.5)*SEG/g.r.length, y=Y-2-r*(H-20); d+=(d?"L":"M")+x.toFixed(1)+","+y.toFixed(1); }));
+  if(d) s+=`<path d="${d}" fill="none" stroke="${EXC.fix}" stroke-width="3.5"/>`;
+  if(!B.segs.length) s+=`<text class="lbl-xs" x="${(X0+X1)/2}" y="${Y-H/2}" text-anchor="middle" style="fill:#B8AF9C">조건을 정하고 ▶ 진행을 누르면 그려진다</text>`;
+  if(EXL.f[3]&&EXL.f[4]&&!EXL.f[5]){
+    s+=`<rect x="476" y="60" width="690" height="420" rx="14" fill="#FFFDF8" opacity=".94"/>
+      <text class="lbl-s" x="500" y="100" font-weight="800">이 실험에서 알 수 있는 것은?</text>`;
+    [["q1","탄소 고정에는 빛이 직접 필요하지 않지만, 빛이 있을 때 만들어진 물질이 필요하다."],["q2","탄소 고정은 어두울 때만 일어난다."],["q3","탄소 고정에는 빛이 직접 필요하다."],["q4","빛만 있으면 CO₂ 없이도 탄소가 고정된다."]].forEach(([id,t],i)=>
+      s+=`<g class="exbtn" data-b="${id}" style="cursor:pointer"><rect x="500" y="${120+i*70}" width="640" height="56" rx="12" fill="#fff" stroke="#8C8371" stroke-width="2"/><text x="516" y="${154+i*70}" font-size="15" font-weight="700">${t}</text></g>`);
+  }
+  const full=B.segs.length>=8;
+  s+=exShelf(exBtn("light",30,540,150,`빛 ${B.light?"켜짐":"꺼짐"}`,B.light)+exBtn("co2",196,540,170,`CO₂ ${B.co2?"공급":"차단"}`,B.co2)+exBtn("run",382,540,150,"▶ 진행",false,full)+exBtn("clear",548,540,170,"처음부터",false)+
+    `<text class="lbl-xs" x="740" y="560">해 볼 순서</text><text class="lbl-xs" x="740" y="584">1) 빛 꺼짐 · CO₂ 공급 → ▶ (대조)</text><text class="lbl-xs" x="740" y="606">2) 처음부터 → 빛 켜짐 · CO₂ 차단 → ▶</text><text class="lbl-xs" x="740" y="628">3) 빛 꺼짐 · CO₂ 공급 → ▶</text>`,
+    full?"그래프가 가득 찼다. 처음부터를 누르자":"단추로 조건을 정하고 ▶ 진행 (한 번 누를 때마다 한 구간)");
+  return s;
+}
+async function exRun(){
+  const B=EXL.b; if(B.segs.length>=8) return;
+  const S0=B.S, prev=B.segs[B.segs.length-1], g={light:B.light,co2:B.co2,r:[]};
+  EXL.busy=true; B.segs.push(g);
+  for(let t=0;t<8;t++){
+    let r=0;
+    if(B.light) B.S=Math.min(1,B.S+0.3);
+    if(B.co2){ if(B.light) r=1; else { r=B.S; B.S=B.S*0.55; if(B.S<0.02) B.S=0; } }
+    else if(!B.light) B.S*=0.92;
+    g.r.push(r); B.lastRate=r; exDraw(); await wait(170);
+  }
+  EXL.busy=false; exDraw();
+  const peak=Math.max(...g.r);
+  if(!g.light&&g.co2&&S0<0.05&&!EXL.f[3]){ EXL.f[3]=true; exDraw(); return labSay("대조 실험: 오랫동안 어둡게 둔 클로렐라에 CO₂만 주었더니 <b>탄소가 고정되지 않았다</b>. 이제 <b>처음부터</b>를 누르고, <b>빛만</b>(CO₂ 차단) 준 뒤 <b>어둡게</b> 하고 CO₂를 주어 보자.","ok"); }
+  if(!g.light&&g.co2&&prev&&prev.light&&!prev.co2&&peak>0.5&&!EXL.f[4]){ EXL.f[4]=true; exDraw(); return labSay("빛이 없는데도 CO₂를 주자 <b>처음에는 탄소가 고정</b>되었다가 곧 멈추었다! 대조 실험과 무엇이 달랐는지 생각하며 <b>결론</b>을 골라 보자.","ok"); }
+  if(g.light&&!g.co2) return labSay("빛은 있지만 CO₂가 없어서 <b>탄소가 고정되지 않았다</b>. 그러나 이때 클로렐라 안에서는 무슨 일이 일어나고 있을까? 이제 <b>빛을 끄고 CO₂를 공급</b>해 ▶ 진행해 보자.");
+  if(g.light&&g.co2) return labSay("빛과 CO₂가 모두 있으면 탄소 고정이 <b>계속</b> 일어난다. 실제 식물의 낮과 같다.");
+  if(!g.light&&g.co2) return labSay(peak>0.05?"처음에는 고정되다가 곧 멈추었다.":"탄소가 고정되지 않았다.");
+  labSay("빛도 CO₂도 없으니 아무 일도 일어나지 않았다.");
+}
+/* ---- ③ 캘빈: ¹⁴C 추적 ---- */
+const EXSPOT={5:[[0.42,0.55,18,"3PG",0.95]],30:[[0.42,0.55,16,"3PG",0.85],[0.72,0.32,12,"PGAL",0.6],[0.22,0.28,12,"RuBP",0.55],[0.72,0.72,13,"당 인산",0.7]]};
+function exC(){
+  const C=EXL.c;
+  let s=`<rect x="40" y="60" width="380" height="420" rx="14" fill="#FFFDF8" stroke="var(--rule2)"/>
+    <text class="lbl-s" x="56" y="86" font-weight="800">클로렐라 배양 장치 (빛 O)</text>
+    <circle cx="230" cy="110" r="22" fill="#FFE27A" stroke="#E0A400" stroke-width="2"/>
+    <ellipse cx="230" cy="270" rx="150" ry="110" fill="#EAF3F8" stroke="${C.sel&&!C.busyRun?"#E07B2C":"#7FA9C4"}" stroke-width="${C.sel?3:2}" id="exFlaskC"/>
+    <ellipse cx="230" cy="290" rx="138" ry="86" fill="#9CCB7A"/>`;
+  for(let i=0;i<18;i++) s+=`<circle cx="${130+(i*37)%200}" cy="${235+((i*29)%110)}" r="5" fill="#3F7A2E" opacity=".75"/>`;
+  s+=`<text class="lbl-s" x="230" y="420" text-anchor="middle" font-weight="800">${C.timer!=null?`¹⁴CO₂ 넣은 뒤 ${C.timer}초`:C.sel?`${C.sel}초 뒤에 멈춘다`:"시간을 먼저 고르자"}</text>
+    <text class="lbl-xs" x="230" y="446" text-anchor="middle" style="fill:#8C8371">정한 시간이 되면 뜨거운 알코올에 넣어 반응을 멈춘다</text>`;
+  /* 필름 */
+  s+=`<rect x="440" y="60" width="500" height="420" rx="14" fill="#FFFDF8" stroke="var(--rule2)"/>
+    <text class="lbl-s" x="456" y="86" font-weight="800">크로마토그래피 + X선 필름 (자기 방사법)</text>
+    <text class="lbl-xs" x="456" y="108">¹⁴C가 든 물질만 검게 나타난다</text>`;
+  [5,30].forEach((t,i)=>{ const x=470+i*230, y=150;
+    s+=`<rect x="${x}" y="${y}" width="200" height="200" rx="6" fill="#F4F1EA" stroke="#8C8371"/><text class="lbl-s" x="${x+100}" y="${y-12}" text-anchor="middle" font-weight="800">${t}초 후</text>`;
+    if(C.films[t]) EXSPOT[t].forEach(([sx,sy,r,n,o])=>{ s+=`<ellipse cx="${x+sx*200}" cy="${y+sy*200}" rx="${r}" ry="${r*0.8}" fill="#2B2A30" opacity="${o}"/><text class="lbl-xs" x="${x+sx*200}" y="${y+sy*200+r+16}" text-anchor="middle" font-weight="800">${n}</text>`; });
+    else s+=`<text class="lbl-xs" x="${x+100}" y="${y+104}" text-anchor="middle" style="fill:#B8AF9C">아직 없음</text>`;
+    s+=`<circle cx="${x+18}" cy="${y+182}" r="4" fill="#8C8371"/><text class="lbl-xs" x="${x+26}" y="${y+196}" font-size="11" style="fill:#8C8371">원점</text>`; });
+  /* 질문 */
+  s+=`<rect x="958" y="60" width="208" height="420" rx="12" fill="#FFFDF8" stroke="var(--rule2)"/>`;
+  if(C.films[5]&&C.films[30]){
+    s+=`<text class="lbl-s" x="972" y="88" font-weight="800">¹⁴C가 가장 먼저</text><text class="lbl-s" x="972" y="110" font-weight="800">나타나는 물질은?</text>`;
+    [["q3PG","3PG"],["qRuBP","RuBP"],["qGlc","포도당"],["qPGAL","PGAL"]].forEach(([id,t],i)=>s+=exBtn(id,972,130+i*58,180,t,EXL.f[8]&&id==="q3PG"));
+  } else s+=`<text class="lbl-xs" x="972" y="88">5초와 30초</text><text class="lbl-xs" x="972" y="110">두 번 실험한 뒤</text><text class="lbl-xs" x="972" y="132">비교해 보자</text>`;
+  s+=exShelf(exBtn("t5",30,540,110,"5초",C.sel===5)+exBtn("t30",156,540,110,"30초",C.sel===30)+
+    `<g class="extok" data-t="C14"><rect x="290" y="536" width="170" height="56" rx="28" fill="#fff" stroke="#3F3D7A" stroke-width="2.5"/><circle cx="324" cy="564" r="12" fill="#3F3D7A"/><text x="324" y="568" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">¹⁴C</text><text x="402" y="572" text-anchor="middle" font-size="19" font-weight="800">¹⁴CO₂</text><text class="lbl-xs" x="375" y="616" text-anchor="middle">방사성 탄소로 표지</text></g>`,
+    "시간을 고른 뒤 ¹⁴CO₂를 플라스크에 끌어다 놓기 (눌러도 된다)");
+  return s;
+}
+function exBindC(svg){
+  const g=svg.querySelector('.extok[data-t="C14"]'); if(!g) return;
+  labDrag(g,svg,{ start(p){ if(EXL.busy) return {}; return {gh:ghost(svg,`<circle r="16" fill="#3F3D7A"/><text y="5" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">¹⁴CO₂</text>`,p)}; },
+    move(p,c){ c.gh&&c.gh.setAttribute("transform",`translate(${p.x},${p.y})`); }, cancel(c){ c.gh&&c.gh.remove(); },
+    end(p){ if(p.x>60&&p.x<400&&p.y>140&&p.y<400) exPulse(); else labSay("¹⁴CO₂는 <b>클로렐라 플라스크</b>에 넣자.","no"); }, tap(){ exPulse(); } });
+}
+async function exPulse(){
+  const C=EXL.c; if(EXL.busy) return;
+  if(!C.sel) return labSay("먼저 아래에서 <b>시간</b>(5초 또는 30초)을 고르자.","no");
+  EXL.busy=true; const T=C.sel;
+  for(let t=0;t<=T;t+=T===5?1:5){ C.timer=t; exDraw(); await wait(T===5?220:200); }
+  C.timer=null; C.films[T]=true; if(T===5) EXL.f[6]=true; else EXL.f[7]=true; EXL.busy=false; exDraw();
+  labSay(T===5?"<b>5초 후</b>: ¹⁴C가 거의 모두 <b>한 물질</b>에만 들어 있었다. 이제 <b>30초</b>로 다시 해 보자."
+    :"<b>30초 후</b>: ¹⁴C가 <b>여러 물질</b>(3PG, PGAL, 당 인산, RuBP 등)에 퍼졌다."+(C.films[5]?" 두 필름을 비교해 ¹⁴C가 <b>가장 먼저</b> 나타나는 물질을 오른쪽에서 고르자.":" <b>5초</b>로도 해 보자."),"ok");
+}
+/* ---- ④ 캘빈: 조건 바꾸기 ---- */
+const EXD={X0:90,X1:740,Y:400,H:300,EV:0.4};
+const EXTARGET={off:{pg:0.92,rb:0.08},low:{pg:0.12,rb:0.92}};
+function exD(){
+  const D=EXL.d, {X0,X1,Y,H,EV}=EXD, ex=X0+(X1-X0)*EV, shown=D.shown[D.cond], T=EXTARGET[D.cond];
+  let s=`<rect x="40" y="60" width="740" height="420" rx="14" fill="#FFFDF8" stroke="var(--rule2)"/>
+    <text class="lbl-s" x="56" y="86" font-weight="800">물질의 양 (상댓값)</text>
+    <line x1="${X0}" y1="${Y}" x2="${X1}" y2="${Y}" stroke="#8C8371"/><line x1="${X0}" y1="${Y}" x2="${X0}" y2="${Y-H}" stroke="#8C8371"/>
+    <line x1="${ex}" y1="${Y-H}" x2="${ex}" y2="${Y}" stroke="#8C8371" stroke-dasharray="6 5"/><text class="lbl-xs" x="${ex+6}" y="${Y-H+14}" font-weight="800">${D.cond==="off"?"빛을 끔":"CO₂ 농도를 낮춤"}</text>
+    <text class="lbl-xs" x="${X0}" y="${Y+22}">시간 →</text>`;
+  const curve=(a,b,col,n)=>{ const p=D.anim, xe=ex+(X1-ex)*p; let d=`M${X0},${Y-H*a} L${ex},${Y-H*a}`; if(shown) d+=` Q${ex+50*p},${Y-H*(a+(b-a)*p)} ${xe},${Y-H*(a+(b-a)*p)}`;
+    return `<path d="${d}" fill="none" stroke="${col}" stroke-width="4"/><text class="lbl-s" x="${shown?xe+6:ex+6}" y="${Y-H*(shown?a+(b-a)*p:a)+6}" font-weight="800" style="fill:${col}">${n}</text>`; };
+  s+=curve(0.55,T.pg,EXC.pg,"3PG")+curve(0.42,T.rb,EXC.rb,"RuBP");
+  if(!shown) s+=`<text x="${(ex+X1)/2}" y="${Y-H/2}" text-anchor="middle" font-size="40" font-weight="800" fill="#D8CDB4">?</text>`;
+  /* 오른쪽: 조건과 예상 */
+  s+=`<rect x="800" y="60" width="366" height="420" rx="14" fill="#FFFDF8" stroke="var(--rule2)"/>
+    <text class="lbl-s" x="816" y="88" font-weight="800">1. 바꿀 조건</text>`+exBtn("off",816,100,160,"빛 끄기",D.cond==="off")+exBtn("low",990,100,160,"CO₂ 낮추기",D.cond==="low")+
+    `<text class="lbl-s" x="816" y="180" font-weight="800">2. 예상하기</text>
+    <text class="lbl-s" x="816" y="214" font-weight="800" style="fill:${EXC.pg}">3PG</text>`+exBtn("p_pg_up",900,190,120,"↑ 늘어난다",D.pred.pg==="up")+exBtn("p_pg_dn",1030,190,120,"↓ 줄어든다",D.pred.pg==="dn")+
+    `<text class="lbl-s" x="816" y="268" font-weight="800" style="fill:${EXC.rb}">RuBP</text>`+exBtn("p_rb_up",900,244,120,"↑ 늘어난다",D.pred.rb==="up")+exBtn("p_rb_dn",1030,244,120,"↓ 줄어든다",D.pred.rb==="dn")+
+    exBtn("show",816,304,334,"3. 결과 보기",false,!(D.pred.pg&&D.pred.rb));
+  /* 회로 그림: 막히는 단계 */
+  const cy=410, bl=D.cond==="off"&&shown, bc=D.cond==="low"&&shown;
+  s+=`<text class="lbl-xs" x="816" y="378">캘빈 회로에서 막히는 단계</text>
+    <text x="840" y="${cy+6}" font-size="14" font-weight="800" fill="${EXC.rb}">RuBP</text><text x="968" y="${cy+6}" font-size="14" font-weight="800" fill="${EXC.pg}">3PG</text><text x="1084" y="${cy+6}" font-size="14" font-weight="800">PGAL</text>
+    <path d="M884 ${cy} L958 ${cy}" stroke="${bc?"#D0483A":"#8C8371"}" stroke-width="2.5" ${bc?'stroke-dasharray="5 4"':""} marker-end="url(#aOr)"/><text class="lbl-xs" x="921" y="${cy-8}" text-anchor="middle">CO₂</text>
+    <path d="M1004 ${cy} L1076 ${cy}" stroke="${bl?"#D0483A":"#8C8371"}" stroke-width="2.5" ${bl?'stroke-dasharray="5 4"':""} marker-end="url(#aOr)"/><text class="lbl-xs" x="1040" y="${cy-8}" text-anchor="middle">ATP·NADPH</text>
+    <path d="M1104 ${cy+14} Q1000 ${cy+56} 862 ${cy+14}" fill="none" stroke="${bl?"#D0483A":"#8C8371"}" stroke-width="2.5" ${bl?'stroke-dasharray="5 4"':""} marker-end="url(#aOr)"/><text class="lbl-xs" x="983" y="${cy+56}" text-anchor="middle">ATP (RuBP 재생)</text>`;
+  if(bc) s+=`<text x="921" y="${cy+26}" text-anchor="middle" font-size="18" font-weight="800" fill="#D0483A">✕</text>`;
+  if(bl) s+=`<text x="1040" y="${cy+26}" text-anchor="middle" font-size="18" font-weight="800" fill="#D0483A">✕</text><text x="983" y="${cy+38}" text-anchor="middle" font-size="18" font-weight="800" fill="#D0483A">✕</text>`;
+  s+=exShelf(`<text class="lbl-s" x="30" y="580" font-weight="800">처음에는 빛과 CO₂가 충분해 캘빈 회로가 일정하게 돌고 있다 (점선 왼쪽)</text>`,"조건을 고르고, 3PG와 RuBP의 변화를 예상한 뒤 결과를 보자");
+  return s;
+}
+async function exShow(){
+  const D=EXL.d; if(!(D.pred.pg&&D.pred.rb)) return;
+  const T=EXTARGET[D.cond], ok={pg:(T.pg>0.55?"up":"dn")===D.pred.pg, rb:(T.rb>0.42?"up":"dn")===D.pred.rb};
+  EXL.busy=true; D.shown[D.cond]=true;
+  for(let i=1;i<=20;i++){ D.anim=i/20; exDraw(); await wait(45); }
+  EXL.busy=false; if(D.cond==="off") EXL.f[9]=true; else EXL.f[10]=true; exDraw();
+  const res=`예상: 3PG ${ok.pg?"✔ 맞음":"✘ 틀림"} · RuBP ${ok.rb?"✔ 맞음":"✘ 틀림"}. `;
+  labSay(res+(D.cond==="off"
+    ?"<b>빛을 끄면</b> 명반응이 멈춰 <b>ATP와 NADPH</b>가 부족해진다. 3PG는 CO₂ 고정으로 계속 만들어지지만 PGAL로 환원되지 못해 <b>쌓이고(↑)</b>, RuBP는 CO₂ 고정에 계속 쓰이지만 재생되지 못해 <b>줄어든다(↓)</b>."+(EXL.f[10]?"":" 이번에는 <b>CO₂ 낮추기</b>를 해 보자.")
+    :"<b>CO₂ 농도를 낮추면</b> 탄소 고정이 줄어든다. RuBP는 CO₂와 결합하지 못해 덜 쓰이지만 재생은 계속되어 <b>쌓이고(↑)</b>, 3PG는 새로 만들어지지 않지만 PGAL로 환원은 계속되어 <b>줄어든다(↓)</b>."+(EXL.f[9]?"":" 이번에는 <b>빛 끄기</b>를 해 보자.")),ok.pg&&ok.rb?"ok":"no");
+}
+VIEW["ps-ex"].lab={
+  vb:"0 0 1180 660",
+  sub:"루벤, 벤슨, 캘빈의 실험을 직접 해 보며 광합성 과정을 밝혀 보자",
+  legend:[],
+  ctrl:`<button class="btn" id="exLReset">처음부터</button><label class="tog"><input type="checkbox" id="exLAdv"> 심화 표기</label>`,
+  init(svg){
+    EXL.svg=svg; svg.classList.add("dragzone");
+    $("#exLReset").onclick=()=>{ if(EXL.busy) return; exReset(); exDraw(); exIntro(); };
+    const adv=$("#exLAdv"); adv.checked=state.adv; adv.onchange=()=>{ state.adv=adv.checked; document.body.classList.toggle("adv",state.adv); };
+    document.body.classList.toggle("adv",state.adv);
+    exDraw(); if(EXL.f.some(Boolean)) labSay("이어서 해 보자."); else exIntro();
+  }
+};
+
 /* ---------- 시작 ---------- */
 go("cr-gl");
 </script>
