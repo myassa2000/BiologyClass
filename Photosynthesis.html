@@ -965,7 +965,7 @@ function renderQ(item,k,n){
   const [q,ans,wrong,hint,exp]=item, p=$("#quizPanel");
   p.hidden=false; p.querySelector("h3").textContent="확인 질문";
   const info=(VIEW[state.view].info||{})[k];
-  const ctx = k==="_all" ? "전체 과정" : "선택: "+(info?info.t:k);
+  const ctx = k==="_all" ? "전체 과정" : QS.labSig ? QS.labTitle : "선택: "+(info?info.t:k);
   const opts=shuffle([ans,...wrong]);
   $("#quiz").innerHTML=`<div class="qctx">${ctx} · 문제 ${n}개 중 무작위</div><div class="q">${q}</div><div class="qopts">`+
     opts.map((t,i)=>`<button class="qopt" data-i="${i}">${t}</button>`).join("")+
@@ -1019,7 +1019,7 @@ function renderSubtabs(){
 }
 function go(view){
   if(state.cleanup){ try{state.cleanup();}catch(e){} state.cleanup=null; }
-  state.quizLock=false;
+  state.quizLock=false; QS.labSig=null;
   const main=view.startsWith("ps")?"ps":"cr";
   state.main=main; state.view=view;
   $$("#maintabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.main===main));
@@ -2477,6 +2477,15 @@ function renderLab(view,v){
   bindModeSeg(view);
   L.init($("#stage").querySelector("svg"));
   window.scrollTo({top:0,behavior:"smooth"});
+}
+/* 직접 해 보기의 확인 질문: 지금 고른 실험의 문제만, 그 실험의 미션을 마치면 연다.
+   같은 상태로 다시 그릴 때는 문제를 바꾸지 않는다 */
+function labQuiz(key,open,title,noun){
+  const sig=state.view+"|"+key+"|"+open; if(QS.labSig===sig) return;
+  QS.labSig=sig; QS.labTitle=title;
+  if(open){ quizFor(key); return; }
+  const p=$("#quizPanel"); p.hidden=false; p.querySelector("h3").textContent="확인 질문";
+  $("#quiz").innerHTML=`<div class="qctx">${title} · 🔒 잠김</div><div class="q" style="font-weight:600">이 ${noun||"실험"}의 미션을 모두 마치면 확인 질문이 열린다. 먼저 직접 해 보자.</div>`;
 }
 function missionHTML(title,list,cur){
   return `<div class="ph">${title}</div><ol class="mis">`+list.map((t,i)=>`<li class="${i<cur?"ok":i===cur?"now":""}"><span>${i<cur?"✔":i+1}</span><div>${t}</div></li>`).join("")+`</ol>`;
@@ -4394,18 +4403,26 @@ const PGMIS=["색소 추출액을 종이의 <b>원점</b>에 찍기",
 const PGACT=["① 크로마토그래피","② 흡수 스펙트럼","③ 엥겔만 실험","④ 광계에서"];
 function pgReset(){ Object.assign(PGL,{act:0,f:Array(9).fill(false),spot:false,inJar:false,dev:0,labels:{},scanMin:999,scanMax:0,lam:550,prism:false,bacMoved:false,counted:false,overlay:false,energy:false,busy:false}); }
 pgReset();
-const pgUnlocked=()=>PGL.f[3]?(PGL.f[5]?(PGL.f[7]?3:2):1):0;
+/* ①~③은 아무 순서로, ④ 광계에서는 ①~③을 모두 마친 뒤에 연다. 미션은 지금 고른 활동의 것만 보여 준다 */
+const PGGRP=[[0,1,2,3],[4,5],[6,7],[8]];
+const pgDoneA=i=>PGGRP[i].every(j=>PGL.f[j]);
+const pgOpen=i=>i<3||[0,1,2].every(pgDoneA);
+const pgNextTip=()=>{ const left=[0,1,2].filter(i=>!pgDoneA(i)); return left.length?` 위의 단추에서 ${left.map(i=>`<b>${PGACT[i]}</b>`).join(", ")}도 해 보자.`:` 이제 위의 <b>④ 광계에서</b>가 열렸다. 흡수한 빛에너지가 어디로 가는지 보자.`; };
 function pgMis(){
-  const d=PGL.f, now=d.indexOf(false), all=d.every(Boolean);
-  $("#info").innerHTML=missionHTML("미션: 광합성 색소 탐구",PGMIS,all?9:now)+(all?`<div class="misdone">미션 완료! <b>정리 그림</b>이 열렸다. 이제 <b>명반응</b> 탭으로 가 보자.</div>`:"")+
+  const d=PGL.f, all=d.every(Boolean), g=PGGRP[PGL.act], now=g.find(i=>!d[i]), gDone=pgDoneA(PGL.act), n=[0,1,2,3].filter(pgDoneA).length;
+  $("#info").innerHTML=`<div class="ph">미션: ${PGACT[PGL.act]}</div><ol class="mis">`+
+    g.map((i,j)=>`<li class="${d[i]?"ok":i===now?"now":""}"><span>${d[i]?"✔":j+1}</span><div>${PGMIS[i]}</div></li>`).join("")+`</ol>`+
+    (gDone&&!all?`<div class="misdone">이 활동 완료!${pgNextTip()}</div>`:"")+
+    (all?`<div class="misdone">미션 완료! <b>정리 그림</b>이 열렸다. 이제 <b>명반응</b> 탭으로 가 보자.</div>`:"")+
+    `<div style="font-size:12.5px;color:var(--ink3);margin-top:8px">마친 활동 ${n} / 4 · ①~③은 어느 것부터 해도 된다. ④는 ①~③을 마치면 열린다.</div>`+
     `<div class="adv adv-only"><b>심화</b> 그래프의 흡수율과 광합성 속도는 모양을 보여 주는 상댓값이다. Rf 값도 전개액·종이·온도에 따라 달라지므로 이번 실험의 값으로만 쓰고, 색소의 순서에 주목하자.</div>`;
+  labQuiz(["chrom","abs","eng","antenna"][PGL.act],gDone,PGACT[PGL.act].replace(/^[①-④] /,""),"활동");
   if(all&&!LABDONE["ps-pg"]){ LABDONE["ps-pg"]=true; const seg=$("#ctrl").querySelector("#labMode"); if(seg){ seg.outerHTML=modeSeg("ps-pg"); bindModeSeg("ps-pg"); } }
 }
 function pgHead(){
-  const u=pgUnlocked();
-  return PGACT.map((t,i)=>{ const x=18+i*190, on=i===PGL.act, ok=i<=u;
+  return PGACT.map((t,i)=>{ const x=18+i*190, on=i===PGL.act, ok=pgOpen(i), dn=pgDoneA(i);
     return `<g class="pgchip" data-i="${i}" style="cursor:${ok?"pointer":"default"}"><rect x="${x}" y="12" width="182" height="34" rx="10" fill="${on?"#3f6b31":ok?"#E3F2E0":"#F1EBDD"}" stroke="${on?"#2f5b28":ok?"#9CC793":"#DDD3BF"}"/>
-      <text x="${x+91}" y="34" text-anchor="middle" font-size="15" font-weight="800" fill="${on?"#fff":ok?"#2f5b28":"#B8AF9C"}">${t}${ok?"":" 🔒"}</text></g>`; }).join("");
+      <text x="${x+91}" y="34" text-anchor="middle" font-size="15" font-weight="800" fill="${on?"#fff":ok?"#2f5b28":"#B8AF9C"}">${t}${!ok?" 🔒":dn&&!on?" ✔":""}</text></g>`; }).join("");
 }
 function pgShelf(inner,hint){ return `<rect x="14" y="494" width="1152" height="152" rx="12" fill="#FFFBF2" stroke="var(--rule2)"/>
   <text class="lbl-s" x="30" y="522" font-weight="800">재료</text><text class="lbl-xs" x="80" y="522">${hint}</text>`+inner; }
@@ -4415,7 +4432,7 @@ function pgDraw(){
   let s=`<rect x="0" y="0" width="1180" height="660" fill="#F2F7EC"/>`+pgHead();
   s+=[pgA,pgB,pgC,pgD][PGL.act]();
   svg.innerHTML=defs()+s;
-  svg.querySelectorAll(".pgchip").forEach(g=>g.addEventListener("click",()=>{ const i=+g.dataset.i; if(PGL.busy||i>pgUnlocked()) return; PGL.act=i; pgDraw(); pgIntro(); }));
+  svg.querySelectorAll(".pgchip").forEach(g=>g.addEventListener("click",()=>{ const i=+g.dataset.i; if(PGL.busy) return; if(!pgOpen(i)) return labSay("<b>④ 광계에서</b>는 ①~③을 모두 마친 뒤에 열린다. 흡수한 빛이 어디로 가는지는 마지막에 정리하자.","no"); PGL.act=i; pgDraw(); pgIntro(); }));
   [pgBindA,pgBindB,pgBindC,pgBindD][PGL.act](svg);
   setCounts(null);
 }
@@ -4493,7 +4510,7 @@ function pgBindA(svg){
       move(p,c){ c.gh&&c.gh.setAttribute("transform",`translate(${p.x},${p.y})`); }, cancel(c){ c.gh&&c.gh.remove(); },
       end(p){ pgLabel(k,p); }, tap(){ labSay("이름표를 끌어서 알맞은 <b>띠</b> 위에 놓자.","no"); } }); });
   svg.querySelectorAll(".pgopt").forEach(g=>g.addEventListener("click",()=>{ if(PGL.f[3]) return;
-    if(g.dataset.ok==="true"){ PGL.f[3]=true; pgDraw(); labSay("<b>Rf = 6.0 ÷ 10.0 = 0.60</b>. Rf는 항상 0과 1 사이이다. 색소는 용매보다 멀리 갈 수 없기 때문이다. 같은 조건이면 같은 색소는 Rf가 같으므로 색소를 구별하는 데 쓴다. 위의 <b>② 흡수 스펙트럼</b>으로 넘어가자.","ok"); }
+    if(g.dataset.ok==="true"){ PGL.f[3]=true; pgDraw(); labSay("<b>Rf = 6.0 ÷ 10.0 = 0.60</b>. Rf는 항상 0과 1 사이이다. 색소는 용매보다 멀리 갈 수 없기 때문이다. 같은 조건이면 같은 색소는 Rf가 같으므로 색소를 구별하는 데 쓴다."+pgNextTip(),"ok"); }
     else labSay(g.dataset.t==="1.67"?"거꾸로 나누었다. Rf는 <b>색소 거리 ÷ 용매 거리</b>이다. 그래서 1보다 클 수 없다.":g.dataset.t==="6.0"?"색소가 이동한 거리 그 자체가 아니라, <b>용매가 이동한 거리로 나눈 값</b>이다.":"용매 거리에서 색소 거리를 뺀 값이 아니다. <b>색소 거리 ÷ 용매 거리</b>를 계산하자.","no"); }));
 }
 function pgSpot(){ if(PGL.spot) return; PGL.spot=true; PGL.f[0]=true; pgDraw();
@@ -4561,7 +4578,7 @@ function pgBindB(svg){
       svg.addEventListener("pointermove",mv); svg.addEventListener("pointerup",up); svg.addEventListener("pointercancel",up);
     }); }
   svg.querySelector("#pgGraph").addEventListener("click",e=>{ if(!PGL.f[4]||PGL.f[5]) return; const l=pgL(svgP(svg,e).x);
-    if(l>=495&&l<=575){ PGL.f[5]=true; pgDraw(); labSay("맞다. 세 색소 모두 <b>초록빛(약 500~570 nm)</b>을 적게 흡수한다. 흡수되지 않은 초록빛이 <b>반사되거나 투과</b>되어 우리 눈에 들어오므로 잎이 초록색으로 보인다. 엽록소는 <b>파란빛과 빨간빛</b>을 많이 흡수하고, 카로티노이드는 <b>파란빛~청록빛</b>을 흡수한다. 위의 <b>③ 엥겔만 실험</b>으로 넘어가자."+ADVN("가을에 엽록소가 분해되면 카로티노이드의 노란색·주황색이 드러나 단풍이 든다."),"ok"); }
+    if(l>=495&&l<=575){ PGL.f[5]=true; pgDraw(); labSay("맞다. 세 색소 모두 <b>초록빛(약 500~570 nm)</b>을 적게 흡수한다. 흡수되지 않은 초록빛이 <b>반사되거나 투과</b>되어 우리 눈에 들어오므로 잎이 초록색으로 보인다. 엽록소는 <b>파란빛과 빨간빛</b>을 많이 흡수하고, 카로티노이드는 <b>파란빛~청록빛</b>을 흡수한다."+pgNextTip()+ADVN("가을에 엽록소가 분해되면 카로티노이드의 노란색·주황색이 드러나 단풍이 든다."),"ok"); }
     else labSay(`${Math.round(l)} nm(${pgColName(l)}) 빛은 색소가 꽤 흡수한다. 우리 눈에 보이는 잎의 색은 <b>흡수되지 않고 반사·투과된 빛</b>의 색이다. 곡선이 가장 낮은 곳을 찾자.`,"no"); });
 }
 function pgScanCheck(){
@@ -4617,7 +4634,7 @@ function pgBindC(svg){
   const c=svg.querySelector("#pgCount"); if(c) c.addEventListener("click",()=>{ PGL.counted=true; PGL.f[7]=true; pgDraw();
     labSay("세균 수를 파장별로 세어 막대그래프로 그렸더니 <b>작용 스펙트럼</b>(점선)이 나타났다. 파란빛과 빨간빛에서 높고, 초록빛에서 낮지만 <b>0은 아니다</b>. 위의 버튼으로 엽록소의 <b>흡수 스펙트럼</b>을 겹쳐 보자.","ok"); });
   const o=svg.querySelector("#pgOver"); if(o) o.addEventListener("click",()=>{ PGL.overlay=!PGL.overlay; pgDraw();
-    if(PGL.overlay) labSay("작용 스펙트럼과 엽록소의 흡수 스펙트럼은 <b>모양이 비슷하다</b>. 색소가 <b>흡수한 빛이 광합성에 쓰인다</b>는 증거이다. 위의 <b>④ 광계에서</b>로 넘어가 흡수한 빛에너지가 어디로 가는지 보자."+ADVN("작용 스펙트럼이 엽록소 a 하나의 흡수 스펙트럼보다 넓은 것은 엽록소 b와 카로티노이드가 흡수한 빛도 광합성에 쓰이기 때문이다."),"ok"); });
+    if(PGL.overlay) labSay("작용 스펙트럼과 엽록소의 흡수 스펙트럼은 <b>모양이 비슷하다</b>. 색소가 <b>흡수한 빛이 광합성에 쓰인다</b>는 증거이다."+pgNextTip()+ADVN("작용 스펙트럼이 엽록소 a 하나의 흡수 스펙트럼보다 넓은 것은 엽록소 b와 카로티노이드가 흡수한 빛도 광합성에 쓰이기 때문이다."),"ok"); });
 }
 async function pgPrism(){
   if(PGL.prism||PGL.busy) return;
@@ -4838,11 +4855,19 @@ function exReset(){ Object.assign(EXL,{act:0,f:Array(11).fill(false),busy:false,
   c:{sel:null,films:{},q:false},
   d:{cond:"off",pred:{pg:null,rb:null},shown:{off:false,low:false},anim:1}}); }
 exReset();
+/* 미션은 지금 고른 실험의 것만 보여 준다 */
+const EXGRP=[[0,1,2],[3,4,5],[6,7,8],[9,10]];
+const EXTTL=["루벤의 실험","벤슨의 실험","캘빈의 실험: ¹⁴C 추적","캘빈의 실험: 조건 바꾸기"];
 function exMis(){
-  const d=EXL.f, now=d.indexOf(false), all=d.every(Boolean);
-  $("#info").innerHTML=missionHTML("미션: 광합성을 밝힌 실험",EXMIS,all?11:now)+(all?`<div class="misdone">미션 완료! <b>정리 그림</b>이 열렸다.</div>`:"")+
-    `<div style="font-size:12.5px;color:var(--ink3);margin-top:6px">위의 실험 단추로 어느 실험부터 해도 된다.</div>`+
+  const d=EXL.f, all=d.every(Boolean), g=EXGRP[EXL.act], gDone=g.every(i=>d[i]), now=g.find(i=>!d[i]);
+  const doneN=EXGRP.filter(a=>a.every(i=>d[i])).length;
+  $("#info").innerHTML=`<div class="ph">미션: ${EXTTL[EXL.act]}</div><ol class="mis">`+
+    g.map((i,j)=>`<li class="${d[i]?"ok":i===now?"now":""}"><span>${d[i]?"✔":j+1}</span><div>${EXMIS[i]}</div></li>`).join("")+`</ol>`+
+    (gDone&&!all?`<div class="misdone">이 실험 완료! 위의 단추에서 <b>다른 실험</b>을 골라 보자.</div>`:"")+
+    (all?`<div class="misdone">네 실험을 모두 마쳤다! <b>정리 그림</b>이 열렸다.</div>`:"")+
+    `<div style="font-size:12.5px;color:var(--ink3);margin-top:8px">마친 실험 ${doneN} / 4 · 위의 단추로 어느 실험부터 해도 된다.</div>`+
     `<div class="adv adv-only"><b>심화</b> 그래프의 값은 모양을 보여 주는 상댓값이다.</div>`;
+  labQuiz(["ruben","benson","calvin14","calvinCond"][EXL.act],gDone,EXTTL[EXL.act]);
   if(all&&!LABDONE["ps-ex"]){ LABDONE["ps-ex"]=true; const seg=$("#ctrl").querySelector("#labMode"); if(seg){ seg.outerHTML=modeSeg("ps-ex"); bindModeSeg("ps-ex"); } }
 }
 function exHead(){
@@ -4992,13 +5017,14 @@ function exB(){
   let d=""; B.segs.forEach((g,i)=>g.r.forEach((r,j)=>{ const x=X0+i*SEG+(j+0.5)*SEG/g.r.length, y=Y-2-r*(H-20); d+=(d?"L":"M")+x.toFixed(1)+","+y.toFixed(1); }));
   if(d) s+=`<path d="${d}" fill="none" stroke="${EXC.fix}" stroke-width="3.5"/>`;
   if(!B.segs.length) s+=`<text class="lbl-xs" x="${(X0+X1)/2}" y="${Y-H/2}" text-anchor="middle" style="fill:#B8AF9C">조건을 정하고 ▶ 진행을 누르면 그려진다</text>`;
-  if(EXL.f[3]&&EXL.f[4]&&!EXL.f[5]){
-    s+=`<rect x="476" y="60" width="690" height="420" rx="14" fill="#FFFDF8" opacity=".94"/>
-      <text class="lbl-s" x="500" y="100" font-weight="800">이 실험에서 알 수 있는 것은?</text>`;
-    [["q1","탄소 고정에는 빛이 직접 필요하지 않지만, 빛이 있을 때 만들어진 물질이 필요하다."],["q2","탄소 고정은 어두울 때만 일어난다."],["q3","탄소 고정에는 빛이 직접 필요하다."],["q4","빛만 있으면 CO₂ 없이도 탄소가 고정된다."]].forEach(([id,t],i)=>
-      s+=`<g class="exbtn" data-b="${id}" style="cursor:pointer"><rect x="500" y="${120+i*70}" width="640" height="56" rx="12" fill="#fff" stroke="#8C8371" stroke-width="2"/><text x="516" y="${154+i*70}" font-size="15" font-weight="700">${t}</text></g>`);
-  }
   const full=B.segs.length>=8;
+  if(EXL.f[3]&&EXL.f[4]&&!EXL.f[5]){
+    /* 결론 고르기: 그래프를 가리지 않도록 아래 칸에 둔다 */
+    s+=`<rect x="14" y="494" width="1152" height="152" rx="12" fill="#FFF6EC" stroke="#E07B2C" stroke-width="2"/>
+      <text class="lbl-s" x="30" y="518" font-weight="800">이 실험에서 알 수 있는 것은?</text><text class="lbl-xs" x="290" y="518" style="fill:#8C8371">위의 그래프를 보며 골라 보자</text>`;
+    [["q1","탄소 고정에는 빛이 직접 필요하지 않지만, 빛이 있을 때 만들어진 물질이 필요하다."],["q2","탄소 고정은 어두울 때만 일어난다."],["q3","탄소 고정에는 빛이 직접 필요하다."],["q4","빛만 있으면 CO₂ 없이도 탄소가 고정된다."]].forEach(([id,t],i)=>{ const x=30+(i%2)*566, y=530+Math.floor(i/2)*56;
+      s+=`<g class="exbtn" data-b="${id}" style="cursor:pointer"><rect x="${x}" y="${y}" width="556" height="48" rx="12" fill="#fff" stroke="#8C8371" stroke-width="2"/><text x="${x+14}" y="${y+30}" font-size="${t.length>30?13.5:15}" font-weight="700">${t}</text></g>`; });
+  }else
   s+=exShelf(exBtn("light",30,540,150,`빛 ${B.light?"켜짐":"꺼짐"}`,B.light)+exBtn("co2",196,540,170,`CO₂ ${B.co2?"공급":"차단"}`,B.co2)+exBtn("run",382,540,150,"▶ 진행",false,full)+exBtn("clear",548,540,170,"처음부터",false)+
     `<text class="lbl-xs" x="740" y="560">해 볼 순서</text><text class="lbl-xs" x="740" y="584">1) 빛 꺼짐 · CO₂ 공급 → ▶ (대조)</text><text class="lbl-xs" x="740" y="606">2) 처음부터 → 빛 켜짐 · CO₂ 차단 → ▶</text><text class="lbl-xs" x="740" y="628">3) 빛 꺼짐 · CO₂ 공급 → ▶</text>`,
     full?"그래프가 가득 찼다. 처음부터를 누르자":"단추로 조건을 정하고 ▶ 진행 (한 번 누를 때마다 한 구간)");
@@ -5128,6 +5154,29 @@ VIEW["ps-ex"].lab={
     exDraw(); if(EXL.f.some(Boolean)) labSay("이어서 해 보자."); else exIntro();
   }
 };
+
+/* 실험·활동별 확인 질문 (직접 해 보기에서 미션을 마치면 열린다) */
+Object.assign(QB["ps-ex"],{
+ruben:[QB["ps-ex"].ruben[0],
+["루벤의 실험에서 H₂O와 C¹⁸O₂를 준 플라스크에서 발생한 O₂는?","보통 O₂ (¹⁸O가 없다)",["¹⁸O₂","¹⁸O와 보통 O가 반씩 섞인 O₂","O₂가 발생하지 않는다"],"CO₂의 산소가 O₂로 가는지 떠올리자.","CO₂의 산소는 O₂로 가지 않으므로 보통 O₂가 발생한다."],
+["루벤의 실험으로 알 수 있는 사실은?","광합성에서 발생하는 O₂는 물에서 나온다.",["광합성에서 발생하는 O₂는 CO₂에서 나온다.","포도당의 산소는 물에서 나온다.","¹⁸O는 광합성을 방해한다."],"¹⁸O₂가 나온 플라스크에는 무엇을 표지했는지 보자.","물을 표지한 쪽에서만 ¹⁸O₂가 나왔다. O₂는 명반응의 물의 광분해에서 생긴다."],
+QB["ps-ex"]._all[5]],
+benson:[QB["ps-ex"].benson[0],
+["벤슨의 실험에서 빛은 있고 CO₂가 없는 구간에서 일어나는 일은?","명반응이 일어나 ATP와 NADPH가 만들어진다.",["탄소 고정이 활발히 일어난다.","아무 반응도 일어나지 않는다.","포도당이 분해된다."],"그다음 구간에서 빛 없이도 탄소가 고정된 까닭과 연결하자.","CO₂가 없어 탄소는 고정되지 않지만 명반응은 일어나 ATP와 NADPH가 쌓인다."],
+["처음부터 어둡게 하고 CO₂만 준 대조 실험에서 탄소가 고정되지 않은 까닭은?","명반응 산물(ATP, NADPH)이 없기 때문이다.",["CO₂가 부족하기 때문이다.","클로렐라가 죽었기 때문이다.","탄소 고정은 빛이 있을 때만 일어나는 반응이기 때문이다."],"본 실험과 무엇이 달랐는지 보자.","빛을 받은 적이 없어 ATP와 NADPH가 없으므로 CO₂가 있어도 고정되지 않는다."],
+QB["ps-ex"]._all[1]],
+calvin14:[QB["ps-ex"].calvin14[0],QB["ps-ex"]._all[2],
+["캘빈의 실험에서 30초 뒤 ¹⁴C가 여러 물질에서 나타난 까닭은?","3PG가 회로를 따라 다른 물질로 바뀌었기 때문이다.",["¹⁴CO₂가 여러 물질과 동시에 결합했기 때문이다.","¹⁴C가 공기 중으로 날아갔기 때문이다.","필름을 오래 감광시켰기 때문이다."],"5초 결과와 비교하자.","CO₂는 먼저 3PG가 되고, 시간이 지나며 PGAL, 당 인산, RuBP 등으로 바뀐다."],
+["캘빈의 실험에서 ¹⁴C로 표지한 CO₂를 쓴 까닭은?","방사선을 내므로 X선 필름으로 ¹⁴C가 든 물질을 찾을 수 있기 때문이다.",["광합성 속도를 높이기 때문이다.","산소의 행방을 알기 위해서이다.","빛을 대신 흡수하기 때문이다."],"자기 방사법을 떠올리자.","¹⁴C는 방사선을 내어 필름을 감광시키므로, ¹⁴C가 들어간 물질의 위치가 검게 나타난다."]],
+calvinCond:[QB["ps-ex"]._all[3],QB["ps-ex"]._all[4],QB["ps-ex"].calvinL[0],QB["ps-ex"].calvinC[0]]
+});
+Object.assign(QB["ps-pg"],{
+chrom:[QB["ps-pg"].chrom[0],QB["ps-pg"].rf[0],QB["ps-pg"]._all[0],QB["ps-pg"]._all[1]],
+abs:[QB["ps-pg"].abs[0],QB["ps-pg"]._all[2],
+["잎이 초록색으로 보이는 까닭은?","광합성 색소가 초록빛을 적게 흡수하여 반사·투과시키기 때문이다.",["엽록소가 초록빛을 가장 많이 흡수하기 때문이다.","잎이 스스로 초록빛을 내기 때문이다.","카로티노이드가 초록색이기 때문이다."],"우리 눈에 들어오는 빛은 흡수된 빛일까, 흡수되지 않은 빛일까?","흡수되지 않고 반사·투과된 초록빛이 눈에 들어온다."]],
+eng:[QB["ps-pg"].eng[0],QB["ps-pg"].act[0],QB["ps-pg"]._all[3],QB["ps-pg"]._all[4]],
+antenna:[QB["ps-pg"].antenna[0],QB["ps-pg"].rc[0],QB["ps-pg"]._all[5]]
+});
 
 /* ---------- 시작 ---------- */
 go("cr-gl");
