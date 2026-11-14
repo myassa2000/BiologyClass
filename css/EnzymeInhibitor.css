@@ -1,0 +1,87 @@
+/* EnzymeInhibitor.html 전용 스타일. 공통 토큰은 base.css */
+
+:root {
+  /* 화면 틀: base.css 토큰 (--surface, --ink, --ink-2) */
+  --bg: var(--paper); --line: var(--rule);
+  --primary: var(--accent); --primary-d: var(--accent-strong);
+  --none: #16a34a;      /* 억제제 없음 : 초록 */
+  --comp: #2563eb;      /* 경쟁적 억제제 : 파랑 */
+  --noncomp: #dc2626;   /* 비경쟁적 억제제 : 빨강 */
+  --e-color: #3F6FA0;    /* 자유 효소 */
+  --es-color: #D29A1E;   /* 효소–기질 복합체 (밝아서 글자는 먹색) */
+  --ei-color: #B85A1E;   /* 효소–억제제 복합체 */
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font); -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+.wrap { max-width: 1100px; margin: 0 auto; padding: 30px var(--gutter) 50px; }
+.eyebrow { display: inline-block; margin-left: 8px; font-size: 13px; color: var(--ink-2); font-weight: 700; }
+h1 { font-size: 30px; font-weight: 800; margin: 0 0 20px; letter-spacing: -0.03em; line-height: 1.25; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+.card { background: var(--surface); border-radius: var(--r-stage); padding: 24px; border: 1px solid var(--line); display: flex; flex-direction: column; }
+.card.full { grid-column: 1 / -1; }
+.card h2 { margin: 0 0 15px; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+
+/* 컨트롤 패널 */
+.control-panel { background: var(--surface-2); padding: 20px; border-radius: var(--r-panel); margin-bottom: 4px; border: 1px solid var(--rule); }
+
+.radio-group { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+.radio-label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 700; padding: 8px 16px; border-radius: var(--r-btn); border: 2px solid var(--rule); transition: 0.2s; background: var(--surface); }
+.radio-label:hover { border-color: var(--rule-2); }
+.radio-label:focus-within { box-shadow: var(--focus); }
+.radio-label input { display: none; }
+.radio-label .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.radio-label.active[data-type="none"] { border-color: var(--none); background: #eafaf1; }
+.radio-label.active[data-type="comp"] { border-color: var(--comp); background: #eaf1fd; }
+.radio-label.active[data-type="noncomp"] { border-color: var(--noncomp); background: #fdecec; }
+
+.slider-group { margin-bottom: 15px; }
+.slider-group.dim { opacity: 0.45; }
+.slider-header { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+input[type=range] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+.tick-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-2); margin-top: -4px; }
+
+.compare-row { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink-2); font-weight: 600; }
+.compare-row input { accent-color: var(--primary); width: 16px; height: 16px; }
+
+/* 그래프 영역 */
+.svg-container { flex: 1; min-height: 340px; position: relative; width: 100%; display: flex; justify-content: center; align-items: center; background: var(--surface-2); border: 1px solid var(--rule); border-radius: var(--r-panel); padding: 12px; }
+svg { width: 100%; height: 100%; overflow: visible; }
+
+.axis { stroke: var(--ink); stroke-width: 2; }
+.grid-line { stroke: var(--rule); stroke-width: 1; }
+.asymptote { stroke: #566573; stroke-width: 1.6; stroke-dasharray: 7 5; }
+.graph-line { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.graph-line.ghost { stroke-width: 2.5; opacity: 0.35; }
+.indicator-line { stroke: var(--ink-3); stroke-width: 1.5; stroke-dasharray: 4; }
+
+.graph-legend { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-size: 13px; font-weight: 700; margin-top: 12px; }
+.graph-legend .li { display: flex; align-items: center; gap: 6px; }
+.swatch { width: 22px; height: 4px; border-radius: 2px; }
+.hint { font-size: 12.5px; color: var(--ink-2); text-align: center; margin-top: 8px; }
+
+/* 효소 상태 바 영역 */
+.status-board { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-panel); padding: 20px; }
+.bar-container { width: 100%; height: 40px; background: var(--paper-2); border-radius: var(--r-btn); overflow: hidden; display: flex; margin-bottom: 15px; border: 1px solid var(--rule); }
+.bar-segment { height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 13px; transition: width 0.25s ease; overflow: hidden; white-space: nowrap; }
+.bar-e { background: var(--e-color); }
+.bar-es { background: var(--es-color); color: var(--ink); }
+.bar-ei { background: var(--ei-color); }
+
+.legend { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; font-size: 13.5px; font-weight: 700; }
+.leg-item { display: flex; align-items: center; gap: 6px; }
+.leg-color { width: 14px; height: 14px; border-radius: 3px; }
+
+.reaction-rate { text-align: center; padding: 15px; background: var(--surface-2); border-radius: var(--r-btn); font-size: 20px; font-weight: 800; border: 1px dashed var(--rule-2); font-variant-numeric: tabular-nums; }
+.reaction-rate small { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-top: 4px; }
+
+/* 개념 설명 */
+.status-desc { margin-top: 15px; padding: 15px; background: #eafaf1; border-left: 4px solid var(--none); border-radius: 3px; font-size: 14.5px; font-weight: 500; flex: 1; }
+
+footer { margin-top: 26px; text-align: center; font-size: 12.5px; color: var(--ink-3); }
