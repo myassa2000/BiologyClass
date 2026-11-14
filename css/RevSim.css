@@ -1,0 +1,88 @@
+/* RevSim.html 전용 스타일. 공통 토큰은 base.css
+   어두운 화면이던 것을 밝은 종이 톤으로 옮겼다. A·a 색은 흰 바탕에서 읽히도록 한 단계 진하게 했다. */
+
+:root{
+  /* 화면 틀: base.css 토큰 (--surface, --ink, --ink-2, --accent) */
+  --bg:var(--paper); --surface2:var(--surface-2); --line:var(--rule); --grid:#D9E0E6;
+  /* 대립유전자와 관찰 집단 */
+  --A:#A0600E; --a:#1E7C8A; --focal:#8F6608;
+  --warn:#C9703A;
+}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font);
+  line-height:1.6; -webkit-font-smoothing:antialiased;}
+.wrap{max-width:1120px; margin:0 auto; padding:28px var(--gutter) 46px;}
+.eyebrow{display:inline-block; margin-left:8px; font-size:13px; color:var(--ink-2); font-weight:700;}
+h1{font-size:clamp(23px,4vw,30px); margin:.1em 0 .1em; letter-spacing:-.03em; font-weight:800;}
+.sub{color:var(--ink-2); font-size:14px; margin:0 0 16px; max-width:760px;}
+.sub b{color:var(--ink);}
+
+/* 시나리오 칩 */
+.presets{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
+.chip{font:inherit; font-size:13px; font-weight:700; cursor:pointer; border:1px solid var(--rule-2);
+      background:var(--surface); color:var(--ink-2); border-radius:var(--r-chip); padding:8px 14px; transition:.15s;}
+.chip:hover{color:var(--ink); background:var(--paper-2);}
+.chip.on{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+
+.grid{display:grid; grid-template-columns:1.55fr 1fr; gap:16px; align-items:start;}
+@media (max-width:900px){ .grid{grid-template-columns:1fr;} }
+.card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-stage);}
+.viz{padding:14px 16px 10px;}
+.vhead{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;}
+.vhead h2{font-size:14px; margin:0; font-weight:700;}
+.vhead .gen{font-variant-numeric:tabular-nums; font-weight:800; color:var(--focal); font-size:13px;}
+.chartleg{display:flex; flex-wrap:wrap; gap:8px 18px; margin:6px 2px 2px; font-size:12px; color:var(--ink-2);}
+.chartleg .cl{display:inline-flex; align-items:center; gap:7px;}
+.chartleg .dash{width:20px; height:3px; border-radius:2px; display:inline-block;}
+svg.chart{width:100%; height:auto; display:block;}
+
+.poolwrap{margin-top:6px; border-top:1px solid var(--line); padding-top:11px;}
+.poolhead{display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--ink-2); margin-bottom:8px;}
+.legend{display:flex; gap:13px;}
+.legend .l{display:inline-flex; align-items:center; gap:6px; font-weight:700; color:var(--ink);}
+.legend .d{width:13px; height:13px; border-radius:50%; display:inline-block;}
+#pool{display:flex; flex-wrap:wrap; gap:4px; align-content:flex-start;}
+.tok{width:13px; height:13px; border-radius:50%; background:var(--a); transition:background-color .5s ease;}
+.tok.A{background:var(--A);}
+
+/* 오른쪽 패널 */
+.panel{padding:16px 18px 18px;}
+.panel h2{font-size:14px; margin:0 0 11px; font-weight:700; color:var(--ink-2);}
+.freqbar{height:30px; border-radius:var(--r-btn); overflow:hidden; display:flex; border:1px solid var(--line); margin-bottom:7px;}
+.freqbar .fa{background:var(--A);} .freqbar .fq{background:var(--a);}
+.freqbar span{display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#fff; transition:width .5s ease;}
+.freqrow{display:flex; justify-content:space-between; font-size:13px; margin-bottom:14px;}
+.freqrow b{font-variant-numeric:tabular-nums;}
+.statgrid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px;}
+.stat{background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-btn); padding:9px 8px; text-align:center;}
+.stat .k{font-size:12px; color:var(--ink-2);}
+.stat .v{font-size:17px; font-weight:800; font-variant-numeric:tabular-nums;}
+.hw{font-size:12.5px; color:var(--ink-2); border-top:1px dashed var(--line); padding-top:10px; margin-bottom:12px;}
+.hw b{color:var(--ink); font-variant-numeric:tabular-nums;}
+.explain{font-size:13.5px; color:var(--ink); background:var(--surface-2); border:1px solid var(--line);
+         border-radius:var(--r-btn); padding:11px 13px;}
+.explain .m{display:block; margin:3px 0;}
+.explain .tag{font-weight:800;}
+
+/* 컨트롤 */
+.controls{margin-top:16px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-panel); padding:15px 17px;}
+.sliders{display:grid; grid-template-columns:repeat(3,1fr); gap:14px 22px;}
+@media (max-width:680px){ .sliders{grid-template-columns:1fr 1fr;} }
+.ctl label{display:block; font-size:12.5px; font-weight:700; color:var(--ink-2); margin-bottom:4px;}
+.ctl .val{color:var(--ink); font-variant-numeric:tabular-nums;}
+input[type=range]{width:100%; accent-color:var(--accent); height:5px;}
+.transport{display:flex; flex-wrap:wrap; gap:9px; align-items:center; margin-top:16px; border-top:1px solid var(--line); padding-top:14px;}
+button.ctrl{font:inherit; font-weight:700; font-size:14px; cursor:pointer; border-radius:var(--r-btn);
+            border:1px solid var(--rule-2); background:var(--surface); color:var(--ink); padding:9px 15px; transition:.15s;}
+button.ctrl:hover{background:var(--paper-2);}
+button.play{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+button.play:hover{background:var(--accent-strong);}
+.speed{display:inline-flex; border:1px solid var(--rule-2); border-radius:var(--r-btn); overflow:hidden; margin-left:auto;}
+.speed button{font:inherit; font-size:12.5px; font-weight:700; border:0; background:var(--surface); color:var(--ink-2); padding:8px 11px; cursor:pointer;}
+.speed button + button{border-left:1px solid var(--rule);}
+.speed button.on{background:var(--accent); color:var(--accent-ink);}
+.scrub{display:flex; align-items:center; gap:10px; margin-top:13px; font-size:12.5px; color:var(--ink-2);}
+.scrub input{flex:1;}
+
+footer{margin-top:22px; text-align:center; font-size:12.5px; color:var(--ink-3); border-top:1px solid var(--line); padding-top:14px;}
+footer b{color:var(--ink-2);}

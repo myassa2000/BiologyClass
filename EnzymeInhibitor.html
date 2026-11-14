@@ -4,95 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>효소 반응 속도와 억제제 시뮬레이션</title>
-<style>
-  :root {
-    --bg: #f4f7f6; --surface: #ffffff; --ink: #2c3e50; --ink-2: #7f8c8d; --line: #ecf0f1;
-    --primary: #27ae60; --primary-d: #229954;
-    --none: #16a34a;      /* 억제제 없음 : 초록 */
-    --comp: #2563eb;      /* 경쟁적 억제제 : 파랑 */
-    --noncomp: #dc2626;   /* 비경쟁적 억제제 : 빨강 */
-    --e-color: #3498db;
-    --es-color: #f1c40f;
-    --ei-color: #e67e22;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font-family: "Pretendard", -apple-system, "Malgun Gothic", sans-serif;
-    line-height: 1.6;
-  }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 30px 20px 50px; }
-  .eyebrow { font-size: 13px; color: var(--primary); font-weight: 800; margin-bottom: 5px; }
-  h1 { font-size: 28px; margin: 0 0 20px; letter-spacing: -0.5px; }
-
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
-  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-
-  .card { background: var(--surface); border-radius: 16px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid var(--line); display: flex; flex-direction: column; }
-  .card.full { grid-column: 1 / -1; }
-  .card h2 { margin: 0 0 15px; font-size: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--line); padding-bottom: 10px; }
-
-  /* 컨트롤 패널 */
-  .control-panel { background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 4px; border: 1px solid #e2e8f0; }
-
-  .radio-group { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-  .radio-label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: bold; padding: 8px 16px; border-radius: 8px; border: 2px solid var(--line); transition: 0.2s; background: #fff; }
-  .radio-label:hover { border-color: #b7c0c4; }
-  .radio-label input { display: none; }
-  .radio-label .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-  .radio-label.active[data-type="none"] { border-color: var(--none); background: #eafaf1; }
-  .radio-label.active[data-type="comp"] { border-color: var(--comp); background: #eaf1fd; }
-  .radio-label.active[data-type="noncomp"] { border-color: var(--noncomp); background: #fdecec; }
-
-  .slider-group { margin-bottom: 15px; }
-  .slider-group.dim { opacity: 0.45; }
-  .slider-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-bottom: 8px; }
-  input[type=range] { width: 100%; accent-color: var(--primary); cursor: pointer; }
-  .tick-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-2); margin-top: -4px; }
-
-  .compare-row { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink-2); font-weight: 600; }
-  .compare-row input { accent-color: var(--primary); width: 16px; height: 16px; }
-
-  /* 그래프 영역 */
-  .svg-container { flex: 1; min-height: 340px; position: relative; width: 100%; display: flex; justify-content: center; align-items: center; background: #fffdf5; border: 1px solid #ead9b0; border-radius: 12px; padding: 12px; }
-  svg { width: 100%; height: 100%; overflow: visible; }
-
-  .axis { stroke: #2c3e50; stroke-width: 2; }
-  .grid-line { stroke: #ecf0f1; stroke-width: 1; }
-  .asymptote { stroke: #566573; stroke-width: 1.6; stroke-dasharray: 7 5; }
-  .graph-line { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-  .graph-line.ghost { stroke-width: 2.5; opacity: 0.35; }
-  .indicator-line { stroke: #95a5a6; stroke-width: 1.5; stroke-dasharray: 4; }
-
-  .graph-legend { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-size: 13px; font-weight: 700; margin-top: 12px; }
-  .graph-legend .li { display: flex; align-items: center; gap: 6px; }
-  .swatch { width: 22px; height: 4px; border-radius: 2px; }
-  .hint { font-size: 12.5px; color: var(--ink-2); text-align: center; margin-top: 8px; }
-
-  /* 효소 상태 바 영역 */
-  .status-board { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
-  .bar-container { width: 100%; height: 40px; background: #ecf0f1; border-radius: 20px; overflow: hidden; display: flex; margin-bottom: 15px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
-  .bar-segment { height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 13px; transition: width 0.25s ease; overflow: hidden; white-space: nowrap; }
-  .bar-e { background: var(--e-color); }
-  .bar-es { background: var(--es-color); }
-  .bar-ei { background: var(--ei-color); }
-
-  .legend { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; font-size: 13.5px; font-weight: bold; }
-  .leg-item { display: flex; align-items: center; gap: 6px; }
-  .leg-color { width: 14px; height: 14px; border-radius: 4px; }
-
-  .reaction-rate { text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 18px; font-weight: 800; border: 2px dashed #bdc3c7; }
-  .reaction-rate small { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-top: 4px; }
-
-  /* 개념 설명 */
-  .status-desc { margin-top: 15px; padding: 15px; background: #eafaf1; border-left: 4px solid var(--none); border-radius: 4px; font-size: 14.5px; font-weight: 500; flex: 1; }
-
-  footer { margin-top: 26px; text-align: center; font-size: 12.5px; color: var(--ink-2); }
-</style>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/EnzymeInhibitor.css">
 </head>
 <body>
 
 <div class="wrap">
+  <a class="unit meta" href="index.html" title="시뮬레이션 목록으로">물질대사</a>
   <div class="eyebrow">세포와 물질대사 · 효소</div>
   <h1>효소 억제제(Enzyme Inhibitor) 시뮬레이션</h1>
 

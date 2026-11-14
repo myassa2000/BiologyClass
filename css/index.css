@@ -1,0 +1,93 @@
+/* 시작 페이지: 시뮬레이션 하나하나를 프레파라트 슬라이드처럼 보여 준다.
+   왼쪽 라벨 칸은 단원 색(염색약)으로 칠하고, 오른쪽 유리 면에 제목과 설명을 쓴다. */
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-size:var(--fs-m);line-height:1.6;word-break:keep-all;overflow-wrap:break-word}
+.wrap{max-width:1120px;margin:0 auto;padding:0 var(--gutter)}
+
+/* ---------- 머리말 ---------- */
+header{padding:56px 0 34px}
+header h1{font-size:var(--fs-2xl);font-weight:800;letter-spacing:-.035em;line-height:1.25}
+header p{margin-top:10px;max-width:44em;color:var(--ink-2)}
+
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.jump a{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:var(--fs-s);font-weight:700;text-decoration:none;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--rule-2);border-radius:var(--r-chip);
+  min-height:var(--tap);padding:0 16px 0 12px;
+  transition:border-color .15s, color .15s;
+}
+.jump a:active{filter:brightness(.95)}
+.jump a::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c)}
+.jump a:hover{color:var(--ink);border-color:var(--c)}
+
+/* ---------- 단원 ---------- */
+section{padding:30px 0 10px;scroll-margin-top:16px}
+section h2{font-size:var(--fs-xl);font-weight:800;letter-spacing:-.03em;line-height:1.3;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+
+/* ---------- 슬라이드 카드 ---------- */
+a.slide{
+  display:grid;grid-template-columns:64px minmax(0,1fr);
+  min-height:150px;
+  background:var(--surface);
+  border:1px solid var(--rule-2);border-radius:5px;
+  text-decoration:none;color:inherit;overflow:hidden;
+  /* 유리 가장자리의 얇은 반사광 */
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.9), 0 1px 0 rgba(30,35,33,.05);
+  transition:border-color .15s, transform .15s ease, box-shadow .15s ease;
+}
+/* 올리면 슬라이드를 2px 들어 올린 것처럼, 누르면 다시 내려놓은 것처럼 */
+a.slide:hover{border-color:var(--c);transform:translateY(-2px);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.9), 0 4px 10px rgba(30,35,33,.08)}
+a.slide:active{transform:translateY(0);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9)}
+a.slide:focus-visible{outline:2px solid var(--c);outline-offset:3px}
+
+/* 라벨 칸: 젖빛 유리 위에 단원 색 */
+.slide .label{
+  position:relative;
+  background:var(--c);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;text-orientation:upright;
+  font-size:var(--fs-s);font-weight:700;letter-spacing:.12em;
+}
+.slide .label::after{
+  /* 라벨과 유리 면의 경계: 덮개유리 가장자리처럼 한 줄 */
+  content:"";position:absolute;top:0;bottom:0;right:0;width:3px;background:rgba(255,255,255,.35);
+}
+
+.slide .body{display:flex;flex-direction:column;gap:8px;padding:18px 20px 16px}
+.slide h3{font-size:var(--fs-l);font-weight:800;letter-spacing:-.03em;line-height:1.35}
+.slide p{font-size:var(--fs-s);color:var(--ink-2);line-height:1.62;flex:1;max-width:40em}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags span{
+  font-size:var(--fs-xs);font-weight:600;line-height:1.5;padding:1px 9px;border-radius:var(--r-chip);
+  background:var(--cs);color:var(--ink-2);
+}
+.new{
+  display:inline-block;vertical-align:2px;margin-left:6px;
+  font-size:var(--fs-xs);font-weight:700;letter-spacing:0;
+  color:var(--eosin);background:var(--eosin-soft);border-radius:var(--r-chip);padding:0 8px;
+}
+
+.t1{--c:var(--stain-cell);--cs:var(--stain-cell-soft)}
+.t2{--c:var(--stain-meta);--cs:var(--stain-meta-soft)}
+.t3{--c:var(--stain-gene);--cs:var(--stain-gene-soft)}
+.t4{--c:var(--stain-evo);--cs:var(--stain-evo-soft)}
+
+/* ---------- 꼬리말 ---------- */
+footer{margin-top:40px;border-top:1px solid var(--rule);padding:18px 0 34px;font-size:var(--fs-xs);color:var(--ink-3)}
+.foot{display:flex;justify-content:space-between;gap:6px 16px;flex-wrap:wrap}
+
+@media (prefers-reduced-motion:reduce){
+  a.slide,a.slide:hover,a.slide:active{transform:none;transition:none}
+}
+@media (max-width:640px){
+  .wrap{padding:0 var(--gutter)}
+  header{padding:32px 0 22px}
+  header h1{font-size:25px}
+  .grid{grid-template-columns:1fr}
+  a.slide{grid-template-columns:48px minmax(0,1fr);min-height:0}
+  .slide .body{padding:14px 16px 14px}
+}

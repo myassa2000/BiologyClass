@@ -4,97 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>진화 시뮬레이션 · 대립유전자 빈도</title>
-<style>
-  :root{
-    --bg:#0b1a1d; --surface:#11262a; --surface2:#18333a; --line:#25454c;
-    --ink:#eaf2f0; --ink-2:#8aa6a6; --grid:#21424a;
-    --A:#eaa43a; --a:#46bccb; --accent:#7ec98c; --focal:#ffd97a;
-    --warn:#e0915a;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0; background:
-      radial-gradient(1100px 600px at 82% -12%, #16383d66, transparent),
-      radial-gradient(800px 500px at 10% 110%, #14302f55, transparent), var(--bg);
-    color:var(--ink);
-    font-family:"Pretendard","Pretendard Variable",-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
-    line-height:1.6; -webkit-font-smoothing:antialiased;}
-  .wrap{max-width:1120px; margin:0 auto; padding:28px 20px 46px;}
-  .eyebrow{font-size:12px; letter-spacing:.26em; text-transform:uppercase; color:var(--accent); font-weight:700;}
-  h1{font-size:clamp(23px,4vw,33px); margin:.1em 0 .1em; letter-spacing:-.015em;}
-  .sub{color:var(--ink-2); font-size:14px; margin:0 0 16px; max-width:760px;}
-  .sub b{color:var(--ink);}
-
-  /* 시나리오 칩 */
-  .presets{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
-  .chip{font:inherit; font-size:13px; font-weight:700; cursor:pointer; border:1px solid var(--line);
-        background:var(--surface); color:var(--ink-2); border-radius:999px; padding:8px 14px; transition:.15s;}
-  .chip:hover{border-color:var(--accent); color:var(--ink);}
-  .chip.on{background:var(--accent); border-color:var(--accent); color:#08221a;}
-
-  .grid{display:grid; grid-template-columns:1.55fr 1fr; gap:16px; align-items:start;}
-  @media (max-width:900px){ .grid{grid-template-columns:1fr;} }
-  .card{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:0 14px 40px #0005;}
-  .viz{padding:14px 16px 10px;}
-  .vhead{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;}
-  .vhead h2{font-size:14px; margin:0; font-weight:700; letter-spacing:.01em;}
-  .vhead .gen{font-variant-numeric:tabular-nums; font-weight:800; color:var(--focal); font-size:13px;}
-  .chartleg{display:flex; flex-wrap:wrap; gap:8px 18px; margin:6px 2px 2px; font-size:12px; color:var(--ink-2);}
-  .chartleg .cl{display:inline-flex; align-items:center; gap:7px;}
-  .chartleg .dash{width:20px; height:3px; border-radius:2px; display:inline-block;}
-  svg.chart{width:100%; height:auto; display:block;}
-
-  .poolwrap{margin-top:6px; border-top:1px solid var(--line); padding-top:11px;}
-  .poolhead{display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--ink-2); margin-bottom:8px;}
-  .legend{display:flex; gap:13px;}
-  .legend .l{display:inline-flex; align-items:center; gap:6px; font-weight:700; color:var(--ink);}
-  .legend .d{width:13px; height:13px; border-radius:50%; display:inline-block;}
-  #pool{display:flex; flex-wrap:wrap; gap:4px; align-content:flex-start;}
-  .tok{width:13px; height:13px; border-radius:50%; background:var(--a); transition:background-color .5s ease;}
-  .tok.A{background:var(--A);}
-
-  /* 오른쪽 패널 */
-  .panel{padding:16px 18px 18px;}
-  .panel h2{font-size:14px; margin:0 0 11px; font-weight:700; letter-spacing:.06em; color:var(--ink-2); text-transform:uppercase;}
-  .freqbar{height:30px; border-radius:8px; overflow:hidden; display:flex; border:1px solid var(--line); margin-bottom:7px;}
-  .freqbar .fa{background:var(--A);} .freqbar .fq{background:var(--a);}
-  .freqbar span{display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#0a1a17; transition:width .5s ease;}
-  .freqrow{display:flex; justify-content:space-between; font-size:13px; margin-bottom:14px;}
-  .freqrow b{font-variant-numeric:tabular-nums;}
-  .statgrid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px;}
-  .stat{background:var(--surface2); border:1px solid var(--line); border-radius:10px; padding:9px 8px; text-align:center;}
-  .stat .k{font-size:11px; color:var(--ink-2);}
-  .stat .v{font-size:17px; font-weight:800; font-variant-numeric:tabular-nums;}
-  .hw{font-size:12.5px; color:var(--ink-2); border-top:1px dashed var(--line); padding-top:10px; margin-bottom:12px;}
-  .hw b{color:var(--ink); font-variant-numeric:tabular-nums;}
-  .explain{font-size:13.5px; color:#d7e6e3; background:var(--surface2); border:1px solid var(--line);
-           border-radius:11px; padding:11px 13px;}
-  .explain .m{display:block; margin:3px 0;}
-  .explain .tag{font-weight:800;}
-
-  /* 컨트롤 */
-  .controls{margin-top:16px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:15px 17px;}
-  .sliders{display:grid; grid-template-columns:repeat(3,1fr); gap:14px 22px;}
-  @media (max-width:680px){ .sliders{grid-template-columns:1fr 1fr;} }
-  .ctl label{display:block; font-size:12px; font-weight:700; color:var(--ink-2); margin-bottom:4px;}
-  .ctl .val{color:var(--ink); font-variant-numeric:tabular-nums;}
-  input[type=range]{width:100%; accent-color:var(--accent); height:5px;}
-  .transport{display:flex; flex-wrap:wrap; gap:9px; align-items:center; margin-top:16px; border-top:1px solid var(--line); padding-top:14px;}
-  button.ctrl{font:inherit; font-weight:700; font-size:14px; cursor:pointer; border-radius:10px;
-              border:1px solid var(--line); background:var(--surface2); color:var(--ink); padding:9px 15px; transition:.15s;}
-  button.ctrl:hover{border-color:var(--accent);}
-  button.play{background:var(--accent); color:#08221a; border-color:var(--accent);}
-  .speed{display:inline-flex; border:1px solid var(--line); border-radius:9px; overflow:hidden; margin-left:auto;}
-  .speed button{font:inherit; font-size:12.5px; font-weight:700; border:0; background:var(--surface2); color:var(--ink-2); padding:8px 11px; cursor:pointer;}
-  .speed button.on{background:var(--accent); color:#08221a;}
-  .scrub{display:flex; align-items:center; gap:10px; margin-top:13px; font-size:12.5px; color:var(--ink-2);}
-  .scrub input{flex:1;}
-
-  footer{margin-top:22px; text-align:center; font-size:12.5px; color:var(--ink-2); border-top:1px solid var(--line); padding-top:14px;}
-  footer b{color:var(--ink);}
-</style>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/RevSim.css">
 </head>
 <body>
 <div class="wrap">
+  <a class="unit evo" href="index.html" title="시뮬레이션 목록으로">진화</a>
   <div class="eyebrow">진화 · 집단유전학</div>
   <h1>대립유전자 빈도는 어떻게 변할까?</h1>
   <p class="sub">한 집단의 모든 대립유전자를 모은 것이 <b>유전자 풀</b>이고, 그중 특정 대립유전자(여기선 <b>A</b>)가 차지하는 비율이 <b>대립유전자 빈도</b>입니다. 그래프의 <b>선 하나가 집단 하나</b>예요 — 같은 조건의 여러 집단을 동시에 굴려, 우연(부동)이 집단마다 다르게 작용하는 모습을 비교합니다. 아래 요인들을 켜고 끄며 빈도가 세대에 따라 어떻게 변하는지 살펴보세요.</p>
@@ -116,7 +31,7 @@
       </div>
       <div class="chartleg">
         <span class="cl"><span class="dash" style="background:var(--focal);height:4px"></span>관찰 집단 (아래 유전자 풀로 자세히 봄)</span>
-        <span class="cl" id="otherLeg"><span class="dash" style="background:#6fb6c4;opacity:.62"></span>같은 조건의 다른 집단들 (독립적으로 진행)</span>
+        <span class="cl" id="otherLeg"><span class="dash" style="background:#3E97A8;opacity:.62"></span>같은 조건의 다른 집단들 (독립적으로 진행)</span>
       </div>
       <svg class="chart" viewBox="0 0 580 320" id="chart" role="img" aria-label="세대별 대립유전자 빈도 그래프"></svg>
 
@@ -209,7 +124,7 @@ function step(p,N,u,m,pm){
 /* ===== 상태 ===== */
 const NVALS=[10,20,50,100,200,500,Infinity];
 const MAXGEN=200;
-const POPCOL=['#ffd97a','#6fb6c4','#cf8fb0','#9bd17a','#e0915a','#8a9ad6','#d9c46a','#69c0a3'];
+const POPCOL=['#8F6608','#3E97A8','#B5628E','#5E9E3E','#C9703A','#5E70B8','#9C8A24','#3A9E80'];
 let P={ Nidx:2, u:0, m:0, pm:1, p0:0.5, nPops:6 };
 let pops=[];      // 각 원소: {hist:[p,...]}
 let gen=0, viewGen=0, playing=false, raf=null, lastT=0, gps=6, acc=0;
@@ -261,10 +176,10 @@ function drawChart(){
   }
   // 현재 세대 표시
   const cx=gx(viewGen);
-  s+=`<line x1="${cx}" y1="${PADT}" x2="${cx}" y2="${H-PADB}" stroke="#ffffff" stroke-width="1" opacity=".22"/>`;
+  s+=`<line x1="${cx}" y1="${PADT}" x2="${cx}" y2="${H-PADB}" stroke="#1E2321" stroke-width="1" opacity=".18"/>`;
   // 관찰 집단 현재 점 + 라벨
   const fp=pops[0].hist[viewGen];
-  s+=`<circle cx="${cx}" cy="${gy(fp)}" r="4.5" fill="var(--focal)" stroke="#0b1a1d" stroke-width="1.5"/>`;
+  s+=`<circle cx="${cx}" cy="${gy(fp)}" r="4.5" fill="var(--focal)" stroke="#FFFFFF" stroke-width="1.5"/>`;
   const lx = cx>W-90 ? cx-8 : cx+8, anch = cx>W-90 ? 'end' : 'start';
   s+=`<text x="${lx}" y="${gy(fp)-8}" text-anchor="${anch}" font-size="11" font-weight="800" fill="var(--focal)">관찰 집단</text>`;
   $('chart').innerHTML=s;
