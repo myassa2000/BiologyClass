@@ -146,7 +146,7 @@ function render(){
   if(fork>0.3 && fork<L){
     const lx=X0+(fork-0.55)*STEP, ly=lerp(PAIR_T,LEAD_T,clamp(0.55/TZ,0,1))+GAP;
     enz+=enzBlob(lx,ly);
-    labels+=leader(lx,96,lx,ly-20,'DNA 중합효소','선도가닥 · 연속','var(--enz-d)');
+    labels+=leader(lx-40,62,lx,ly-20,'DNA 중합효소','선도가닥 · 연속','var(--enz-d)');   // 헬리케이스 이름표와 겹치지 않게 한 줄 위·왼쪽
     labels+=`<text x="${X0+ (fork*0.5)*STEP}" y="${LEAD_T-22}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--lead)">선도가닥 (연속) 5'→3' ►</text>`;
   }
 
@@ -179,14 +179,16 @@ function render(){
     enz+=enzBlob(ex,ey);
     labels+=leader(ex,452,ex,ey+18,'DNA 중합효소','지연가닥 · 절편 합성 ◄','var(--enz-d)');
   }
-  labels+=`<text x="${X0+ Math.min(f, L-2)*STEP*0.55}" y="${LAG_B+40}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--lag)">지연가닥 (오카자키 절편)</text>`;
+  labels+=`<text x="${Math.max(X0+90, X0+ Math.min(f, L-2)*STEP*0.55)}" y="${LAG_B+60}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--lag)">지연가닥 (오카자키 절편)</text>`;
 
-  // 5'/3' 끝 라벨
-  labels+=endlab(X0-30,PAIR_T,'3\u2032')+endlab(X0-30,PAIR_B,'5\u2032');
-  labels+=endlab(XE+30,PAIR_T,'5\u2032')+endlab(XE+30,PAIR_B,'3\u2032');
-  labels+=`<text x="${XE+8}" y="${PAIR_T-22}" font-size="11" font-weight="700" fill="var(--ink-2)">🌀 꼬인 이중나선</text>`;
-  labels+=`<text x="${X0-44}" y="${LEAD_T-22}" font-size="11" font-weight="700" fill="var(--ink-2)">주형</text>`;
-  labels+=`<text x="${X0-44}" y="${LAG_B+34}" font-size="11" font-weight="700" fill="var(--ink-2)">주형</text>`;
+  // 5'/3' 끝 라벨 (왼쪽 끝은 풀린 가닥을 따라 움직인다)
+  const t0=clamp(fork/TZ,0,1), y0T=lerp(PAIR_T,LEAD_T,t0), y0B=lerp(PAIR_B,LAG_B,t0);
+  labels+=endlab(X0-30,y0T,'3\u2032')+endlab(X0-30,y0B,'5\u2032');
+  const t1=clamp((fork-(L-1))/TZ,0,1), y1T=lerp(PAIR_T,LEAD_T,t1), y1B=lerp(PAIR_B,LAG_B,t1);
+  labels+=endlab(XE+30,y1T,'5\u2032')+endlab(XE+30,y1B,'3\u2032');
+  if(fork<L-1.5) labels+=`<text x="${XE+8}" y="${PAIR_T-22}" font-size="11" font-weight="700" fill="var(--ink-2)">🌀 꼬인 이중나선</text>`;
+  labels+=`<text x="${X0-30}" y="${y0T-14}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink-2)">주형</text>`;
+  labels+=`<text x="${X0-30}" y="${y0B+26}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink-2)">주형</text>`;
 
   SVG.innerHTML = mid+rungs+tiles+enz+labels;
   panel(f,fork,activeK);

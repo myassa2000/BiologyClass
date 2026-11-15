@@ -162,7 +162,7 @@ function ensureMRNA(){
     const inUTR=n<start;
     m+=bbox(n*baseW, MY, mrna[n], inUTR?'#BDB9AE':BCOL[mrna[n]]);
   }
-  m+=`<text class="lab" x="${start*baseW-42}" y="${MY+5}" fill="var(--ink-2)">5\u2032</text>`;
+  m+=`<text class="lab" x="${-baseW/2-8}" y="${MY+5}" text-anchor="end" fill="var(--ink-2)">5\u2032</text>`;
   m+=`<text class="lab" x="${mrna.length*baseW+10}" y="${MY+5}" fill="var(--ink-2)">3\u2032</text>`;
   document.getElementById('mrna').innerHTML=shade+m;
 }
@@ -223,7 +223,7 @@ function render(){
   let b='';
   if(st.large){
     b+=`<rect x="${RIBO-134}" y="244" width="268" height="92" rx="46" fill="#EFE4CB" stroke="#B89A5C" stroke-width="2"/>`;
-    b+=`<text class="lab" x="${RIBO}" y="270" text-anchor="middle" fill="#6B5A32" font-size="12">대단위체 (펩타이드 결합 형성)</text>`;
+    b+=`<text class="lab" x="${RIBO+144}" y="284" fill="#6B5A32" font-size="12">대단위체</text><text class="lab" x="${RIBO+144}" y="300" fill="#8C7A4E" font-size="10.5">(펩타이드 결합 형성)</text>`;
   }
   if(st.small){
     b+=`<rect x="${RIBO-134}" y="${MY+12}" width="268" height="44" rx="22" fill="#E6D6B2" stroke="#B89A5C" stroke-width="2"/>`;
@@ -260,8 +260,10 @@ function render(){
   else fr+=trnaSvg+chainSvg;
 
   if(st.factor){
-    fr+=`<g class="anim-enterA"><circle cx="${siteX.A}" cy="${ANTI_Y+2}" r="17" fill="#F7DDE3" stroke="#C25A70" stroke-width="1.6"/>
-         <text class="lab" x="${siteX.A}" y="${ANTI_Y+6}" text-anchor="middle" fill="#8E2F45" font-size="9">방출인자</text></g>`;
+    // 방출인자: tRNA 자리(A 자리)에 들어가는 모양으로, mRNA 염기를 가리지 않게 위쪽에 그린다
+    fr+=`<g class="anim-enterA"><rect x="${siteX.A-24}" y="${ANTI_Y-50}" width="48" height="58" rx="14" fill="#F7DDE3" stroke="#C25A70" stroke-width="1.6"/>
+         <text class="lab" x="${siteX.A}" y="${ANTI_Y-26}" text-anchor="middle" fill="#8E2F45" font-size="11">방출</text>
+         <text class="lab" x="${siteX.A}" y="${ANTI_Y-11}" text-anchor="middle" fill="#8E2F45" font-size="11">인자</text></g>`;
   }
   front.innerHTML=fr;
   panel(f,st);
