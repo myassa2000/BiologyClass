@@ -4,121 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>세포 분열 시뮬레이션 — 체세포 분열 · 감수 분열</title>
-<style>
-  :root{
-    --bg:#e8edf1; --surface:#ffffff; --ink:#1d2731; --ink-2:#5d6b77; --line:#d6dee5;
-    --cell:#f1f8f7; --cell-stroke:#a9bcc6; --cell-wall:#5f9a55; --cell-plant:#eef6ea;
-    --nuc:#e2ecf3; --nuc-stroke:#9db1bf;
-    --mat:#e0654d; --mat-d:#b03e28; --pat:#2e8d94; --pat-d:#19595f;
-    --accent:#e3a32a; --spindle:#aebbc4;
-    --warn-bg:#fdf3df; --warn-line:#e3a32a;
-    --good-bg:#e8f4ec; --good-line:#3f9d6a;
-    --info-bg:#eaf1f7; --info-line:#5d87b0;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0; background:var(--bg); color:var(--ink);
-    font-family:"Pretendard","Pretendard Variable",-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
-    line-height:1.6; -webkit-font-smoothing:antialiased;}
-  .wrap{max-width:1080px; margin:0 auto; padding:26px 20px 40px;}
-  .eyebrow{font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--pat-d); font-weight:700;}
-  h1{font-size:clamp(21px,3.6vw,29px); margin:.12em 0 .12em; letter-spacing:-.01em;}
-  .sub{color:var(--ink-2); font-size:14px; margin:0 0 16px;}
- 
-  /* 상단 컨트롤 */
-  .toolbar{display:flex; flex-wrap:wrap; gap:10px 14px; align-items:flex-end; margin-bottom:16px;
-           background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:13px 15px;
-           box-shadow:0 6px 18px rgba(20,40,60,.05);}
-  .tb-group{display:flex; flex-direction:column; gap:5px;}
-  .tb-label{font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--ink-2); text-transform:uppercase;}
-  .seg{display:inline-flex; border:1px solid var(--line); border-radius:9px; overflow:hidden;}
-  .seg button{font:inherit; font-size:13px; font-weight:700; border:0; background:#f6f9fb; color:var(--ink-2);
-              padding:7px 13px; cursor:pointer; transition:.15s;}
-  .seg button.on{background:var(--pat); color:#fff;}
-  .geno-pick{display:flex; gap:8px;}
-  .geno-pick select{font:inherit; font-weight:700; font-size:13px; padding:6px 8px; border:1px solid var(--line);
-                     border-radius:8px; background:#f6f9fb; color:var(--ink); cursor:pointer;}
-  .geno-pick label{display:flex; flex-direction:column; gap:3px; font-size:10.5px; color:var(--ink-2); align-items:center;}
-  button.mini{font:inherit; font-weight:700; font-size:13px; border:1px solid var(--line); background:#fff;
-              border-radius:9px; padding:7px 12px; cursor:pointer; color:var(--ink);}
-  button.mini:hover{border-color:var(--pat); color:var(--pat-d);}
-  button.mini.hidden{display:none;}
- 
-  .grid{display:grid; grid-template-columns:1.32fr 1fr; gap:18px; align-items:start;}
-  @media (max-width:880px){ .grid{grid-template-columns:1fr;} }
-  .card{background:var(--surface); border:1px solid var(--line); border-radius:16px;
-        box-shadow:0 1px 2px rgba(20,40,60,.04), 0 8px 24px rgba(20,40,60,.05);}
-  .stage-card{padding:13px 13px 15px;}
-  svg.scene{width:100%; height:auto; display:block; user-select:none;}
-  .chromatid{transition:transform .85s cubic-bezier(.42,.04,.22,1), opacity .45s ease;}
-  .chromatid text{font-weight:700; font-size:12px; pointer-events:none;}
-  .chromatid.thread .bar{opacity:.74;}
-  @media (prefers-reduced-motion:reduce){ .chromatid{transition:none;} }
- 
-  .stepper{display:flex; flex-wrap:wrap; gap:5px; margin:13px 2px 4px;}
-  .step{flex:1 1 0; min-width:62px; border:1px solid var(--line); background:#f7fafc;
-        border-radius:9px; padding:7px 3px; cursor:pointer; text-align:center; transition:.18s;}
-  .step .ph{font-size:9.5px; color:var(--ink-2); letter-spacing:.02em;}
-  .step .nm{font-size:11.5px; font-weight:700; margin-top:1px;}
-  .step:hover{border-color:var(--pat);}
-  .step.active{background:var(--pat); border-color:var(--pat); color:#fff;}
-  .step.active .ph{color:#cfeaec;}
-  .controls{display:flex; gap:8px; margin-top:11px;}
-  button.ctrl{font:inherit; font-weight:700; font-size:14px; cursor:pointer; border-radius:10px;
-              border:1px solid var(--line); background:#fff; padding:9px 14px; transition:.15s; color:var(--ink);}
-  button.ctrl:hover{border-color:var(--pat); color:var(--pat-d);}
-  button.ctrl:disabled{opacity:.4; cursor:not-allowed;}
-  button.play{margin-left:auto; background:var(--pat); border-color:var(--pat); color:#fff;}
-  button.play:hover{background:var(--pat-d); color:#fff;}
- 
-  .panel{padding:17px 18px 19px;}
-  .phase-tag{display:inline-block; font-size:12px; font-weight:700; color:var(--pat-d);
-             background:#e4f1f1; padding:3px 10px; border-radius:999px;}
-  .panel h2{font-size:18px; margin:9px 0 6px;}
-  .desc{font-size:14px; color:#2b3a45; margin:0 0 11px;}
-  .count{font-size:12.5px; color:var(--ink-2); border-top:1px dashed var(--line); padding-top:9px; margin-bottom:11px;}
-  .count b{color:var(--ink);}
-  .hl{font-size:13.5px; border-radius:11px; padding:10px 12px; border:1px solid var(--line); background:#f7fafc;}
-  .hl.warn{background:var(--warn-bg); border-color:var(--warn-line);}
-  .hl.good{background:var(--good-bg); border-color:var(--good-line);}
-  .hl.info{background:var(--info-bg); border-color:var(--info-line);}
-  .hl strong{font-weight:800;}
-  .genobar{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:13px; font-size:12.5px;
-           color:var(--ink-2); background:#f7fafc; border:1px solid var(--line); border-radius:11px; padding:9px 11px;}
-  .geno{font-weight:800; color:var(--ink); letter-spacing:.04em; font-size:14px;}
-  .arrow{color:var(--pat-d); font-weight:800;}
-  .legend{margin-top:14px; border-top:1px solid var(--line); padding-top:12px;}
-  .legend h3{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); margin:0 0 7px;}
-  .leg-row{display:flex; align-items:center; gap:8px; font-size:12.5px; margin:5px 0; color:#2b3a45;}
-  .swatch{width:15px; height:15px; border-radius:5px; flex:none;}
-  .sw-mat{background:var(--mat);} .sw-pat{background:var(--pat);}
-  .pair-ico{display:flex; gap:3px;} .pair-ico i{width:6px; height:15px; border-radius:3px; display:block;}
- 
-  /* 하단 설명 카드 */
-  .info-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px;}
-  @media (max-width:880px){ .info-grid{grid-template-columns:1fr;} }
-  .infocard{padding:16px 18px;}
-  .infocard h3{margin:0 0 9px; font-size:15px; display:flex; align-items:center; gap:7px;}
-  .infocard p{margin:0 0 9px; font-size:13.5px; color:#2b3a45;}
-  .infocard p b{color:var(--ink);}
-  .term{border-left:3px solid var(--pat); padding-left:11px; margin-bottom:11px;}
-  .term .t{font-weight:800; font-size:13.5px;}
-  .term .d{font-size:13px; color:#3a4852;}
-  .cyto-row{display:flex; gap:12px; flex-wrap:wrap;}
-  .cyto-box{flex:1 1 200px; border:1px solid var(--line); border-radius:11px; padding:11px 13px; background:#fafcfd;}
-  .cyto-box.animal{border-color:var(--mat-d);}
-  .cyto-box.plant{border-color:var(--cell-wall);}
-  .cyto-box .h{font-weight:800; font-size:13.5px; margin-bottom:3px;}
-  .cyto-box.animal .h{color:var(--mat-d);}
-  .cyto-box.plant .h{color:#3f7a36;}
-  .cyto-box .b{font-size:12.5px; color:#3a4852;}
- 
-  footer.copyright{margin-top:22px; text-align:center; font-size:13px; color:var(--ink-2);
-                   border-top:1px solid var(--line); padding-top:16px;}
-  footer.copyright b{color:var(--ink);}
-</style>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/CellDivision.css">
 </head>
 <body>
 <div class="wrap">
+  <a class="unit gene" href="index.html" title="시뮬레이션 목록으로">유전</a>
   <div class="eyebrow">생명과학 · 세포 분열</div>
   <h1>세포 분열 시뮬레이션</h1>
   <p class="sub">체세포 분열과 감수 분열을 한 화면에서 비교하고, 유전자형·세포 종류를 바꿔가며 살펴보세요. (예시 세포: 2n=6 / 유전자 A·B·D 3쌍)</p>
