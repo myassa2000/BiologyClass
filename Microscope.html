@@ -290,7 +290,7 @@ const PARTS={
   arm:{t:"팔",r:"경통과 다리를 잇는 부분",d:[["역할","현미경을 옮길 때 손으로 잡는 부분이다. 이동할 때는 팔과 다리를 함께 받쳐 든다."]]},
   base:{t:"다리 (경대)",r:"현미경을 바닥에 지지하는 받침",d:[["역할","현미경 전체를 안정적으로 지지한다. 무게 중심이 있어 현미경이 넘어지지 않게 한다."]]}
 };
-const PARTS_LEGEND=[["var(--lens2)","렌즈"],["var(--red)","초점 나사"],["var(--steel2)","몸체"],["var(--obj)","재물대/클립"]];
+const PARTS_LEGEND=[["#6FA8CF","렌즈"],["#22262B","초점 나사·재물대"],["#DDE2E7","몸체"],["#FFD23F","광원"]];
 
 /* ---------- 현미경 측면도 ---------- */
 function drawMicroscope(withKnobHi){
@@ -361,9 +361,71 @@ const PHOTO_PARTS={
   arm:[538,341,92,190],
   base:[365,820,242,85]
 };
+/* 현미경 그림 (SVG). 부품 위치는 PHOTO_PARTS 좌표(746×918 기준)에 맞춰 그렸다 */
 function drawMicroscopePhoto(x=0){
-  return `<image href="./ms.png" x="${x}" y="0" width="${PHOTO_W}" height="${PHOTO_H}"
-    preserveAspectRatio="xMidYMid meet" aria-label="실제 현미경 사진"/>`;
+  const d=`<defs>
+    <linearGradient id="mvBody" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#F2F4F6"/><stop offset="1" stop-color="#CDD3D9"/></linearGradient>
+    <linearGradient id="mvBodyV" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".6" stop-color="#EEF1F3"/><stop offset="1" stop-color="#C9D0D6"/></linearGradient>
+    <linearGradient id="mvDark" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4A5058"/><stop offset=".5" stop-color="#22262B"/><stop offset="1" stop-color="#101214"/></linearGradient>
+    <linearGradient id="mvDarkH" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#15181B"/><stop offset=".35" stop-color="#3C424A"/><stop offset="1" stop-color="#0E1012"/></linearGradient>
+    <linearGradient id="mvSilver" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#7F8891"/><stop offset=".3" stop-color="#F7F8F9"/><stop offset=".62" stop-color="#BCC3CA"/><stop offset="1" stop-color="#6E767E"/></linearGradient>
+    <radialGradient id="mvLamp" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#FFFBE0"/><stop offset=".55" stop-color="#FFE27A"/><stop offset="1" stop-color="#E3A912"/></radialGradient>
+    <radialGradient id="mvGlass" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#F2FAFF"/><stop offset="1" stop-color="#6FA8CF"/></radialGradient>
+    <filter id="mvSh" x="-10%" y="-10%" width="120%" height="125%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#2B3540" flood-opacity=".18"/></filter>
+  </defs>`;
+  const obj=(cx,top,len,w,band)=>`<g filter="url(#mvSh)">
+    <rect x="${cx-w/2}" y="${top}" width="${w}" height="${len}" rx="4" fill="url(#mvSilver)" stroke="#6E767E" stroke-width="1.2"/>
+    <rect x="${cx-w/2}" y="${top+len*0.32}" width="${w}" height="6" fill="${band}"/>
+    <rect x="${cx-w*0.32}" y="${top+len-2}" width="${w*0.64}" height="${len>60?20:12}" rx="3" fill="url(#mvSilver)" stroke="#6E767E" stroke-width="1"/>
+    <ellipse cx="${cx}" cy="${top+len+(len>60?18:10)}" rx="${w*0.26}" ry="3.5" fill="url(#mvGlass)"/></g>`;
+  let s=`<g transform="translate(${x},0)" aria-label="현미경 그림" role="img">${d}
+    <ellipse cx="380" cy="890" rx="280" ry="14" fill="#2B3540" opacity=".10"/>`;
+  /* 팔 */
+  s+=`<path d="M520 800 C508 700 542 610 546 520 C550 440 526 350 470 262 L548 196 C616 282 642 400 634 520 C626 640 602 720 614 800 Z" fill="url(#mvBody)" stroke="#BFC6CD" stroke-width="2" filter="url(#mvSh)"/>
+    <path d="M600 300 C626 380 630 460 622 540" fill="none" stroke="#FFFFFF" stroke-width="5" opacity=".8" stroke-linecap="round"/>`;
+  /* 다리(경대) */
+  s+=`<path d="M128 800 Q128 780 150 780 L604 780 Q630 780 632 800 L640 858 Q642 878 618 878 L134 878 Q110 878 112 858 Z" fill="url(#mvBodyV)" stroke="#BFC6CD" stroke-width="2" filter="url(#mvSh)"/>
+    <path d="M150 786 L604 786" stroke="#FFFFFF" stroke-width="3" opacity=".9"/>`;
+  /* 광원 */
+  s+=`<rect x="292" y="694" width="84" height="88" rx="12" fill="url(#mvBody)" stroke="#BFC6CD" stroke-width="2"/>
+    <ellipse cx="334" cy="702" rx="44" ry="20" fill="#FFE27A" opacity=".35"/>
+    <ellipse cx="334" cy="700" rx="32" ry="10" fill="url(#mvLamp)" stroke="#C99A10" stroke-width="1.5"/>
+    <rect x="300" y="752" width="68" height="8" rx="4" fill="#DCE1E6"/>`;
+  /* 재물대 받침과 조리개 */
+  s+=`<rect x="512" y="508" width="44" height="74" rx="6" fill="url(#mvDarkH)"/>
+    <rect x="314" y="534" width="62" height="58" rx="6" fill="url(#mvBody)" stroke="#BFC6CD" stroke-width="1.5"/><rect x="318" y="548" width="54" height="5" fill="#DCE1E6"/>
+    <ellipse cx="345" cy="596" rx="64" ry="15" fill="url(#mvDark)"/>
+    <ellipse cx="345" cy="590" rx="52" ry="9" fill="#4B525A"/><ellipse cx="345" cy="590" rx="14" ry="4" fill="#1A1D20"/>
+    <rect x="404" y="590" width="40" height="7" rx="3.5" fill="url(#mvSilver)"/><circle cx="446" cy="593.5" r="7" fill="url(#mvSilver)" stroke="#6E767E"/>`;
+  /* 재물대 */
+  s+=`<g filter="url(#mvSh)"><rect x="150" y="498" width="410" height="18" rx="5" fill="url(#mvDark)"/>
+    <rect x="164" y="516" width="382" height="20" rx="6" fill="url(#mvBody)" stroke="#BFC6CD" stroke-width="1.5"/></g>
+    <ellipse cx="345" cy="507" rx="18" ry="4" fill="#0B0C0E"/>`;
+  /* 프레파라트와 클립 */
+  s+=`<rect x="252" y="488" width="196" height="10" rx="2" fill="#DDEFF8" opacity=".9" stroke="#8FB9D2" stroke-width="1.2"/>
+    <ellipse cx="345" cy="493" rx="16" ry="3" fill="#C77DBA" opacity=".85"/>
+    <path d="M226 482 L298 490" stroke="url(#mvSilver)" stroke-width="7" stroke-linecap="round"/><circle cx="226" cy="483" r="8" fill="url(#mvSilver)" stroke="#6E767E"/>
+    <path d="M484 482 L412 490" stroke="url(#mvSilver)" stroke-width="7" stroke-linecap="round"/><circle cx="484" cy="483" r="8" fill="url(#mvSilver)" stroke="#6E767E"/>`;
+  /* 경통(머리)과 기울어진 접안 경통 */
+  s+=`<g transform="rotate(38 245 175)" filter="url(#mvSh)">
+      <rect x="165" y="146" width="168" height="58" rx="10" fill="url(#mvBodyV)" stroke="#BFC6CD" stroke-width="2"/>
+      <rect x="166" y="144" width="12" height="62" fill="url(#mvSilver)"/>
+      <rect x="82" y="140" width="88" height="70" rx="12" fill="url(#mvDarkH)"/>
+      <rect x="80" y="137" width="14" height="76" rx="5" fill="#2A2E33"/></g>
+    <path d="M300 200 L470 172 Q522 166 536 212 L546 300 Q548 342 506 346 L332 352 Q292 352 292 312 Z" fill="url(#mvBody)" stroke="#BFC6CD" stroke-width="2" filter="url(#mvSh)"/>
+    <path d="M318 214 L466 190" stroke="#FFFFFF" stroke-width="5" opacity=".9" stroke-linecap="round"/>`;
+  /* 회전판과 대물렌즈 */
+  s+=`<path d="M302 348 Q372 314 446 348 L440 376 Q372 396 308 376 Z" fill="url(#mvSilver)" stroke="#6E767E" stroke-width="1.5" filter="url(#mvSh)"/>
+    <path d="M306 350 Q372 324 442 350" fill="none" stroke="#2A2E33" stroke-width="5"/>`;
+  s+=obj(425,370,50,34,"#E8C21A")+obj(319,370,46,38,"#D0483A")+obj(372,374,74,36,"#3A7BC0");
+  /* 조동나사 · 미동나사 (같은 축) */
+  s+=`<g filter="url(#mvSh)"><circle cx="622" cy="621" r="58" fill="url(#mvDark)"/>
+      <circle cx="622" cy="621" r="52" fill="none" stroke="#5A6168" stroke-width="5" stroke-dasharray="3 4"/>
+      <circle cx="622" cy="621" r="30" fill="url(#mvSilver)" stroke="#6E767E"/></g>
+    <g filter="url(#mvSh)"><circle cx="670" cy="622" r="32" fill="url(#mvDark)"/>
+      <circle cx="670" cy="622" r="28" fill="none" stroke="#5A6168" stroke-width="4" stroke-dasharray="2.5 3.5"/>
+      <circle cx="670" cy="622" r="15" fill="url(#mvSilver)" stroke="#6E767E"/></g>`;
+  return s+`</g>`;
 }
 function photoTagHot(id,label,tx,ty,anchor,imgX=0){
   const [px,py,rx,ry]=PHOTO_PARTS[id];
@@ -392,7 +454,7 @@ function photoStepOverlay(part,imgX=0,step=0,knob=null){
     s+=`<path d="M${imgX+333} 705 L${imgX+345} 548" stroke="#E4B52C" stroke-width="9" opacity=".55" marker-end="url(#aOr)"/>`;
   } else if(step===3){
     s+=`<path class="photo-cue" d="M${objX} 458 L${objX} 354" marker-end="url(#aRe)"/>`;
-    s+=`<text class="note" x="${objX+18}" y="405">서서히 위로</text>`;
+    s+=`<text class="note" x="${objX+84}" y="412">서서히 위로</text>`;
   } else if(step===4){
     s+=`<path class="photo-cue" d="M${imgX+670} 570 A55 55 0 0 1 ${imgX+704} 654" marker-end="url(#aRe)"/>`;
     s+=`<text class="note" x="${imgX+610}" y="548">미세 조절</text>`;
